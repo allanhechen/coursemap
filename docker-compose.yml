@@ -1,0 +1,28 @@
+services:
+    coursemap:
+        build: .
+        environment:
+            DEPLOYMENT_TYPE: docker
+        ports:
+            - "3000:3000"
+        depends_on:
+            - pg_proxy
+    postgres:
+        image: postgres:16.4
+        environment:
+            POSTGRES_PASSWORD: a_very_secret_password
+        ports:
+            - "54320:5432"
+        volumes:
+            - ./pgdata:/var/lib/postgresql/data
+            - ./init.sql:/docker-entrypoint-initdb.d/1_init.sql
+    pg_proxy:
+        image: ghcr.io/neondatabase/wsproxy:latest
+        environment:
+            APPEND_PORT: "postgres:5432"
+            ALLOW_ADDR_REGEX: ".*"
+            LOG_TRAFFIC: "true"
+        ports:
+            - "54330:80"
+        depends_on:
+            - postgres
