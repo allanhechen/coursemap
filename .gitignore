@@ -1,3 +1,6 @@
+# Documentation artifacts
+.source
+
 # Logs
 logs
 *.log
