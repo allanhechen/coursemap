@@ -1,1 +1,5 @@
-.env
+*.env
+next.config.mjs
+
+# Keep files ending in .docker used during build
+!/*.docker
