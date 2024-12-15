@@ -1,12 +1,11 @@
 services:
     postgres:
         image: postgres:16.4
-        environment:
-            POSTGRES_PASSWORD: password
         ports:
             - "54320:5432"
         volumes:
             - ./pgdata:/var/lib/postgresql/data
+        env_file: ".env.development"
     pg_proxy:
         image: ghcr.io/neondatabase/wsproxy:latest
         environment:

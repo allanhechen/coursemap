@@ -14,12 +14,16 @@ RUN npm i
 FROM base AS builder
 WORKDIR /app
 
+# Add building ENV
+ENV DEPLOYMENT_TYPE=docker
+ENV POSTGRES_PASSWORD=password
+ENV POSTGRES_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
+
 COPY --from=deps /app/node_modules ./node_modules
 
 COPY . .
 
 # Copy special files
-COPY .env.docker .env
 COPY next.config.mjs.docker next.config.mjs
 
 RUN npm run build
@@ -28,7 +32,6 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV SKIP_GENERATE_STATIC_PARAMS=true
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs

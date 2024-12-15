@@ -127,11 +127,8 @@ async function createTables(client: PoolClient) {
 }
 
 export async function GET() {
-    if (process.env.SKIP_GENERATE_STATIC_PARAMS === "true") return;
-
     neonConfig.webSocketConstructor = ws;
     const pool = new Pool({ connectionString: process.env.POSTGRES_URL });
-    console.log(pool);
     const client = await pool.connect();
 
     try {
