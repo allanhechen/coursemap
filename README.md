@@ -32,15 +32,44 @@ Some features to be implemented include:
 Many of the features mentioned above are still in progress!
 ```
 
-To deploy Coursemap, clone the repository and use the Docker Compose file:
+To deploy Coursemap, you can simply use the following Docker compose file and optionally a .env file:
 
-```sh
-git clone https://github.com/allanhechen/coursemap.git
-cd coursemap
-docker compose -f docker-compose.prod.yml up -d
+```yaml
+services:
+    coursemap:
+        image: ghcr.io/allanhechen/coursemap:latest
+        environment:
+            DEPLOYMENT_TYPE: ${DEPLOYMENT_TYPE:-docker}
+            POSTGRES_URL: ${POSTGRES_URL:-postgresql://postgres:password@postgres:5432/postgres}
+        ports:
+            - "3000:3000"
+        depends_on:
+            - pg_proxy
+    postgres:
+        image: postgres:16.4
+        environment:
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+        ports:
+            - "54320:5432"
+        volumes:
+            - ./pgdata:/var/lib/postgresql/data
+    pg_proxy:
+        image: ghcr.io/neondatabase/wsproxy:latest
+        environment:
+            APPEND_PORT: ${APPEND_PORT:-}
+            ALLOW_ADDR_REGEX: ".*"
+            LOG_TRAFFIC: "true"
+        ports:
+            - "54330:80"
+        depends_on:
+            - postgres
 ```
 
-I will soon be looking into setting up a Github workflow to deploy the image to ghcr.io and eliminate the need of cloning this repo.
+```
+DEPLOYMENT_TYPE=docker
+POSTGRES_PASSWORD=password
+POSTGRES_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
+```
 
 ## Building From Source
 
