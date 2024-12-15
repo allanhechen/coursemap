@@ -71,9 +71,11 @@ cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/
 5. Start the Docker services and the server!
 
 ```sh
-docker compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.prod.yml up postgres -d && docker compose -f docker-compose.prod.yml up pg_proxy -d
 node .next/standalone/server.js
 ```
+
+6. Head to (port 3000)[http://localhost:3000]
 
 Sample .env files for the last step will be added soon—stay tuned!
 
@@ -83,7 +85,7 @@ Thanks for reading this far into the documentation! This is my first open source
 
 Coursemap is built mainly using Next.js and Postgres, with Docker as an option to avoid setting up Vercel's serverless environment.
 
-To get started, follow the instructions above but start `docker compose -f docker-compose.dev.yml up -d` instead of the prod version.
+To get started, follow the instructions 1-3 above but run `npm run dev` as the last command.
 
 I am doing my best to document all of my decisions and the logic behind the code, extensive docs can be found [here](https://coursemap-zeta.vercel.app/docs).
 
