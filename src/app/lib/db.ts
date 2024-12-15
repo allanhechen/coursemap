@@ -4,8 +4,11 @@ import { neonConfig } from "@neondatabase/serverless";
 // Connect to postgres through a proxy when developing locally or deploying to Docker
 // to mimic the serverless environment
 
-// Connect to 54320 in development environment
-if (process.env.DEPLOYMENT_TYPE === "development") {
+// Connect to 54320 in development environment and local deployment
+if (
+    process.env.DEPLOYMENT_TYPE === "development" ||
+    process.env.DEPLOYMENT_TYPE === "local"
+) {
     neonConfig.wsProxy = (host) => `${host}:54330/v1`;
     neonConfig.useSecureWebSocket = false;
     neonConfig.pipelineTLS = false;

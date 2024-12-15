@@ -66,18 +66,17 @@ npm i
 ```sh
 npm run build
 cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/
+cp .env.exmaple .env
 ```
 
 5. Start the Docker services and the server!
 
 ```sh
-docker compose -f docker-compose.prod.yml up postgres -d && docker compose -f docker-compose.prod.yml up pg_proxy -d
-node .next/standalone/server.js
+docker compose -f docker-compose.prod.yml up postgres -d && APPEND_PORT="postgres:5432" docker compose -f docker-compose.prod.yml up pg_proxy -d
+DEPLOYMENT_TYPE=local POSTGRES_PASSWORD="password" POSTGRES_URL="postgresql://postgres:${POSTGRES_PASSWORD}@localhost:54320/postgres" node .next/standalone/server.js
 ```
 
 6. Head to (port 3000)[http://localhost:3000]
-
-Sample .env files for the last step will be added soon—stay tuned!
 
 ## Contributing
 
