@@ -1,0 +1,28 @@
+services:
+    coursemap:
+        build: .
+        environment:
+            DEPLOYMENT_TYPE: docker
+            SKIP_GENERATE_STATIC_PARAMS: false
+            POSTGRES_URL: "postgresql://postgres:password@postgres:5432/postgres"
+        ports:
+            - "3000:3000"
+        depends_on:
+            - pg_proxy
+    postgres:
+        image: postgres:16.4
+        environment:
+            POSTGRES_PASSWORD: password
+        ports:
+            - "54320:5432"
+        volumes:
+            - ./pgdata:/var/lib/postgresql/data
+    pg_proxy:
+        image: ghcr.io/neondatabase/wsproxy:latest
+        environment:
+            ALLOW_ADDR_REGEX: ".*"
+            LOG_TRAFFIC: "true"
+        ports:
+            - "54330:80"
+        depends_on:
+            - postgres

@@ -6,11 +6,11 @@
         "dev": "next dev --turbopack",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint",
-        "postinstall": "fumadocs-mdx"
+        "lint": "next lint"
     },
     "dependencies": {
         "@types/mdx": "^2.0.13",
+        "@vercel/postgres": "^0.9.0",
         "fumadocs-core": "^14.6.1",
         "fumadocs-mdx": "^11.1.2",
         "fumadocs-ui": "^14.6.1",
@@ -20,9 +20,11 @@
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3",
+        "@neondatabase/serverless": "^0.9.3",
         "@types/node": "^20",
         "@types/react": "^18",
         "@types/react-dom": "^18",
+        "@types/ws": "^8.5.13",
         "eslint": "^9",
         "eslint-config-next": "15.1.0",
         "postcss": "^8",
