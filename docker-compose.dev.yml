@@ -16,3 +16,4 @@ services:
             - "54330:80"
         depends_on:
             - postgres
+        env_file: ".env.development"
