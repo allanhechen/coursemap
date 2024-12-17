@@ -6,7 +6,6 @@ export default {
         "./components/**/*.{ts,tsx}",
         "./app/**/*.{ts,tsx}",
         "./content/**/*.{md,mdx}",
-        "./mdx-components.{ts,tsx}",
         "./node_modules/fumadocs-ui/dist/**/*.js",
         "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
         "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -16,7 +15,11 @@ export default {
         "./docs/**/*.mdx",
         "./mdx-components.tsx",
     ],
-    presets: [createPreset()],
+    presets: [
+        createPreset({
+            preset: "vitepress",
+        }),
+    ],
     darkMode: "class",
     theme: {
         extend: {

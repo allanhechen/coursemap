@@ -1,4 +1,4 @@
-import { source } from "@/app/lib/source";
+import source from "@/app/lib/source";
 import {
     DocsPage,
     DocsBody,
