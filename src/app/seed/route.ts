@@ -1,4 +1,4 @@
-import "@/app/lib/db";
+import "@/lib/db";
 import { Pool, PoolClient, neonConfig } from "@neondatabase/serverless";
 import ws from "ws";
 

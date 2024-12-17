@@ -1,4 +1,4 @@
-import source from "@/app/lib/source";
+import source from "@/lib/source";
 import {
     DocsPage,
     DocsBody,
@@ -7,7 +7,7 @@ import {
 } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
 import defaultMdxComponents from "fumadocs-ui/mdx";
-import { metadataImage } from "@/app/lib/metadata";
+import { metadataImage } from "@/lib/metadata";
 
 export default async function Page(props: {
     params: Promise<{ slug?: string[] }>;

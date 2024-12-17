@@ -1,8 +1,8 @@
-import source from "@/app/lib/source";
+import source from "@/lib/source";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import type { ReactNode } from "react";
 import { baseOptions } from "@/app/layout.config";
-import WideLogo from "@/app/components/header/WideLogo";
+import WideLogo from "@/components/header/WideLogo";
 import Link from "next/link";
 
 export default function Layout({ children }: { children: ReactNode }) {
