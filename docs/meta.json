@@ -1,0 +1,16 @@
+{
+    "title": "Docs",
+    "description": "The coursemap documentation",
+    "root": true,
+    "pages": [
+        "---Overview---",
+        "index",
+        "backstory",
+        "---Deployment---",
+        "instructions",
+        "---Contributing---",
+        "how-to",
+        "university-support",
+        "(the-code)"
+    ]
+}

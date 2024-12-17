@@ -1,0 +1,60 @@
+---
+title: Backstory
+full: false
+---
+
+One of my biggest issues I had during the first few years of my school
+is simply choosing which courses I should take. While many courses are
+already laid out for you through your program outlines, you still need
+to decide which electives to take, and also potentially which stream
+you want to enter within your program.
+
+For example, I am a Computer Science student at Toronto Metropolitan
+University. When I first enrolled, I had no idea what my course paths
+would look like if I wanted to go into computer vision, or data science,
+or software engineering (I actually want to go into software engineering
+please hire me, thanks).
+
+I had trouble imagining how the different paths of courses would look
+even look because each course only has some prerequisites that are
+needed in order to take it. There was no indication of where I could
+go after taking it, or if it would even be useful without clicking into
+four additional pages.
+
+This is not even mentioning the restrictions that some of the courses
+have. Some courses only run during the fall, and others only the winter.
+Sometimes I found a course that would only run only when the first day
+of the month happened to coincide with the full-moon and the year
+happened to be a leap year...
+
+## The Solution
+
+Coursemap aims to solve two problems hinted at above, in two pieces that
+can be switched between within the app.
+
+### 1. Course Planning
+
+This is done with a semester-oriented view of your program. You add
+semesters that take place during a term, and add courses that you wish
+to take during that term. Depending on your university, this data will
+be found using public information or provided through one of your
+university's APIs.
+
+Additionally, coursemap will attempt to determine whether a course
+typically runs during the fall, winter, spring/summer, or without a
+predictable pattern at all. Additional warnings will be provided in
+case of potential issues.
+
+### 2. Course Visualization
+
+This is done by visualizing how courses in specific categories flow into
+each other using pre/post/anti requisite information. You will be able
+to look at how courses fit together with a tree-like structure with
+directed edges representing how courses depend on each other.
+
+## The Solution (cont.)
+
+Coursemap aims to be as unopinionated and unbiased as possible when it
+comes to which universities are supported (read below). The database
+tables provided should be able to be generalized for any arbitrary
+university, and hypothetically with some work, support them as well.
