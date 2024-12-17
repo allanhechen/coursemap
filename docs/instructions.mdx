@@ -2,3 +2,127 @@
 title: Instructions
 full: false
 ---
+
+## Method One: Docker Compose
+
+This method takes in a `docker-compose.yml` file and sets up all of the services required
+using the current folder as the base. What's important is that all of your database data
+is stored within the pgdata folder, and your application is located at
+`http://localhost:3000`.
+
+```yaml
+services:
+    coursemap:
+        image: ghcr.io/allanhechen/coursemap:latest
+        environment:
+            DEPLOYMENT_TYPE: ${DEPLOYMENT_TYPE:-docker}
+            POSTGRES_URL: ${POSTGRES_URL:-postgresql://postgres:password@postgres:5432/postgres}
+        ports:
+            - "3000:3000"
+        depends_on:
+            - pg_proxy
+    postgres:
+        image: postgres:16.4
+        environment:
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+        ports:
+            - "54320:5432"
+        volumes:
+            - ./pgdata:/var/lib/postgresql/data
+    pg_proxy:
+        image: ghcr.io/neondatabase/wsproxy:latest
+        environment:
+            APPEND_PORT: ${APPEND_PORT:-}
+            ALLOW_ADDR_REGEX: ".*"
+            LOG_TRAFFIC: "true"
+        ports:
+            - "54330:80"
+        depends_on:
+            - postgres
+```
+
+Optionally, you can configure some additional parameters within a `.env` file for additional
+security measures, or to customize the database connection string.
+
+```
+DEPLOYMENT_TYPE=docker
+POSTGRES_PASSWORD=password
+POSTGRES_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
+```
+
+To deploy, copy the files into the same folder and run the following command in the folder:
+
+```sh
+docker compose up -d
+```
+
+## Method Two: Locally
+
+It is possible to deploy coursemap without a Docker container built around it. There is no
+benefit to doing so, especially since you still need to start Postgres and the `pg_proxy`
+service.
+
+Regardless, the following steps will get you up and running.
+
+1. Clone this repository
+
+```sh
+git clone https://github.com/allanhechen/coursemap.git
+cd coursemap
+```
+
+2.  Install npm dependencies
+
+```sh
+npm i
+```
+
+3.  Build the app and copy dependencies
+
+```sh
+npm run build
+cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/
+cp .env.exmaple .env
+```
+
+4. Start the Docker services and the server
+
+```sh
+docker compose -f docker-compose.prod.yml up postgres -d && APPEND_PORT="postgres:5432" docker compose -f docker-compose.prod.yml up pg_proxy -d
+DEPLOYMENT_TYPE=local POSTGRES_PASSWORD="password" POSTGRES_URL="postgresql://postgres:${POSTGRES_PASSWORD}@localhost:54320/postgres" node .next/standalone/server.js
+```
+
+This method sets the `APPEND_PORT` environment variable to the `pg_proxy` container. It is
+not required for deploying within Docker itself, but is for deploying locally. This idea
+is reused in the following section with the `.env.development` file.
+
+## Method Three: Development Environment
+
+This section is similar to the one above, but we will not compile Next.js into binaries
+and instead run the development script in `package.json`. For completeness, the steps are
+listed here below:
+
+1. Clone this repository
+
+```sh
+git clone https://github.com/allanhechen/coursemap.git
+cd coursemap
+```
+
+2.  Install npm dependencies
+
+```sh
+npm i
+```
+
+3. Run the development server
+
+```sh
+npm run dev
+```
+
+## The Plus One: Vercel Deployment
+
+We deploy to Vercel using their CI pipeline. This repository is simply added as a Vercel
+project, and Vercel automatically builds and hosts our pull requests. The database is a
+Neon database, and everything is hosted on the free tier.

@@ -1,4 +1,24 @@
 ---
-title: Database
+title: The Database
 full: false
 ---
+
+The following is a description of the database layout. For deployment details, please visit
+[here](/docs/how-it-works).
+
+Our tables are hosted within Postgres databases. The main idea is illustrated in the following
+ER diagram:
+
+<img src="/concepts/coursemap-er-diagram.png" alt="coursemap ER diagram" />
+
+-   You have a school
+-   You have programs belonging to the school
+-   You have courses belonging to a school, that might be required by some programs
+
+-   Users belong to a school and a program
+-   Users have their own semesters that they control
+
+-   Semesters have courses within them
+
+-   Courses have pre/post/anti requisites which can be used to construct a tree
+-   Courses run during some periods

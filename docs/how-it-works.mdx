@@ -1,0 +1,17 @@
+---
+title: How It Works
+full: false
+---
+
+This is an aside for the `DEPLOYMENT_TYPE` environment variable determines how the database
+library interacts with Postgres, skip to [Deployment Options](/docs/instructions#delpoyment-options)
+for actual instructions.
+
+1. In the `docker` mode, it looks for a local address named `pg_proxy` to send the traffic to.
+2. In the `development` and `local` modes, it sends the traffic to `localhost:54330`, which is
+   the port exposed for `pg_proxy` on your machine.
+3. For any other values, default behavior is retained, which means that the database
+   library searches for environment variables to Vercel's databases.
+
+In other words, we are hijacking the database library to point towards a local database
+somewhat documented [here](https://vercel.com/docs/storage/vercel-postgres/local-development).
