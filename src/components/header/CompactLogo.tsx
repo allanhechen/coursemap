@@ -1,4 +1,9 @@
-// TODO: Add this component
+import Link from "next/link";
+
 export default function CompactLogo() {
-    return <div>CompactLogo</div>;
+    return (
+        <Link href="/dashboard">
+            <img src="/logos/coursemap-icon-no-bg-dark.svg" />
+        </Link>
+    );
 }

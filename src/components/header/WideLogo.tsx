@@ -1,5 +1,9 @@
-import React from "react";
+import Link from "next/link";
 
 export default function WideLogo() {
-    return <img src="/logos/coursemap-banner-dark.svg" />;
+    return (
+        <Link href="/dashboard">
+            <img src="/logos/coursemap-banner-dark.svg" />
+        </Link>
+    );
 }
