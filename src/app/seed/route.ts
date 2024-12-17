@@ -56,6 +56,7 @@ async function createTables(client: PoolClient) {
         CREATE TABLE IF NOT EXISTS courseprerequisite (
             courseid INT REFERENCES course(courseid),
             prerequisite INT REFERENCES course(courseid),
+            groupid INT NOT NULL,
             PRIMARY KEY (courseid, prerequisite)
         );
     `);
