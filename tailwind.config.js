@@ -3,9 +3,8 @@ import { createPreset } from "fumadocs-ui/tailwind-plugin";
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
-        "./app/**/*.{ts,tsx}",
+        "./src/app/**/*.{ts,tsx}",
         "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-        "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
 
         "./node_modules/fumadocs-ui/dist/**/*.js",
         "./docs/**/*.mdx",
@@ -16,7 +15,7 @@ export default {
             preset: "vitepress",
         }),
     ],
-    darkMode: "class",
+    darkMode: ["class", '[data-mantine-color-scheme="dark"]'],
     theme: {
         extend: {
             colors: {

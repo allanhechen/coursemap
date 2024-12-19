@@ -1,0 +1,34 @@
+@layer tailwind {
+    @tailwind base;
+}
+@tailwind components;
+@tailwind utilities;
+
+/* obtained from https://stackoverflow.com/questions/78279141/how-to-change-body-bg-color-for-light-and-dark-mode-mantine-ui */
+/* this is probably the wrong way to use this but I couldn't find a clear API in the docs */
+
+/* For light mode */
+:root[data-mantine-color-scheme="light"] {
+    --mantine-color-body: #f8f8f8 !important;
+}
+
+/* For dark mode */
+:root[data-mantine-color-scheme="dark"] {
+    --mantine-color-body: #282a33 !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-Paper-root {
+    background-color: white !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Paper-root {
+    background-color: #22242e !important;
+}
+
+[data-mantine-color-scheme="light"] .mantine-Menu-dropdown {
+    background-color: white !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Menu-dropdown {
+    background-color: #22242e !important;
+}

@@ -1,7 +1,17 @@
 import type { Metadata } from "next";
 import "@mantine/core/styles.css";
+import "@/app/(main)/globals.css";
 
-import { ColorSchemeScript, MantineProvider } from "@mantine/core";
+import { ColorSchemeScript, createTheme, MantineProvider } from "@mantine/core";
+
+const theme = createTheme({
+    primaryShade: { light: 6, dark: 4 },
+    primaryColor: "blue",
+
+    white: "#FFFFFF",
+    black: "#22242E",
+    defaultRadius: "10px",
+});
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -16,10 +26,12 @@ export default function RootLayout({
     return (
         <html lang="en">
             <head>
-                <ColorSchemeScript />
+                <ColorSchemeScript defaultColorScheme="dark" />
             </head>
             <body>
-                <MantineProvider>{children}</MantineProvider>
+                <MantineProvider theme={theme} defaultColorScheme="dark">
+                    {children}
+                </MantineProvider>
             </body>
         </html>
     );
