@@ -1,14 +1,10 @@
 import { Card, Group, Text } from "@mantine/core";
 import Chip from "@/components/ChipFilled";
 import { stringToColor, stringToDeg } from "@/lib/color";
-import { CardInformation } from "@/types/courseCard";
+import { CardInformation, CardWrapper } from "@/types/courseCard";
 
-export default function CourseCard({
-    courseCode,
-    courseName,
-    faculty,
-    chips,
-}: CardInformation) {
+export default function CourseCard({ data }: CardWrapper) {
+    const { courseCode, courseName, faculty, chips } = data;
     return (
         <Card
             className="h-44 w-80 select-none"
