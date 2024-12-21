@@ -8,6 +8,10 @@ import {
 import { notFound } from "next/navigation";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { metadataImage } from "@/lib/metadata";
+import { MantineProvider } from "@mantine/core";
+import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
+import "@/app/(main)/globals.css";
 
 export default async function Page(props: {
     params: Promise<{ slug?: string[] }>;
@@ -19,13 +23,15 @@ export default async function Page(props: {
     const MDX = page.data.body;
 
     return (
-        <DocsPage toc={page.data.toc} full={page.data.full}>
-            <DocsTitle>{page.data.title}</DocsTitle>
-            <DocsDescription>{page.data.description}</DocsDescription>
-            <DocsBody>
-                <MDX components={{ ...defaultMdxComponents }} />
-            </DocsBody>
-        </DocsPage>
+        <MantineProvider>
+            <DocsPage toc={page.data.toc} full={page.data.full}>
+                <DocsTitle>{page.data.title}</DocsTitle>
+                <DocsDescription>{page.data.description}</DocsDescription>
+                <DocsBody>
+                    <MDX components={{ ...defaultMdxComponents }} />
+                </DocsBody>
+            </DocsPage>
+        </MantineProvider>
     );
 }
 

@@ -1,0 +1,6 @@
+{
+    "title": "Structuring",
+    "description": "How the pieces fit together",
+    "root": false,
+    "pages": ["overview", "..."]
+}

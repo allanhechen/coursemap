@@ -20,7 +20,7 @@ export default function NavBar() {
     return (
         <Paper
             shadow="sm"
-            className="flex justify-between items-center py-3 px-6 m-5 relative"
+            className="flex justify-between items-center py-3 px-6 m-5 relative not-prose"
             radius="lg"
         >
             <div className="hidden sm:block">
