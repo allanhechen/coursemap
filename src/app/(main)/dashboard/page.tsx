@@ -1,4 +1,12 @@
-// TODO: Add this component
+"use client";
+
+import { ReactFlowProvider } from "@xyflow/react";
+import DashboardComponent from "./DashboardComponent";
+
 export default function Page() {
-    return <></>;
+    return (
+        <ReactFlowProvider>
+            <DashboardComponent />
+        </ReactFlowProvider>
+    );
 }
