@@ -2,3 +2,17 @@
 title: NavBar
 full: false
 ---
+
+import NavBar from "@/components/header/NavBar.tsx";
+import { MantineProvider } from "@mantine/core";
+import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
+import "@/app/(main)/globals.css";
+
+<MantineProvider className="mt-24">
+    <NavBar />
+</MantineProvider>
+
+## Description
+
+The NavBar element can be seen in all dashboard pages of the application.
