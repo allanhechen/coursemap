@@ -1,6 +1,6 @@
-import "@xyflow/react/dist/style.css";
+"use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, createContext } from "react";
 import { ReactFlow, useReactFlow, applyNodeChanges } from "@xyflow/react";
 import { PanOnScrollMode } from "@xyflow/react";
 import CourseCard from "@/components/CourseCard";
@@ -12,6 +12,10 @@ import {
 } from "@/components/semester/semesterFormContext";
 import { SemesterTerm } from "@/types/semester";
 import SemesterForm from "@/components/semester/SemesterForm";
+import {
+    SemesterPlacement,
+    SemesterPositionContextType,
+} from "@/types/semester";
 
 {
     /* <Group>
@@ -119,6 +123,9 @@ const nodeTypes = {
     semesterNode: Semester,
 };
 
+const SemeseterPositionContext =
+    createContext<SemesterPositionContextType | null>(null);
+
 export default function DashboardComponent() {
     const form = useSemesterForm({
         mode: "uncontrolled",
@@ -131,7 +138,10 @@ export default function DashboardComponent() {
     });
 
     const { getIntersectingNodes } = useReactFlow();
+
     const [nodes, setNodes] = useState(initialNodes);
+    const [placement, setPlacement] = useState<SemesterPlacement[]>([]);
+
     const onNodesChange = useCallback(
         // eslint-disable-next-line
         (changes: any) => {
@@ -145,31 +155,33 @@ export default function DashboardComponent() {
         [getIntersectingNodes]
     );
     return (
-        <SemesterFormProvider form={form}>
-            <div
-                style={{
-                    height: "80vh",
-                    backgroundColor: "grey",
-                }}
-            >
-                <ReactFlow
-                    nodes={nodes}
-                    onNodesChange={onNodesChange}
-                    panOnDrag={false}
-                    panOnScroll={true}
-                    zoomOnScroll={false}
-                    zoomOnDoubleClick={false}
-                    preventScrolling={false}
-                    nodeTypes={nodeTypes}
-                    onNodeDragStop={onNodeDragStop}
-                    translateExtent={[
-                        [0, 0],
-                        [5000, 1000],
-                    ]}
-                    panOnScrollMode={PanOnScrollMode.Horizontal}
-                />
-            </div>
-            <SemesterForm />
-        </SemesterFormProvider>
+        <SemeseterPositionContext.Provider value={[placement, setPlacement]}>
+            <SemesterFormProvider form={form}>
+                <div
+                    style={{
+                        height: "80vh",
+                        backgroundColor: "grey",
+                    }}
+                >
+                    <ReactFlow
+                        nodes={nodes}
+                        onNodesChange={onNodesChange}
+                        panOnDrag={false}
+                        panOnScroll={true}
+                        zoomOnScroll={false}
+                        zoomOnDoubleClick={false}
+                        preventScrolling={false}
+                        nodeTypes={nodeTypes}
+                        onNodeDragStop={onNodeDragStop}
+                        translateExtent={[
+                            [0, 0],
+                            [5000, 1000],
+                        ]}
+                        panOnScrollMode={PanOnScrollMode.Horizontal}
+                    />
+                </div>
+                <SemesterForm />
+            </SemesterFormProvider>
+        </SemeseterPositionContext.Provider>
     );
 }
