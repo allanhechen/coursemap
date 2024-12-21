@@ -107,6 +107,7 @@ async function createTables(client: PoolClient) {
         );
     `);
 
+    // TODO: insert userid into this instead of semesterid -> technically breaks 3nf but we need to uniquely identify courseid within semesters
     await client.query(`
         CREATE TABLE IF NOT EXISTS coursesemester (
             semesterid INT REFERENCES semester(semesterid),
