@@ -1,5 +1,3 @@
-"use client";
-
 import { ReactFlowProvider } from "@xyflow/react";
 import DashboardComponent from "./DashboardComponent";
 
