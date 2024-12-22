@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, createContext } from "react";
+import { useState, useCallback, createContext, useEffect } from "react";
 import { ReactFlow, useReactFlow, applyNodeChanges } from "@xyflow/react";
 import { PanOnScrollMode } from "@xyflow/react";
 import CourseCard from "@/components/CourseCard";
@@ -16,6 +16,8 @@ import {
     SemesterPlacement,
     SemesterPositionContextType,
 } from "@/types/semester";
+import { useUpdateNodes } from "@/lib/placement";
+import { Button } from "@mantine/core";
 
 {
     /* <Group>
@@ -78,48 +80,48 @@ import {
 //      This will be set to the position of the last semester + some other space for an add semester button
 // 5. node takes in data and isconnectable and that is all, all card information is wrapped within data
 
-const initialNodes = [
-    {
-        id: "3",
-        data: {
-            courseCode: "CPS 706",
-            courseName: "Computer Networks",
-            faculty: "Computer Science",
-            chips: ["Winter"],
-        },
-        position: { x: 200, y: 200 },
-        type: "cardNode",
-    },
-    {
-        id: "4",
-        data: {
-            courseCode: "CPS 109",
-            courseName: "Computer Science I",
-            faculty: "Computer Science",
-            chips: ["Winter"],
-        },
-        position: { x: 200, y: 200 },
-        type: "cardNode",
-    },
-    {
-        id: "5",
-        data: {
-            semesterId: 1,
-            semesterName: "1a",
-            semesterYear: new Date(2024, 0, 1),
-            semesterTerm: "FA",
-        },
-        style: {
-            zIndex: -1,
-            cursor: "default",
-        },
-        position: { x: 300, y: 300 },
-        type: "semesterNode",
-    },
-];
+// const initialNodes = [
+//     {
+//         id: "3",
+//         data: {
+//             courseCode: "CPS 706",
+//             courseName: "Computer Networks",
+//             faculty: "Computer Science",
+//             chips: ["Winter"],
+//         },
+//         position: { x: 200, y: 200 },
+//         type: "courseNode",
+//     },
+//     {
+//         id: "4",
+//         data: {
+//             courseCode: "CPS 109",
+//             courseName: "Computer Science I",
+//             faculty: "Computer Science",
+//             chips: ["Winter"],
+//         },
+//         position: { x: 200, y: 200 },
+//         type: "courseNode",
+//     },
+//     {
+//         id: "5",
+//         data: {
+//             semesterId: 1,
+//             semesterName: "1a",
+//             semesterYear: new Date(2024, 0, 1),
+//             semesterTerm: "FA",
+//         },
+//         style: {
+//             zIndex: -1,
+//             cursor: "default",
+//         },
+//         position: { x: 300, y: 300 },
+//         type: "semesterNode",
+//     },
+// ];
 
 const nodeTypes = {
-    cardNode: CourseCard,
+    courseNode: CourseCard,
     semesterNode: Semester,
 };
 
@@ -130,7 +132,7 @@ export default function DashboardComponent() {
     const form = useSemesterForm({
         mode: "uncontrolled",
         initialValues: {
-            semesterId: undefined,
+            semesterId: 0,
             semesterName: "",
             semesterYear: new Date(2024, 0, 1),
             semesterTerm: SemesterTerm.SU,
@@ -139,8 +141,17 @@ export default function DashboardComponent() {
 
     const { getIntersectingNodes } = useReactFlow();
 
-    const [nodes, setNodes] = useState(initialNodes);
+    const [nodes, setNodes] = useState<Node[]>([]);
     const [placement, setPlacement] = useState<SemesterPlacement[]>([]);
+    const { updateNodes } = useUpdateNodes();
+
+    // get initial node state
+    useEffect(() => {
+        const loadData = async () => {
+            await updateNodes();
+        };
+        loadData();
+    }, [updateNodes]);
 
     const onNodesChange = useCallback(
         // eslint-disable-next-line
@@ -179,6 +190,7 @@ export default function DashboardComponent() {
                         ]}
                         panOnScrollMode={PanOnScrollMode.Horizontal}
                     />
+                    <Button onClick={updateNodes} />
                 </div>
                 <SemesterForm />
             </SemesterFormProvider>

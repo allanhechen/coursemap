@@ -1,6 +1,11 @@
+import { XYPosition } from "@xyflow/react";
+
 export interface SemesterWrapper {
     data: SemesterInformation;
-    isConnectable: boolean;
+    isConnectable?: boolean;
+    position?: XYPosition;
+    id?: string;
+    type?: "semesterNode";
 }
 
 export enum SemesterTerm {
@@ -11,7 +16,7 @@ export enum SemesterTerm {
 }
 
 export interface SemesterInformation {
-    semesterId: number | undefined;
+    semesterId: number;
     semesterName: string;
     semesterYear: Date;
     semesterTerm: SemesterTerm;

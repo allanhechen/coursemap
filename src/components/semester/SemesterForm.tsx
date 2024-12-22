@@ -11,7 +11,7 @@ import {
 import { YearPickerInput } from "@mantine/dates";
 import { SemesterTerm } from "@/types/semester";
 import { useSemesterFormContext } from "./semesterFormContext";
-import { createSemester, updateSemester } from "@/lib/actions/semester";
+import { putSemester, updateSemester } from "@/lib/actions/semester";
 import { useCallback } from "react";
 import { IconEdit, IconCirclePlus } from "@tabler/icons-react";
 
@@ -69,7 +69,7 @@ export default function SemesterForm({
                                 values.semesterTerm
                             );
                         } else {
-                            createSemester(
+                            putSemester(
                                 values.semesterName,
                                 values.semesterYear,
                                 values.semesterTerm
