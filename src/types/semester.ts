@@ -25,11 +25,13 @@ export interface SemesterInformation {
 
 export interface SemesterPlacement {
     semesterId: number;
-    x: number;
-    y: number;
+    intervalStart: number;
+    intervalEnd: number;
+    top: number;
+    bottom: number;
 }
 
 export type SemesterPositionContextType = [
-    SemesterPlacement[], // Array of objects
-    React.Dispatch<React.SetStateAction<SemesterPlacement[]>> // Setter function
+    SemesterPlacement[],
+    React.Dispatch<React.SetStateAction<SemesterPlacement[]>>
 ];
