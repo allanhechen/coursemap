@@ -5,6 +5,17 @@ import { CardWrapper } from "@/types/courseCard";
 import { getAllSemesters } from "./actions/semester";
 import { getAllCourseSemesters } from "./actions/course";
 
+const SEMESTER_WIDTH = 360;
+const SEMESTER_GAP = 10;
+const SEMESTER_PADDING_X = 20;
+const SEMESTER_PADDING_TOP = 50;
+// const SEMESTER_PADDING_BOTTOM = 20;
+const SEMESTER_STARTING_POSITION_X = 0;
+const SEMESTER_STARTING_POSITION_Y = 0;
+
+const CARD_GAP = 10;
+const CARD_HEIGHT = 175;
+
 interface SemesterGroup {
     semester: SemesterWrapper;
     courses: CardWrapper[];
@@ -43,16 +54,44 @@ export const useScrollHandler = () => {
 
 function placeNodes(semesterGroupDict: Dictionary<SemesterGroup>): Node[] {
     const finalNodes: Node[] = [];
-    let semesterPosition = 0;
+    let semesterPosition = SEMESTER_STARTING_POSITION_X;
 
     for (const key in semesterGroupDict) {
+        const cardPositionX = semesterPosition + SEMESTER_PADDING_X;
+        let cardPositionY = SEMESTER_PADDING_TOP + SEMESTER_STARTING_POSITION_Y;
         const { semester, courses } = semesterGroupDict[key];
-        semester.position = { x: 0, y: semesterPosition };
+        semester.position = {
+            x: semesterPosition,
+            y: SEMESTER_STARTING_POSITION_Y,
+        };
+        semester.style = {
+            width: SEMESTER_WIDTH,
+            // height:
+            //     SEMESTER_PADDING_TOP +
+            //     SEMESTER_PADDING_BOTTOM +
+            //     CARD_HEIGHT * courses.length +
+            //     CARD_GAP * (courses.length - 1),
+            // backgroundColor: "white",
+            zIndex: -1,
+            cursor: "default",
+            overflow: "hidden",
+        };
         semester.id = `${key}-${semester.data.semesterName}`;
         semester.type = "semesterNode" as const;
         // TODO: fix the wrapper types so they extend node correctly
         finalNodes.push(semester as unknown as Node);
-        semesterPosition += 100;
+
+        courses.forEach((course) => {
+            course.position = {
+                x: cardPositionX,
+                y: cardPositionY,
+            };
+            cardPositionY += CARD_HEIGHT + CARD_GAP;
+            course.id = `${course.data.courseCode}`;
+            course.type = "courseNode" as const;
+            finalNodes.push(course as unknown as Node);
+        });
+        semesterPosition += SEMESTER_WIDTH + SEMESTER_GAP;
     }
     return finalNodes;
 }

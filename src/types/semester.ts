@@ -5,6 +5,7 @@ export interface SemesterWrapper {
     isConnectable?: boolean;
     position?: XYPosition;
     id?: string;
+    style?: object;
     type?: "semesterNode";
 }
 

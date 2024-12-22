@@ -1,5 +1,4 @@
 import { SemesterWrapper } from "@/types/semester";
-import { Paper } from "@mantine/core";
 import { Node, useNodeId, useReactFlow } from "@xyflow/react";
 import { useCallback, useState } from "react";
 import SemesterData from "@/components/semester/SemesterData";
@@ -39,17 +38,12 @@ export default function Semester({ data }: SemesterWrapper) {
     }, []);
 
     return (
-        <Paper
+        <div
             className="nowheel nodrag flex justify-center items-start"
             onWheel={onWheel}
             onTouchMove={onTouchMove}
             onTouchStart={onTouchStart}
-            radius={10}
-            style={{
-                height: "500px",
-                width: "500px",
-                backgroundColor: "white",
-            }}
+            style={{ height: "200vh" }}
         >
             <SemesterData
                 semesterId={data.semesterId}
@@ -57,6 +51,6 @@ export default function Semester({ data }: SemesterWrapper) {
                 semesterYear={data.semesterYear}
                 semesterTerm={data.semesterTerm}
             />
-        </Paper>
+        </div>
     );
 }
