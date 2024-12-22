@@ -32,3 +32,20 @@
 [data-mantine-color-scheme="dark"] .mantine-Menu-dropdown {
     background-color: #22242e !important;
 }
+
+[class*="react-flow"] {
+    transition: transform 0.1s ease;
+}
+
+@media (pointer: coarse) {
+    [class*="react-flow"] {
+        transition: none;
+    }
+}
+
+body,
+html {
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+}
