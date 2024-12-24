@@ -18,12 +18,14 @@ export default function CourseCard({ data }: CardWrapper) {
             const self = getNode(node_id) as Node; // we know for sure this node exists
             const intersectingNodes = getIntersectingNodes(self);
 
-            // should always be intersecting nodes because card will always be on semester
-            // first (and only) on will be the semester
-            if (intersectingNodes.length == 1) {
-                const deltaY = event.deltaY;
-                scrollHandler(intersectingNodes[0], deltaY);
-            }
+            // try to find an overlapping node whose key begins with semester
+            // this is the semester the course belongs to
+            intersectingNodes.forEach((node) => {
+                if (node.id.startsWith("semester")) {
+                    scrollHandler(node, event.deltaY);
+                    return;
+                }
+            });
         },
         [scrollHandler, getIntersectingNodes, getNode, node_id]
     );

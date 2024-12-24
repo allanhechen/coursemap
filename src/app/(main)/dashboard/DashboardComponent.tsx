@@ -1,18 +1,29 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { ReactFlow, useReactFlow, applyNodeChanges } from "@xyflow/react";
-import { PanOnScrollMode } from "@xyflow/react";
+import {
+    ReactFlow,
+    applyNodeChanges,
+    PanOnScrollMode,
+    Node,
+    useOnViewportChange,
+    NodeChange,
+} from "@xyflow/react";
 import CourseCard from "@/components/CourseCard";
-import { Node } from "@xyflow/react";
 import Semester from "@/components/semester/Semester";
+import DeleteArea from "@/components/DeleteArea";
 import {
     SemesterFormProvider,
     useSemesterForm,
 } from "@/components/semester/semesterFormContext";
 import { SemesterTerm } from "@/types/semester";
 import SemesterForm from "@/components/semester/SemesterForm";
-import { useUpdateNodes } from "@/lib/placement";
+import {
+    useGroupCards,
+    useUpdateNodes,
+    useDragStartHandler,
+    useOnViewportMove,
+} from "@/lib/placement";
 import { Button } from "@mantine/core";
 
 // ipmlementation notes:
@@ -26,6 +37,7 @@ import { Button } from "@mantine/core";
 const nodeTypes = {
     courseNode: CourseCard,
     semesterNode: Semester,
+    deleteNode: DeleteArea,
 };
 
 export default function DashboardComponent() {
@@ -39,10 +51,11 @@ export default function DashboardComponent() {
         },
     });
 
-    const { getIntersectingNodes } = useReactFlow();
-
     const [nodes, setNodes] = useState<Node[]>([]);
     const { updateNodes } = useUpdateNodes();
+    const { groupCards } = useGroupCards();
+    const { dragStartHandler } = useDragStartHandler();
+    const { onViewportMove } = useOnViewportMove();
 
     // get initial node state
     useEffect(() => {
@@ -52,24 +65,25 @@ export default function DashboardComponent() {
         loadData();
     }, [updateNodes]);
 
-    const onNodesChange = useCallback(
-        // eslint-disable-next-line
-        (changes: any) => {
-            setNodes((nds) => applyNodeChanges(changes, nds));
-        },
-        []
-    );
-    const onNodeDragStop = useCallback(
-        // eslint-disable-next-line
-        (_: any, node: Node) => console.log(getIntersectingNodes(node)),
-        [getIntersectingNodes]
-    );
+    const onNodesChange = useCallback((changes: NodeChange[]) => {
+        setNodes((nds) => applyNodeChanges(changes, nds));
+    }, []);
+
+    // move the delete area on screen move (in the future will also include search bar)
+    useOnViewportChange({
+        onChange: onViewportMove,
+    });
+
     return (
         <SemesterFormProvider form={form}>
             <div
                 style={{
-                    height: "80vh",
-                    backgroundColor: "grey",
+                    height: "100vh",
+                    width: "100vw",
+                    top: 0,
+                    left: 0,
+                    position: "absolute",
+                    zIndex: -1,
                 }}
             >
                 <ReactFlow
@@ -81,12 +95,17 @@ export default function DashboardComponent() {
                     zoomOnDoubleClick={false}
                     preventScrolling={false}
                     nodeTypes={nodeTypes}
-                    onNodeDragStop={onNodeDragStop}
+                    onNodeDragStop={groupCards}
+                    onNodeDragStart={dragStartHandler}
                     translateExtent={[
                         [0, 0],
                         [5000, 1000],
                     ]}
                     panOnScrollMode={PanOnScrollMode.Horizontal}
+                    autoPanOnConnect={false}
+                    autoPanOnNodeDrag={false}
+                    minZoom={1}
+                    maxZoom={1}
                 />
                 <Button onClick={updateNodes} />
             </div>

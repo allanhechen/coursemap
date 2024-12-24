@@ -50,6 +50,8 @@ export default function SemesterForm({
     return (
         <>
             <Modal
+                // lockScroll introduces a bar onto position absolute elements
+                lockScroll={false}
                 opened={opened}
                 onClose={close}
                 title={semesterId ? "Edit Semester" : "Add Semester"}
