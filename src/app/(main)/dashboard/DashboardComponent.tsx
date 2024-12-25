@@ -13,12 +13,6 @@ import CourseCard from "@/components/CourseCard";
 import Semester from "@/components/semester/Semester";
 import DeleteArea from "@/components/DeleteArea";
 import {
-    SemesterFormProvider,
-    useSemesterForm,
-} from "@/components/semester/semesterFormContext";
-import { SemesterTerm } from "@/types/semester";
-import SemesterForm from "@/components/semester/SemesterForm";
-import {
     useGroupCards,
     useUpdateNodes,
     useDragStartHandler,
@@ -41,16 +35,6 @@ const nodeTypes = {
 };
 
 export default function DashboardComponent() {
-    const form = useSemesterForm({
-        mode: "uncontrolled",
-        initialValues: {
-            semesterId: 0,
-            semesterName: "",
-            semesterYear: new Date(2024, 0, 1),
-            semesterTerm: SemesterTerm.SU,
-        },
-    });
-
     const [nodes, setNodes] = useState<Node[]>([]);
     const { updateNodes } = useUpdateNodes();
     const { groupCards } = useGroupCards();
@@ -75,41 +59,38 @@ export default function DashboardComponent() {
     });
 
     return (
-        <SemesterFormProvider form={form}>
-            <div
-                style={{
-                    height: "100vh",
-                    width: "100vw",
-                    top: 0,
-                    left: 0,
-                    position: "absolute",
-                    zIndex: -1,
-                }}
-            >
-                <ReactFlow
-                    nodes={nodes}
-                    onNodesChange={onNodesChange}
-                    panOnDrag={false}
-                    panOnScroll={true}
-                    zoomOnScroll={false}
-                    zoomOnDoubleClick={false}
-                    preventScrolling={false}
-                    nodeTypes={nodeTypes}
-                    onNodeDragStop={groupCards}
-                    onNodeDragStart={dragStartHandler}
-                    translateExtent={[
-                        [0, 0],
-                        [5000, 1000],
-                    ]}
-                    panOnScrollMode={PanOnScrollMode.Horizontal}
-                    autoPanOnConnect={false}
-                    autoPanOnNodeDrag={false}
-                    minZoom={1}
-                    maxZoom={1}
-                />
-                <Button onClick={updateNodes} />
-            </div>
-            <SemesterForm />
-        </SemesterFormProvider>
+        <div
+            style={{
+                height: "100vh",
+                width: "100vw",
+                top: 0,
+                left: 0,
+                position: "absolute",
+                zIndex: -1,
+            }}
+        >
+            <ReactFlow
+                nodes={nodes}
+                onNodesChange={onNodesChange}
+                panOnDrag={false}
+                panOnScroll={true}
+                zoomOnScroll={false}
+                zoomOnDoubleClick={false}
+                preventScrolling={false}
+                nodeTypes={nodeTypes}
+                onNodeDragStop={groupCards}
+                onNodeDragStart={dragStartHandler}
+                translateExtent={[
+                    [0, 0],
+                    [5000, 1000],
+                ]}
+                panOnScrollMode={PanOnScrollMode.Horizontal}
+                autoPanOnConnect={false}
+                autoPanOnNodeDrag={false}
+                minZoom={1}
+                maxZoom={1}
+            />
+            <Button onClick={updateNodes} />
+        </div>
     );
 }

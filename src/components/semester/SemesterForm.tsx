@@ -13,7 +13,7 @@ import { SemesterTerm } from "@/types/semester";
 import { useSemesterFormContext } from "./semesterFormContext";
 import { putSemester, updateSemester } from "@/lib/actions/semester";
 import { useCallback } from "react";
-import { IconEdit, IconCirclePlus } from "@tabler/icons-react";
+import { IconEdit } from "@tabler/icons-react";
 
 // semseterForm will be called in two places
 // the first is the create page on a semester, where all fields will initially be fileld in
@@ -128,7 +128,7 @@ export default function SemesterForm({
                         <IconEdit />
                     </>
                 ) : (
-                    <IconCirclePlus size="2rem" />
+                    <Button>Add Semester</Button>
                 )}
             </div>
         </>
