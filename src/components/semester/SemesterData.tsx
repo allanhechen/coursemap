@@ -3,7 +3,6 @@ import { SemesterInformation } from "@/types/semester";
 import { Title } from "@mantine/core";
 
 export default function SemesterData(props: SemesterInformation) {
-    console.log(props);
     return (
         <div className="flex items-center relative mt-2">
             <Title order={2}>{props.semesterName}</Title>

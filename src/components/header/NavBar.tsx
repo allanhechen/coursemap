@@ -1,3 +1,4 @@
+import SemesterForm from "../semester/SemesterForm";
 import CompactLogo from "./CompactLogo";
 import ThemeSwitcher from "./ThemeSwitcher";
 import UserMenu from "./UserMenu";
@@ -30,6 +31,7 @@ export default function NavBar() {
                 <CompactLogo />
             </div>
             <Group className="items-center">
+                <SemesterForm />
                 <ThemeSwitcher />
                 <UserMenu
                     menuItems={getData()}

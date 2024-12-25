@@ -1,8 +1,8 @@
 "use server";
 
-import { SemesterTerm } from "@/types/semester";
+import { SemesterInformation, SemesterTerm } from "@/types/semester";
 
-export async function createSemester(
+export async function putSemester(
     semesterName: string,
     semesterYear: Date,
     semesterTerm: SemesterTerm
@@ -16,6 +16,26 @@ export async function createSemester(
         `Create a new semester with ${semesterName}, ${semesterYear}, and ${semesterTerm}`
     );
     return 1;
+}
+
+export async function getAllSemesters(): Promise<SemesterInformation[]> {
+    // get user, program from auth system
+    // return all semesters belonging to the user in this program
+    console.log(`We are reading semester information`);
+    return [
+        {
+            semesterId: 1,
+            semesterName: "1a",
+            semesterYear: new Date(2024, 0, 1),
+            semesterTerm: SemesterTerm.FA,
+        },
+        {
+            semesterId: 2,
+            semesterName: "2a",
+            semesterYear: new Date(2024, 0, 1),
+            semesterTerm: SemesterTerm.WI,
+        },
+    ];
 }
 
 export async function updateSemester(

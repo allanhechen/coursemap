@@ -11,9 +11,9 @@ import {
 import { YearPickerInput } from "@mantine/dates";
 import { SemesterTerm } from "@/types/semester";
 import { useSemesterFormContext } from "./semesterFormContext";
-import { createSemester, updateSemester } from "@/lib/actions/semester";
+import { putSemester, updateSemester } from "@/lib/actions/semester";
 import { useCallback } from "react";
-import { IconEdit, IconCirclePlus } from "@tabler/icons-react";
+import { IconEdit } from "@tabler/icons-react";
 
 // semseterForm will be called in two places
 // the first is the create page on a semester, where all fields will initially be fileld in
@@ -50,6 +50,8 @@ export default function SemesterForm({
     return (
         <>
             <Modal
+                // lockScroll introduces a bar onto position absolute elements
+                lockScroll={false}
                 opened={opened}
                 onClose={close}
                 title={semesterId ? "Edit Semester" : "Add Semester"}
@@ -69,7 +71,7 @@ export default function SemesterForm({
                                 values.semesterTerm
                             );
                         } else {
-                            createSemester(
+                            putSemester(
                                 values.semesterName,
                                 values.semesterYear,
                                 values.semesterTerm
@@ -126,7 +128,7 @@ export default function SemesterForm({
                         <IconEdit />
                     </>
                 ) : (
-                    <IconCirclePlus size="2rem" />
+                    <Button>Add Semester</Button>
                 )}
             </div>
         </>

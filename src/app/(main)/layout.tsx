@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import "@xyflow/react/dist/style.css";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "@/app/(main)/globals.css";
