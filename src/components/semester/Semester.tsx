@@ -16,6 +16,7 @@ export default function Semester({ data }: SemesterWrapper) {
 
     const onWheel = useCallback(
         (event: React.WheelEvent) => {
+            event.stopPropagation();
             const { deltaX, deltaY } = event;
             // Only scroll horizontal or vertical
             if (Math.abs(deltaX) > Math.abs(deltaY)) {
@@ -30,6 +31,7 @@ export default function Semester({ data }: SemesterWrapper) {
 
     const onTouchMove = useCallback(
         (event: React.TouchEvent) => {
+            event.stopPropagation();
             const { pageX, pageY } = event.changedTouches[0];
             if (Math.abs(pageX) > Math.abs(pageY)) {
                 const deltaX = pageX - lastX;
@@ -53,6 +55,7 @@ export default function Semester({ data }: SemesterWrapper) {
     );
 
     const onTouchStart = useCallback((event: React.TouchEvent) => {
+        event.stopPropagation();
         setLastY(event.changedTouches[0].pageY);
         setLastX(event.changedTouches[0].pageX);
     }, []);

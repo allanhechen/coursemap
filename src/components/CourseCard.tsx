@@ -16,6 +16,7 @@ export default function CourseCard({ data }: CardWrapper) {
     // only support wheel scrolling for cards since touchmove  is used for dragging cards
     const onWheel = useCallback(
         (event: React.WheelEvent) => {
+            event.stopPropagation();
             const { deltaX, deltaY } = event;
             // Only scroll horizontal or vertical
             if (Math.abs(deltaX) > Math.abs(deltaY)) {
