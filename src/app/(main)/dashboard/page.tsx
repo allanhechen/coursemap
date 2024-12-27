@@ -6,6 +6,7 @@ import { useState } from "react";
 import { SemesterPlacement } from "@/types/semester";
 
 import { SemesterPositionContext } from "./semesterPositionContext";
+import NavBar from "@/components/header/NavBar";
 
 export default function Page() {
     const [placements, setPlacements] = useState<SemesterPlacement[]>([]);
@@ -13,6 +14,8 @@ export default function Page() {
     return (
         <SemesterPositionContext.Provider value={[placements, setPlacements]}>
             <ReactFlowProvider>
+                <NavBar />
+
                 <DashboardComponent />
             </ReactFlowProvider>
         </SemesterPositionContext.Provider>

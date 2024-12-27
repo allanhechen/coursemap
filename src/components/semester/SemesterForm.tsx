@@ -7,13 +7,17 @@ import {
     SegmentedControl,
     Button,
     Input,
+    Title,
 } from "@mantine/core";
 import { YearPickerInput } from "@mantine/dates";
 import { SemesterTerm } from "@/types/semester";
-import { useSemesterFormContext } from "./semesterFormContext";
+import { useSemesterFormContext } from "@/components/semester/semesterFormContext";
 import { putSemester, updateSemester } from "@/lib/actions/semester";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
+import { useUpdateNodes } from "@/lib/placement";
+
+import "@/components/semester/SemesterForm.css";
 
 // semseterForm will be called in two places
 // the first is the create page on a semester, where all fields will initially be fileld in
@@ -35,6 +39,17 @@ export default function SemesterForm({
     semesterTerm?: SemesterTerm;
 }) {
     const [opened, { open, close }] = useDisclosure(false);
+    const [visible, setVisible] = useState(false);
+
+    const { updateNodes } = useUpdateNodes();
+
+    const onMouseEnter = useCallback(() => {
+        setVisible(true);
+    }, []);
+
+    const onMouseLeave = useCallback(() => {
+        setVisible(false);
+    }, []);
 
     const form = useSemesterFormContext();
 
@@ -78,14 +93,7 @@ export default function SemesterForm({
                             );
                         }
 
-                        // we might need to reorder the semesters
-                        // this workaround forces a page refresh so it is guaranteed to get the up to date semesters
-                        // i will figure out how to redraw the semesters without triggering a full refresh
-                        // but as of right now this is already implemented on initial page load
-                        // perhaps we can usecallback -> get data using server action -> recreate reactflowprovider?
-                        setTimeout(function () {
-                            window.location.reload();
-                        }, 1000);
+                        updateNodes();
                     })}
                 >
                     <div className="mt-3">
@@ -107,7 +115,7 @@ export default function SemesterForm({
                         />
                     </div>
                     <div className="mt-3">
-                        <Input.Label>Hello World</Input.Label>
+                        <Input.Label>Term</Input.Label>
                         <div>
                             <SegmentedControl
                                 key={form.key("semesterTerm")}
@@ -124,9 +132,22 @@ export default function SemesterForm({
             </Modal>
             <div className="cursor-pointer" onClick={openedWrapper}>
                 {semesterName ? (
-                    <>
-                        <IconEdit />
-                    </>
+                    <div
+                        className="flex items-center relative mt-2 pr-2"
+                        onMouseEnter={onMouseEnter}
+                        onMouseLeave={onMouseLeave}
+                    >
+                        <Title order={2}>{semesterName}</Title>
+                        <div
+                            className="absolute edit-icon"
+                            style={{
+                                transform: "translate(35px, 1px)",
+                                opacity: visible ? 1 : 0,
+                            }}
+                        >
+                            <IconEdit />
+                        </div>
+                    </div>
                 ) : (
                     <Button>Add Semester</Button>
                 )}
