@@ -20,6 +20,8 @@ import {
 } from "@/lib/placement";
 import { Button } from "@mantine/core";
 
+import "@/app/(main)/dashboard/DashboardComponent.css";
+
 // ipmlementation notes:
 // 1. pan on drag false -> can't move the viewport with mouse
 // 2. panonscoll true -> can scroll
