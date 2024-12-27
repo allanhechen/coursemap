@@ -17,8 +17,11 @@ import {
     useUpdateNodes,
     useDragStartHandler,
     useOnViewportMove,
+    useScrollHandler,
 } from "@/lib/placement";
 import { Button } from "@mantine/core";
+
+import "@/app/(main)/dashboard/DashboardComponent.css";
 
 // ipmlementation notes:
 // 1. pan on drag false -> can't move the viewport with mouse
@@ -35,6 +38,8 @@ const nodeTypes = {
 };
 
 export default function DashboardComponent() {
+    const [lastX, setLastX] = useState(0);
+    const { horizontalScrollHandler } = useScrollHandler();
     const [nodes, setNodes] = useState<Node[]>([]);
     const { updateNodes } = useUpdateNodes();
     const { groupCards } = useGroupCards();
@@ -57,6 +62,32 @@ export default function DashboardComponent() {
     useOnViewportChange({
         onChange: onViewportMove,
     });
+    const onWheel = useCallback(
+        (event: React.WheelEvent) => {
+            const { deltaX, deltaY } = event;
+            // Only scroll horizontal or vertical
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                horizontalScrollHandler(deltaX);
+            }
+        },
+        [horizontalScrollHandler]
+    );
+
+    const onTouchMove = useCallback(
+        (event: React.TouchEvent) => {
+            const { pageX, pageY } = event.changedTouches[0];
+            if (Math.abs(pageX) > Math.abs(pageY)) {
+                const deltaX = pageX - lastX;
+                horizontalScrollHandler(deltaX);
+                setLastX(pageX);
+            }
+        },
+        [lastX, horizontalScrollHandler]
+    );
+
+    const onTouchStart = useCallback((event: React.TouchEvent) => {
+        setLastX(event.changedTouches[0].pageX);
+    }, []);
 
     return (
         <div
@@ -89,6 +120,10 @@ export default function DashboardComponent() {
                 autoPanOnNodeDrag={false}
                 minZoom={1}
                 maxZoom={1}
+                className="nodrag nowheel"
+                onWheel={onWheel}
+                onTouchMove={onTouchMove}
+                onTouchStart={onTouchStart}
             />
             <Button onClick={updateNodes} />
         </div>

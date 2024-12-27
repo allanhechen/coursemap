@@ -10,24 +10,39 @@ export default function CourseCard({ data }: CardWrapper) {
     const { courseCode, courseName, faculty, chips } = data;
     const { getNode, getIntersectingNodes } = useReactFlow();
     const node_id = useNodeId() as string; // we are sure this is a string
-    const { scrollHandler } = useScrollHandler();
+    const { verticalScrollHandler, horizontalScrollHandler } =
+        useScrollHandler();
 
     // only support wheel scrolling for cards since touchmove  is used for dragging cards
     const onWheel = useCallback(
         (event: React.WheelEvent) => {
-            const self = getNode(node_id) as Node; // we know for sure this node exists
-            const intersectingNodes = getIntersectingNodes(self);
+            event.stopPropagation();
+            const { deltaX, deltaY } = event;
+            // Only scroll horizontal or vertical
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                horizontalScrollHandler(deltaX);
+            } else if (Math.abs(deltaY) > Math.abs(deltaX)) {
+                const self = getNode(node_id) as Node; // we know for sure this node exists
 
-            // try to find an overlapping node whose key begins with semester
-            // this is the semester the course belongs to
-            intersectingNodes.forEach((node) => {
-                if (node.id.startsWith("semester")) {
-                    scrollHandler(node, event.deltaY);
-                    return;
-                }
-            });
+                const intersectingNodes = getIntersectingNodes(self);
+
+                // try to find an overlapping node whose key begins with semester
+                // this is the semester the course belongs to
+                intersectingNodes.forEach((node) => {
+                    if (node.id.startsWith("semester")) {
+                        verticalScrollHandler(node, event.deltaY);
+                        return;
+                    }
+                });
+            }
         },
-        [scrollHandler, getIntersectingNodes, getNode, node_id]
+        [
+            verticalScrollHandler,
+            horizontalScrollHandler,
+            getIntersectingNodes,
+            getNode,
+            node_id,
+        ]
     );
 
     return (

@@ -51,7 +51,8 @@ interface Dictionary<T> {
 // currently assumes that the item to be moved is a smester
 // must be changed to account for the search bar
 export const useScrollHandler = () => {
-    const { getIntersectingNodes, setNodes } = useReactFlow();
+    const { getIntersectingNodes, setNodes, setViewport, getViewport } =
+        useReactFlow();
     const contextItem = useContext(SemesterPositionContext);
 
     if (!contextItem) {
@@ -61,7 +62,7 @@ export const useScrollHandler = () => {
     }
     const [placements, setPlacements] = contextItem;
 
-    const scrollHandler = useCallback(
+    const verticalScrollHandler = useCallback(
         (targetSemester: Node, distance: number) => {
             const semesterId = targetSemester.data.semesterId;
 
@@ -133,7 +134,22 @@ export const useScrollHandler = () => {
         [getIntersectingNodes, setNodes, placements, setPlacements]
     );
 
-    return { scrollHandler };
+    const horizontalScrollHandler = useCallback(
+        (distance: number) => {
+            const { x, y, zoom }: Viewport = getViewport();
+            if (x + distance > 0) {
+                distance = -x;
+            }
+            setViewport({
+                x: x + distance,
+                y: y,
+                zoom: zoom,
+            });
+        },
+        [setViewport, getViewport]
+    );
+
+    return { verticalScrollHandler, horizontalScrollHandler };
 };
 
 // a helper funciton that calculates where the nodes should go
