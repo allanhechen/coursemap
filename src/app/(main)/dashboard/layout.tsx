@@ -1,6 +1,5 @@
 "use client";
 
-import NavBar from "@/components/header/NavBar";
 import {
     SemesterFormProvider,
     useSemesterForm,
@@ -23,10 +22,7 @@ export default function Layout({
     });
     return (
         <>
-            <SemesterFormProvider form={form}>
-                <NavBar />
-                {children}
-            </SemesterFormProvider>
+            <SemesterFormProvider form={form}>{children}</SemesterFormProvider>
         </>
     );
 }
