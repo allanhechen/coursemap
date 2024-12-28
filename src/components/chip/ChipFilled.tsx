@@ -1,16 +1,14 @@
 "use client";
 
-import { ChipVariant } from "@/types/chipVariant";
+import { ChipProps, ChipVariant } from "@/types/chipVariant";
 import { useMantineTheme } from "@mantine/core";
 import { Text } from "@mantine/core";
 
 export default function ChipFilled({
     variant,
     clickable = true,
-}: {
-    variant: ChipVariant;
-    clickable?: boolean;
-}) {
+    ...rootDomAttributes
+}: ChipProps) {
     const theme = useMantineTheme();
 
     let backgroundColor = "";
@@ -48,6 +46,7 @@ export default function ChipFilled({
             className={`px-3 rounded-3xl h-7 inline-block select-none ${
                 clickable ? "cursor-pointer" : ""
             }`}
+            {...rootDomAttributes}
         >
             {variant}
         </Text>

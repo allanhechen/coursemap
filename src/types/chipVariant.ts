@@ -7,3 +7,9 @@ export enum ChipVariant {
     ELECTIVE = "Elective",
     WARNING = "Warning",
 }
+
+export interface ChipProps extends React.HTMLAttributes<HTMLDivElement> {
+    variant: ChipVariant;
+    filled?: boolean;
+    clickable?: boolean;
+}
