@@ -9,9 +9,12 @@ import {
     useOnViewportChange,
     NodeChange,
 } from "@xyflow/react";
+
 import CourseCard from "@/components/CourseCard";
-import Semester from "@/components/semester/Semester";
 import DeleteArea from "@/components/DeleteArea";
+import Semester from "@/components/semester/Semester";
+import NavBar from "@/components/header/NavBar";
+
 import {
     useGroupCards,
     useUpdateNodes,
@@ -19,9 +22,8 @@ import {
     useOnViewportMove,
     useScrollHandler,
 } from "@/lib/placement";
-import { Button } from "@mantine/core";
-
 import "@/app/(main)/dashboard/DashboardComponent.css";
+import { User } from "@/types/user";
 
 // ipmlementation notes:
 // 1. pan on drag false -> can't move the viewport with mouse
@@ -37,7 +39,7 @@ const nodeTypes = {
     deleteNode: DeleteArea,
 };
 
-export default function DashboardComponent() {
+export default function DashboardComponent(props: User) {
     const [lastX, setLastX] = useState(0);
     const { horizontalScrollHandler } = useScrollHandler();
     const [nodes, setNodes] = useState<Node[]>([]);
@@ -90,42 +92,45 @@ export default function DashboardComponent() {
     }, []);
 
     return (
-        <div
-            style={{
-                height: "100vh",
-                width: "100vw",
-                top: 0,
-                left: 0,
-                position: "absolute",
-                zIndex: -1,
-            }}
-        >
-            <ReactFlow
-                nodes={nodes}
-                onNodesChange={onNodesChange}
-                panOnDrag={false}
-                panOnScroll={true}
-                zoomOnScroll={false}
-                zoomOnDoubleClick={false}
-                preventScrolling={false}
-                nodeTypes={nodeTypes}
-                onNodeDragStop={groupCards}
-                onNodeDragStart={dragStartHandler}
-                translateExtent={[
-                    [0, 0],
-                    [5000, 1000],
-                ]}
-                panOnScrollMode={PanOnScrollMode.Horizontal}
-                autoPanOnConnect={false}
-                autoPanOnNodeDrag={false}
-                minZoom={1}
-                maxZoom={1}
-                className="nodrag nowheel"
-                onWheel={onWheel}
-                onTouchMove={onTouchMove}
-                onTouchStart={onTouchStart}
-            />
-            <Button onClick={updateNodes} />
-        </div>
+        <>
+            <NavBar {...props} />
+            <div
+                style={{
+                    height: "100vh",
+                    width: "100vw",
+                    top: 0,
+                    left: 0,
+                    position: "absolute",
+                    zIndex: -1,
+                }}
+            >
+                <ReactFlow
+                    nodes={nodes}
+                    onNodesChange={onNodesChange}
+                    panOnDrag={false}
+                    panOnScroll={true}
+                    zoomOnScroll={false}
+                    zoomOnDoubleClick={false}
+                    preventScrolling={false}
+                    nodeTypes={nodeTypes}
+                    onNodeDragStop={groupCards}
+                    onNodeDragStart={dragStartHandler}
+                    translateExtent={[
+                        [0, 0],
+                        [5000, 1000],
+                    ]}
+                    panOnScrollMode={PanOnScrollMode.Horizontal}
+                    autoPanOnConnect={false}
+                    autoPanOnNodeDrag={false}
+                    minZoom={1}
+                    maxZoom={1}
+                    className="nodrag nowheel"
+                    onWheel={onWheel}
+                    onTouchMove={onTouchMove}
+                    onTouchStart={onTouchStart}
+                    proOptions={{ hideAttribution: true }}
+                />
+            </div>
+        </>
     );
 }

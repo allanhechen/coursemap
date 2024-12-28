@@ -1,3 +1,4 @@
+import { User } from "@/types/user";
 import SemesterForm from "../semester/SemesterForm";
 import CompactLogo from "./CompactLogo";
 import ThemeSwitcher from "./ThemeSwitcher";
@@ -5,19 +6,7 @@ import UserMenu from "./UserMenu";
 import WideLogo from "./WideLogo";
 import { Group, Paper } from "@mantine/core";
 
-function getData() {
-    return ["Math", "Computer Science"];
-}
-
-function getUserName() {
-    return "Allan";
-}
-
-function getUserAvatarURL() {
-    return "/logos/coursemap-icon-bg-dark.svg";
-}
-
-export default function NavBar() {
+export default function NavBar(props: User) {
     return (
         <Paper
             shadow="sm"
@@ -33,11 +22,7 @@ export default function NavBar() {
             <Group className="items-center">
                 <SemesterForm />
                 <ThemeSwitcher />
-                <UserMenu
-                    menuItems={getData()}
-                    userName={getUserName()}
-                    userAvatarURL={getUserAvatarURL()}
-                />
+                <UserMenu {...props} />
             </Group>
         </Paper>
     );
