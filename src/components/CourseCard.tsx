@@ -1,19 +1,18 @@
 import { Card, Group, Text } from "@mantine/core";
 import Chip from "@/components/chip/ChipFilled";
 import { stringToColor, stringToDeg } from "@/lib/color";
-import { CardWrapper } from "@/types/courseCard";
+import { CardWrapper, CourseInformation } from "@/types/courseCard";
 import { useScrollHandler } from "@/lib/placement";
 import { useCallback } from "react";
 import { Node, useNodeId, useReactFlow } from "@xyflow/react";
 
-export default function CourseCard({ data }: CardWrapper) {
-    const { courseCode, courseName, faculty, chips } = data;
+export default function CourseCardWrapper({ data }: CardWrapper) {
     const { getNode, getIntersectingNodes } = useReactFlow();
     const node_id = useNodeId() as string; // we are sure this is a string
     const { verticalScrollHandler, horizontalScrollHandler } =
         useScrollHandler();
 
-    // only support wheel scrolling for cards since touchmove  is used for dragging cards
+    // only support wheel scrolling for cards since touchmove is used for dragging cards
     const onWheel = useCallback(
         (event: React.WheelEvent) => {
             event.stopPropagation();
@@ -46,6 +45,19 @@ export default function CourseCard({ data }: CardWrapper) {
     );
 
     return (
+        <div onWheel={onWheel}>
+            <CourseCard {...data} />
+        </div>
+    );
+}
+
+export function CourseCard({
+    courseCode,
+    courseName,
+    faculty,
+    chips,
+}: CourseInformation) {
+    return (
         <Card
             className="h-44 w-80 select-none not-prose nowheel"
             radius="lg"
@@ -59,7 +71,6 @@ export default function CourseCard({ data }: CardWrapper) {
                     courseName
                 )})`,
             }}
-            onWheel={onWheel}
         >
             <Text
                 className="leading-none"

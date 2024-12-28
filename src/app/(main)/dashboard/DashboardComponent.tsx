@@ -10,7 +10,7 @@ import {
     NodeChange,
 } from "@xyflow/react";
 
-import CourseCard from "@/components/CourseCard";
+import CourseCardWrapper from "@/components/CourseCard";
 import DeleteArea from "@/components/DeleteArea";
 import Semester from "@/components/semester/Semester";
 import NavBar from "@/components/header/NavBar";
@@ -34,7 +34,7 @@ import { User } from "@/types/user";
 // 5. node takes in data and isconnectable and that is all, all card information is wrapped within data
 
 const nodeTypes = {
-    courseNode: CourseCard,
+    courseNode: CourseCardWrapper,
     semesterNode: Semester,
     deleteNode: DeleteArea,
 };

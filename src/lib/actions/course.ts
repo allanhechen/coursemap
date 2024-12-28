@@ -7,13 +7,13 @@ import {
 } from "@/types/courseCard";
 
 export async function searchCourses(): Promise<CourseInformation[]> {
-// searchQuery: string,
-// includeFall: boolean,
-// includeWinter: boolean,
-// includeSpring: boolean,
-// includeSummer: boolean,
-// includeRequired: boolean,
-// includeElective: boolean
+    // searchQuery: string,
+    // includeFall: boolean,
+    // includeWinter: boolean,
+    // includeSpring: boolean,
+    // includeSummer: boolean,
+    // includeRequired: boolean,
+    // includeElective: boolean
     // do server side processing to get course chips
     console.log("Getting courses that match the search query");
     return [
@@ -34,6 +34,24 @@ export async function searchCourses(): Promise<CourseInformation[]> {
             courseName: "Linear Algebra",
             faculty: "Mathematics",
             chips: [ChipVariant.SUMMER, ChipVariant.REQUIRED],
+        },
+        {
+            courseCode: "COURSE 4",
+            courseName: "Computer Science II",
+            faculty: "Computer Science",
+            chips: [ChipVariant.WINTER, ChipVariant.REQUIRED],
+        },
+        {
+            courseCode: "Course 5",
+            courseName: "Computer Science II",
+            faculty: "Computer Science",
+            chips: [ChipVariant.WINTER, ChipVariant.REQUIRED],
+        },
+        {
+            courseCode: "Course 6",
+            courseName: "Computer Science II",
+            faculty: "Computer Science",
+            chips: [ChipVariant.WINTER, ChipVariant.REQUIRED],
         },
     ];
 }
