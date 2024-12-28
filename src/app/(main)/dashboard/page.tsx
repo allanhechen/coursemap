@@ -1,23 +1,15 @@
-"use client";
+"use server";
 
 import { ReactFlowProvider } from "@xyflow/react";
-import DashboardComponent from "@/app/(main)/dashboard/DashboardComponent";
-import { useState } from "react";
-import { SemesterPlacement } from "@/types/semester";
+import DashboardWrapper from "@/app/(main)/dashboard/DashboardWrapper";
+import { getUser } from "@/lib/actions/user";
 
-import { SemesterPositionContext } from "./semesterPositionContext";
-import NavBar from "@/components/header/NavBar";
-
-export default function Page() {
-    const [placements, setPlacements] = useState<SemesterPlacement[]>([]);
+export default async function Page() {
+    const user = await getUser();
 
     return (
-        <SemesterPositionContext.Provider value={[placements, setPlacements]}>
-            <ReactFlowProvider>
-                <NavBar />
-
-                <DashboardComponent />
-            </ReactFlowProvider>
-        </SemesterPositionContext.Provider>
+        <ReactFlowProvider>
+            <DashboardWrapper {...user} />
+        </ReactFlowProvider>
     );
 }
