@@ -1,10 +1,12 @@
 "use client";
 
-import { SemesterPositionContext } from "./semesterPositionContext";
 import { useState } from "react";
+
 import { SemesterPlacement } from "@/types/semester";
 import { User } from "@/types/user";
-import DashboardComponent from "./DashboardComponent";
+
+import DashboardComponent from "@/app/(main)/dashboard/DashboardComponent";
+import { SemesterPositionContext } from "@/app/(main)/dashboard/semesterPositionContext";
 
 export default function DashboardWrapper(props: User) {
     const [placements, setPlacements] = useState<SemesterPlacement[]>([]);

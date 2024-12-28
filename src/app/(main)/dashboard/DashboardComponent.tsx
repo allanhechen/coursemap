@@ -9,9 +9,12 @@ import {
     useOnViewportChange,
     NodeChange,
 } from "@xyflow/react";
+
 import CourseCard from "@/components/CourseCard";
-import Semester from "@/components/semester/Semester";
 import DeleteArea from "@/components/DeleteArea";
+import Semester from "@/components/semester/Semester";
+import NavBar from "@/components/header/NavBar";
+
 import {
     useGroupCards,
     useUpdateNodes,
@@ -19,10 +22,7 @@ import {
     useOnViewportMove,
     useScrollHandler,
 } from "@/lib/placement";
-
 import "@/app/(main)/dashboard/DashboardComponent.css";
-import NavBar from "@/components/header/NavBar";
-
 import { User } from "@/types/user";
 
 // ipmlementation notes:
