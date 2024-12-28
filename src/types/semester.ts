@@ -10,10 +10,10 @@ export interface SemesterWrapper {
 }
 
 export enum SemesterTerm {
-    SU = "SU",
-    SP = "SP",
     FA = "FA",
     WI = "WI",
+    SP = "SP",
+    SU = "SU",
 }
 
 export interface SemesterInformation {

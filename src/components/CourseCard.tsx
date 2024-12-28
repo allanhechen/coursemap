@@ -1,5 +1,5 @@
 import { Card, Group, Text } from "@mantine/core";
-import Chip from "@/components/ChipFilled";
+import Chip from "@/components/chip/ChipFilled";
 import { stringToColor, stringToDeg } from "@/lib/color";
 import { CardWrapper } from "@/types/courseCard";
 import { useScrollHandler } from "@/lib/placement";
