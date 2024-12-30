@@ -59,7 +59,7 @@ export function CourseCard({
 }: CourseInformation) {
     return (
         <Card
-            className="h-44 w-80 select-none not-prose nowheel"
+            className="h-44 w-80 min-h-44 select-none not-prose nowheel"
             radius="lg"
             shadow="sm"
             padding="lg"
