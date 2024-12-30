@@ -13,6 +13,7 @@ export interface CourseInformation {
     courseName: string;
     faculty: string;
     chips: ChipVariant[];
+    fresh?: boolean;
 }
 
 export interface SemesterCourseInformation {

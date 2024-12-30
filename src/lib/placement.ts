@@ -314,6 +314,7 @@ export const useUpdateNodes = () => {
 
         const nodes = placeNodes(semesterGroupDict, setPlacements);
         setNodes(nodes);
+        return nodes.length;
     }, [setNodes, setPlacements]);
 
     return { updateNodes };
@@ -364,7 +365,7 @@ export const useGroupCards = () => {
     const placements = oldPlacements.slice();
 
     const groupCards = useCallback(
-        (_: React.MouseEvent, droppedNode: Node) => {
+        (_: React.MouseEvent | null, droppedNode: Node) => {
             const nodes = getNodes();
             const intersectingNodes = getIntersectingNodes(droppedNode);
 
@@ -372,7 +373,7 @@ export const useGroupCards = () => {
             // if it is, delete it
             for (let i = 0; i < intersectingNodes.length; i++) {
                 const node = intersectingNodes[i];
-                if (node.id == "deleteArea") {
+                if (node.id === "deleteArea") {
                     const newNodes = removeNode(droppedNode.id, nodes);
                     setNodes(newNodes);
                     const deleteArea = getNode("deleteArea") as Node;
@@ -394,9 +395,8 @@ export const useGroupCards = () => {
                 const newNodes = removeNode(droppedNode.id, nodes);
                 setNodes(newNodes);
                 return;
-            } else {
-                setNodes(nodes);
             }
+
             const { interval: relatedSemester, index: relatedSemesterIndex } =
                 foundInterval;
 

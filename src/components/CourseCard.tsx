@@ -44,11 +44,7 @@ export default function CourseCardWrapper({ data }: CardWrapper) {
         ]
     );
 
-    return (
-        <div onWheel={onWheel}>
-            <CourseCard {...data} />
-        </div>
-    );
+    return <CourseCard onWheel={onWheel} {...data} />;
 }
 
 export function CourseCard({
@@ -56,9 +52,11 @@ export function CourseCard({
     courseName,
     faculty,
     chips,
-}: CourseInformation) {
+    ...rest
+}: CourseInformation & React.HTMLAttributes<HTMLDivElement>) {
     return (
         <Card
+            {...rest}
             className="h-44 w-80 min-h-44 select-none not-prose nowheel"
             radius="lg"
             shadow="sm"

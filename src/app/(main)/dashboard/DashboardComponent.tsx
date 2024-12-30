@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useContext } from "react";
 import {
     ReactFlow,
     applyNodeChanges,
@@ -27,6 +27,8 @@ import {
 import "@/app/(main)/dashboard/DashboardComponent.css";
 import { User } from "@/types/user";
 import CourseSearch from "@/components/courseSearch/CourseSearch";
+import { DnDContext } from "@/app/(main)/dashboard/dndContext";
+import { CardWrapper } from "@/types/courseCard";
 
 // ipmlementation notes:
 // 1. pan on drag false -> can't move the viewport with mouse
@@ -46,6 +48,7 @@ const nodeTypes = {
 export default function DashboardComponent(props: User) {
     const [lastX, setLastX] = useState(0);
     const [nodes, setNodes] = useState<Node[]>([]);
+    const [nodesLength, setNodesLength] = useState(0);
 
     const windowSize = useWindowSize();
     const { horizontalScrollHandler } = useScrollHandler();
@@ -53,7 +56,14 @@ export default function DashboardComponent(props: User) {
     const { groupCards } = useGroupCards();
     const { dragStartHandler } = useDragStartHandler();
     const { onViewportMove } = useOnViewportMove();
-    const { getViewport, setViewport } = useReactFlow();
+    const { getViewport, setViewport, getNodes } = useReactFlow();
+
+    const contextItem = useContext(DnDContext);
+
+    if (!contextItem) {
+        throw new Error("DashboardComponent must be used in a DnDContext");
+    }
+    const [type] = contextItem;
 
     // group cards again on window resize
     useEffect(() => {
@@ -63,7 +73,8 @@ export default function DashboardComponent(props: User) {
     // get initial node state
     useEffect(() => {
         const loadData = async () => {
-            await updateNodes();
+            const countNodes = await updateNodes();
+            setNodesLength(countNodes);
         };
         loadData();
         // I am unsure why my viewport is being set to something else, hacky way to fix this
@@ -83,7 +94,7 @@ export default function DashboardComponent(props: User) {
             const { deltaX, deltaY } = event;
             // Only scroll horizontal or vertical
             if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                horizontalScrollHandler(deltaX);
+                horizontalScrollHandler(-deltaX);
             }
         },
         [horizontalScrollHandler]
@@ -104,6 +115,69 @@ export default function DashboardComponent(props: User) {
     const onTouchStart = useCallback((event: React.TouchEvent) => {
         setLastX(event.changedTouches[0].pageX);
     }, []);
+
+    const onDragOver = useCallback((event: React.DragEvent) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+    }, []);
+
+    const onDrop = useCallback(
+        (event: React.DragEvent) => {
+            event.preventDefault();
+
+            if (!type) {
+                return;
+            }
+
+            const [nodeType, data] = type;
+            const id = `course-${data.courseCode}`;
+
+            const nodes = getNodes();
+            for (let i = 0; i < nodes.length; i++) {
+                if (nodes[i].id === id) {
+                    return;
+                }
+            }
+
+            const position = {
+                x: event.clientX - 100, // offset to account for semester intervals, not precise but it should work
+                y: event.clientY,
+            };
+
+            data.fresh = true;
+
+            const newNode: CardWrapper = {
+                data: data,
+                type: nodeType,
+                position: position,
+                id: id,
+            };
+
+            setNodes((nds) => {
+                const newNodes = [...nds];
+                const insertIndex = newNodes.length - 2;
+                newNodes.splice(insertIndex, 0, newNode as unknown as Node);
+                return newNodes;
+            });
+        },
+        [type, getNodes]
+    );
+
+    useEffect(() => {
+        if (nodes.length > nodesLength) {
+            const lastAddedNode = nodes[nodes.length - 3];
+
+            // measured isn't added until after calculation
+            // the newly added node won't have it
+            if (!lastAddedNode.data.fresh) {
+                return;
+            }
+
+            lastAddedNode.measured = { width: 320, height: 176 };
+            groupCards(null, lastAddedNode);
+        }
+        setNodesLength(nodes.length);
+    }, [nodes, nodesLength, groupCards]);
 
     return (
         <>
@@ -142,6 +216,8 @@ export default function DashboardComponent(props: User) {
                     onWheel={onWheel}
                     onTouchMove={onTouchMove}
                     onTouchStart={onTouchStart}
+                    onDragOver={onDragOver}
+                    onDrop={onDrop}
                     proOptions={{ hideAttribution: true }}
                 />
             </div>
