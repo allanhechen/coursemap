@@ -13,13 +13,13 @@ export default function NavBar(props: User) {
             className="flex justify-between items-center py-3 px-6 m-5 relative"
             radius="lg"
         >
-            <div className="hidden sm:block">
+            <div className="hidden md:block">
                 <WideLogo />
             </div>
-            <div className="block sm:hidden">
+            <div className="block md:hidden">
                 <CompactLogo />
             </div>
-            <Group className="items-center">
+            <Group gap="xs" className="items-center">
                 <SemesterForm />
                 <ThemeSwitcher />
                 <UserMenu {...props} />
