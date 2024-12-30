@@ -19,7 +19,7 @@ export default function CourseCardWrapper({ data }: CardWrapper) {
             const { deltaX, deltaY } = event;
             // Only scroll horizontal or vertical
             if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                horizontalScrollHandler(deltaX);
+                horizontalScrollHandler(-deltaX);
             } else if (Math.abs(deltaY) > Math.abs(deltaX)) {
                 const self = getNode(node_id) as Node; // we know for sure this node exists
 
@@ -29,7 +29,7 @@ export default function CourseCardWrapper({ data }: CardWrapper) {
                 // this is the semester the course belongs to
                 intersectingNodes.forEach((node) => {
                     if (node.id.startsWith("semester")) {
-                        verticalScrollHandler(node, event.deltaY);
+                        verticalScrollHandler(node, -deltaY);
                         return;
                     }
                 });

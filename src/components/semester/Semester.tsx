@@ -20,10 +20,10 @@ export default function Semester({ data }: SemesterWrapper) {
             const { deltaX, deltaY } = event;
             // Only scroll horizontal or vertical
             if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                horizontalScrollHandler(deltaX);
+                horizontalScrollHandler(-deltaX);
             } else {
                 const self = getNode(node_id) as Node; // we know for sure this node exists
-                verticalScrollHandler(self, deltaY);
+                verticalScrollHandler(self, -deltaY);
             }
         },
         [verticalScrollHandler, horizontalScrollHandler, getNode, node_id]
