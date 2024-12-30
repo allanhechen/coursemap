@@ -10,7 +10,6 @@ export default function Semester({ data }: SemesterWrapper) {
     const { getNode } = useReactFlow();
     const node_id = useNodeId() as string; // we are sure this is a string
     const [lastY, setLastY] = useState(0);
-    const [lastX, setLastX] = useState(0);
     const { verticalScrollHandler, horizontalScrollHandler } =
         useScrollHandler();
 
@@ -32,32 +31,19 @@ export default function Semester({ data }: SemesterWrapper) {
     const onTouchMove = useCallback(
         (event: React.TouchEvent) => {
             event.stopPropagation();
-            const { pageX, pageY } = event.changedTouches[0];
-            if (Math.abs(pageX) > Math.abs(pageY)) {
-                const deltaX = pageX - lastX;
-                horizontalScrollHandler(deltaX);
-                setLastX(pageX);
-            } else {
-                const self = getNode(node_id) as Node; // we know for sure this node exists
-                const deltaY = pageY - lastY;
-                verticalScrollHandler(self, deltaY);
-                setLastY(pageY);
-            }
+            const { pageY } = event.changedTouches[0];
+
+            const self = getNode(node_id) as Node; // we know for sure this node exists
+            const deltaY = pageY - lastY;
+            verticalScrollHandler(self, deltaY);
+            setLastY(pageY);
         },
-        [
-            lastY,
-            lastX,
-            verticalScrollHandler,
-            horizontalScrollHandler,
-            getNode,
-            node_id,
-        ]
+        [lastY, verticalScrollHandler, getNode, node_id]
     );
 
     const onTouchStart = useCallback((event: React.TouchEvent) => {
         event.stopPropagation();
         setLastY(event.changedTouches[0].pageY);
-        setLastX(event.changedTouches[0].pageX);
     }, []);
 
     return (
