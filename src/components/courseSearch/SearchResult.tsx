@@ -21,7 +21,7 @@ export default function SearchResult({
     });
     return (
         <Stack
-            style={{ borderRadius: "--mantine-radius-lg" }}
+            style={{ borderRadius: "16px" }}
             className="mt-4 flex-1 hidden-scrollbar"
         >
             {renderedCards}

@@ -8,7 +8,9 @@ import {
     Node,
     useOnViewportChange,
     NodeChange,
+    useReactFlow,
 } from "@xyflow/react";
+import { useWindowSize } from "@uidotdev/usehooks";
 
 import CourseCardWrapper from "@/components/CourseCard";
 import DeleteArea from "@/components/DeleteArea";
@@ -24,6 +26,7 @@ import {
 } from "@/lib/placement";
 import "@/app/(main)/dashboard/DashboardComponent.css";
 import { User } from "@/types/user";
+import CourseSearch from "@/components/courseSearch/CourseSearch";
 
 // ipmlementation notes:
 // 1. pan on drag false -> can't move the viewport with mouse
@@ -37,16 +40,25 @@ const nodeTypes = {
     courseNode: CourseCardWrapper,
     semesterNode: Semester,
     deleteNode: DeleteArea,
+    searchNode: CourseSearch,
 };
 
 export default function DashboardComponent(props: User) {
     const [lastX, setLastX] = useState(0);
-    const { horizontalScrollHandler } = useScrollHandler();
     const [nodes, setNodes] = useState<Node[]>([]);
+
+    const windowSize = useWindowSize();
+    const { horizontalScrollHandler } = useScrollHandler();
     const { updateNodes } = useUpdateNodes();
     const { groupCards } = useGroupCards();
     const { dragStartHandler } = useDragStartHandler();
     const { onViewportMove } = useOnViewportMove();
+    const { getViewport, setViewport } = useReactFlow();
+
+    // group cards again on window resize
+    useEffect(() => {
+        onViewportMove(getViewport());
+    }, [windowSize, getViewport, onViewportMove]);
 
     // get initial node state
     useEffect(() => {
@@ -54,7 +66,9 @@ export default function DashboardComponent(props: User) {
             await updateNodes();
         };
         loadData();
-    }, [updateNodes]);
+        // I am unsure why my viewport is being set to something else, hacky way to fix this
+        setViewport({ x: 0, y: 0, zoom: 1 });
+    }, [updateNodes, setViewport]);
 
     const onNodesChange = useCallback((changes: NodeChange[]) => {
         setNodes((nds) => applyNodeChanges(changes, nds));

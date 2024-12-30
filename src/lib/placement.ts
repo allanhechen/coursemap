@@ -18,9 +18,23 @@ if (typeof window !== "undefined") {
     var DELETEAREA_DEFAULT_POSITION = window.innerHeight;
     // eslint-disable-next-line
     var DELETEAREA_ACTIVE_POSITION = window.innerHeight * 0.9;
+
+    // eslint-disable-next-line
+    var SEARCHAREA_POSITION_X = 20;
+    // eslint-disable-next-line
+    var SEARCHAREA_POSITION_Y = window.innerWidth >= 768 ? 106 : 114;
+
+    // eslint-disable-next-line
+    var SEMESTER_STARTING_POSITION_X = 420;
+    // eslint-disable-next-line
+    var SEMESTER_STARTING_POSITION_Y = SEARCHAREA_POSITION_Y;
+
     window.addEventListener("resize", () => {
         DELETEAREA_DEFAULT_POSITION = window.innerHeight;
         DELETEAREA_ACTIVE_POSITION = window.innerHeight * 0.9;
+
+        SEARCHAREA_POSITION_Y = window.innerWidth >= 768 ? 106 : 114;
+        SEMESTER_STARTING_POSITION_Y = SEARCHAREA_POSITION_Y;
     });
 }
 
@@ -31,8 +45,6 @@ const SEMESTER_GAP = 10;
 const SEMESTER_PADDING_X = 20;
 const SEMESTER_PADDING_TOP = 50;
 const SEMESTER_PADDING_BOTTOM = 20;
-const SEMESTER_STARTING_POSITION_X = 0;
-const SEMESTER_STARTING_POSITION_Y = 100;
 
 const INTERVAL_OFFSET = -(SEMESTER_WIDTH + SEMESTER_GAP) / 2;
 
@@ -105,8 +117,11 @@ export const useScrollHandler = () => {
             // cannot use map because we skip some elements
             const newPositions: NodePositionChange[] = [];
             nodesToMove.forEach((currentNode: Node) => {
-                // don't move the deleteArea
-                if (currentNode.id == "deleteArea") {
+                // don't move the deleteArea or courseSearch
+                if (
+                    currentNode.id === "deleteArea" ||
+                    currentNode.id === "courseSearch"
+                ) {
                     return;
                 }
                 const { x, y } = currentNode.position;
@@ -229,13 +244,28 @@ function placeNodes(
     }
     setPlacements(newPlacements);
 
-    const windowWidth = window.innerWidth;
+    // push this near the end so it appears on top of semesters
+    const courseSearch: Node = {
+        id: "courseSearch",
+        data: {},
+        type: "searchNode" as const,
+        position: {
+            x: SEARCHAREA_POSITION_X,
+            y: SEARCHAREA_POSITION_Y, //for testing
+        },
+        className: "nopan nodrag",
+        style: {
+            cursor: "default",
+        },
+    };
+    finalNodes.push(courseSearch);
+
     const deleteArea: Node = {
         id: "deleteArea",
         data: {},
         type: "deleteNode" as const,
         position: {
-            x: 0.1 * windowWidth,
+            x: 0.1 * window.innerWidth,
             y: DELETEAREA_DEFAULT_POSITION,
         },
         style: {
@@ -393,7 +423,7 @@ export const useGroupCards = () => {
             nodesInInterval.forEach((node) => {
                 // ignore non course items
                 if (
-                    !node.id.startsWith("course") ||
+                    !node.id.startsWith("course-") ||
                     node.id === droppedNode.id
                 ) {
                     return;
@@ -567,6 +597,13 @@ export const useOnViewportMove = () => {
                 position: {
                     x: x + 0.1 * windowWidth,
                     y: DELETEAREA_DEFAULT_POSITION,
+                },
+            });
+
+            updateNode("courseSearch", {
+                position: {
+                    x: x + SEARCHAREA_POSITION_X,
+                    y: SEARCHAREA_POSITION_Y,
                 },
             });
         },
