@@ -19,7 +19,7 @@ export default function CourseCardWrapper({ data }: CardWrapper) {
             const { deltaX, deltaY } = event;
             // Only scroll horizontal or vertical
             if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                horizontalScrollHandler(deltaX);
+                horizontalScrollHandler(-deltaX);
             } else if (Math.abs(deltaY) > Math.abs(deltaX)) {
                 const self = getNode(node_id) as Node; // we know for sure this node exists
 
@@ -29,7 +29,7 @@ export default function CourseCardWrapper({ data }: CardWrapper) {
                 // this is the semester the course belongs to
                 intersectingNodes.forEach((node) => {
                     if (node.id.startsWith("semester")) {
-                        verticalScrollHandler(node, event.deltaY);
+                        verticalScrollHandler(node, -deltaY);
                         return;
                     }
                 });
@@ -44,11 +44,7 @@ export default function CourseCardWrapper({ data }: CardWrapper) {
         ]
     );
 
-    return (
-        <div onWheel={onWheel}>
-            <CourseCard {...data} />
-        </div>
-    );
+    return <CourseCard onWheel={onWheel} {...data} />;
 }
 
 export function CourseCard({
@@ -56,10 +52,12 @@ export function CourseCard({
     courseName,
     faculty,
     chips,
-}: CourseInformation) {
+    ...rest
+}: CourseInformation & React.HTMLAttributes<HTMLDivElement>) {
     return (
         <Card
-            className="h-44 w-80 select-none not-prose nowheel"
+            {...rest}
+            className="h-44 w-80 min-h-44 select-none not-prose nowheel"
             radius="lg"
             shadow="sm"
             padding="lg"

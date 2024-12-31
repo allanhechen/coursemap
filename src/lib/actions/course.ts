@@ -6,16 +6,19 @@ import {
     SemesterCourseInformation,
 } from "@/types/courseCard";
 
-export async function searchCourses(): Promise<CourseInformation[]> {
-    // searchQuery: string,
-    // includeFall: boolean,
-    // includeWinter: boolean,
-    // includeSpring: boolean,
-    // includeSummer: boolean,
-    // includeRequired: boolean,
-    // includeElective: boolean
+export async function searchCourses(
+    searchQuery: string,
+    includeFall: boolean,
+    includeWinter: boolean,
+    includeSpring: boolean,
+    includeSummer: boolean,
+    includeRequired: boolean,
+    includeElective: boolean
+): Promise<CourseInformation[]> {
     // do server side processing to get course chips
-    console.log("Getting courses that match the search query");
+    console.log(
+        `Getting courses for ${searchQuery}, ${includeFall}, ${includeWinter}, ${includeSpring}, ${includeSummer}, ${includeRequired}, ${includeElective}`
+    );
     return [
         {
             courseCode: "CPS 209",
