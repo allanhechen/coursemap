@@ -82,7 +82,7 @@ export default function CourseSearch() {
                     ? window.innerWidth >= 768
                         ? window.innerHeight - 126
                         : window.innerHeight - 134
-                    : 10
+                    : "100vh"
             }
             style={{
                 width: "23rem",
