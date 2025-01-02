@@ -1,10 +1,12 @@
-import { User } from "@/types/user";
-import SemesterForm from "../semester/SemesterForm";
-import CompactLogo from "./CompactLogo";
-import ThemeSwitcher from "./ThemeSwitcher";
-import UserMenu from "./UserMenu";
-import WideLogo from "./WideLogo";
 import { Group, Paper } from "@mantine/core";
+
+import CompactLogo from "@/components/header/CompactLogo";
+import WideLogo from "@/components/header/WideLogo";
+import SemesterForm from "@/components/semester/SemesterForm";
+import ThemeSwitcher from "@/components/header/ThemeSwitcher";
+import UserMenu from "@/components/header/UserMenu";
+
+import { User } from "@/types/user";
 
 export default function NavBar(props: User) {
     return (

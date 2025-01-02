@@ -3,5 +3,5 @@ type Base64<imageType extends string> =
 
 export interface User {
     displayName: string;
-    userPhoto: Base64<"png"> | Base64<"jpg"> | Base64<"jpeg">;
+    userPhoto: Base64<"png"> | Base64<"jpg"> | Base64<"jpeg"> | null;
 }
