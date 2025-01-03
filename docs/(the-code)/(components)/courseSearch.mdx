@@ -1,0 +1,43 @@
+---
+title: CourseSearch
+full: false
+---
+
+import Link from "next/link";
+
+## Usage
+
+```javascript
+"use client";
+
+import CourseSearch from "@/components/courseSearch/CourseSearch";
+import { useState } from "react";
+
+import { CourseInformation } from "@/types/courseCard";
+import { DnDContext } from "@/app/(main)/dashboard/dndContext";
+
+export default function Demo() {
+    const [type, setType] =
+        (useState < [string, CourseInformation]) | (null > null);
+
+    return (
+        <DnDContext.Provider value={[type, setType]}>
+            <CourseSearch />
+        </DnDContext.Provider>
+    );
+}
+```
+
+## Description
+
+A component that searches for courses using the <Link href="/docs/course">course</Link> server action.
+It takes in the debounced value of the search bar, in addition to the values selected as course chips,
+and calls the server action to return a list of courses. These courses are filled within a `SearchResult`
+component which renders them out.
+
+Additionally, CourseSearch supports ReactFlow's drag and drop functionality, which is implemented with
+the `DnDContext`. As a consequence, it must be wrapped within a `DnDContext.Provider`.
+
+## Props
+
+CourseSearch does not take in any props.

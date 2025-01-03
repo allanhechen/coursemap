@@ -1,0 +1,77 @@
+---
+title: CourseCard
+full: false
+---
+
+import Link from "next/link";
+
+## Usage
+
+```javascript
+"use client";
+
+import { CourseCard } from "@/components/CourseCard";
+import { ChipVariant } from "@/types/chipVariant";
+
+export default function Demo() {
+    return (
+        <CourseCard
+            courseCode="CPS 109"
+            courseName="Computer Science I"
+            faculty="Computer Science"
+            chips={[ChipVariant.WINTER, ChipVariant.REQUIRED]}
+        />
+    );
+}
+```
+
+## Description
+
+A component that is used to display courses and their corresponding information. They are a fixed width
+and height, and their background color is generated using the <Link href="/docs/color">color</Link> module.
+
+The course code is used to generate one color, the course name is used to generate the other color, and their
+concatenation decides the angle of the gradient.
+
+The component is optionally wrapped in the CourseCardWrapper class when passed to ReactFlow, and it uses
+the <Link href="/docs/placement">placement</Link> module to handle scrolling.
+
+The CourseCardWrapper class also implements vertical and horizontal scroll handlers which get the distance moved.
+The distance is passed to the <Link href="/docs/placement">placement module</Link> where it is dealt with.
+It does not deal with touch gestures because they are instead used to drag the cards around.
+
+## Props
+
+1. `courseCode`: The course code displayed at the top of the card
+
+```javascript
+// A string
+```
+
+2. `courseName`: The course name displayed under the course code
+
+```javascript
+// A string
+```
+
+3. `faculty`: Faculty stored in data-faculty within the HTML
+
+```javascript
+// A string
+```
+
+4. `chips`: The chips to be displayed along with the card
+
+```javascript
+// A list containing values of chipVariants
+
+export enum ChipVariant {
+    FALL = "Fall",
+    WINTER = "Winter",
+    SPRING = "Spring",
+    SUMMER = "Summer",
+    REQUIRED = "Required",
+    ELECTIVE = "Elective",
+    WARNING = "Warning",
+}
+```

@@ -1,6 +1,6 @@
 {
-    "title": "The Components",
+    "title": "Components",
     "description": "How the Components Work",
     "root": false,
-    "pages": ["navbar"]
+    "pages": ["..."]
 }

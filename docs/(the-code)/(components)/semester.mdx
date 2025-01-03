@@ -1,0 +1,105 @@
+---
+title: Semester
+full: false
+---
+
+import Link from "next/link";
+
+## Usage
+
+```javascript
+// See how it is implemented in DashboardComponent for an example
+// In short, it needs to be added as a nodeType
+// The semesters are retreived and placed automatically
+```
+
+## Description
+
+These rest below CourseCards. While there is technically no idea of being "inside" of another node
+in ReactFlow, the <Link href="/docs/placement">placement</Link> module allows for cards to be organized
+within (on top of) semesters. This means that if a CourseCard is placed on top of a semester, it is
+associated with the semester.
+
+Semesters own the space around them, which means that CourseCards do not have to be placed completely within
+a semester in order to be associated with it. This is done with semesterPositionContexts, which is further
+discussed within the placement module.
+
+Semesters have one visible component, called SemesterData. This component displays the data passed in
+the semester, along with an edit button on hover.
+
+Upon interacting with the edit button, a Mantine modal called SemesterForm is presented. This modal will be
+pre-filled with the current semester's information. All information is revalidated with the server and re-placed
+with the placement module upon submission of a new semester (assuming no errors).
+
+Semesters also implement different scroll handlers for the mouse wheel and touch gestures as follows:
+
+1. onWheel: The wheel action is captured. The larger one (between X and Y) is sent to be handled
+2. onTouchMove: Upon the first movement, the position is recorded. The subsequent total movement is captured and sent to be handled
+
+## Props
+
+### Semester
+
+1. `SemesterWrapper`: Semesters are ReactFlow nodes. There is enough information to customize a semester itself, along with some additional ReactFlow options
+
+```javascript
+export interface SemesterWrapper {
+    data: SemesterInformation;
+    isConnectable?: boolean;
+    position?: XYPosition;
+    id?: string;
+    style?: object;
+    type?: "semesterNode";
+}
+
+export interface SemesterInformation {
+    semesterId: number;
+    semesterName: string;
+    semesterYear: Date;
+    semesterTerm: SemesterTerm;
+}
+
+export enum SemesterTerm {
+    FA = "FA",
+    WI = "WI",
+    SP = "SP",
+    SU = "SU",
+}
+```
+
+### SemesterData
+
+1. `semesterId`: The semesterId assigned by the server to identify this unique semester
+
+```javascript
+// A number
+```
+
+2. `semseterName`: The name given to this semester
+
+```javascript
+// A string
+```
+
+3. `semesterYear`: The year this semester takes place
+
+```javascript
+// A date (only the year portion is ever considered)
+```
+
+4. `semesterTerm`: The term this semester takes place
+
+```javascript
+// One of the following values
+
+export enum SemesterTerm {
+    FA = "FA",
+    WI = "WI",
+    SP = "SP",
+    SU = "SU",
+}
+```
+
+### SemesterForm
+
+Takes in the same props as above, but the blank ones are not pre-filled.

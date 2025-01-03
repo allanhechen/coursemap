@@ -2,5 +2,5 @@
     "title": "The Code",
     "description": "How the Code Works",
     "root": false,
-    "pages": ["(components)", "database"]
+    "pages": ["(app)", "(components)", "(actions)", "database"]
 }

@@ -2,3 +2,95 @@
 title: NavBar
 full: false
 ---
+
+import Link from "next/link";
+
+## Usage
+
+```javascript
+"use client";
+
+import { useEffect, useState } from "react";
+import { ReactFlowProvider } from "@xyflow/react";
+
+import NavBar from "@/components/header/NavBar";
+import { getUser } from "@/lib/actions/user";
+import { SemesterPositionContext } from "@/app/(main)/dashboard/semesterPositionContext";
+import {
+    SemesterFormProvider,
+    useSemesterForm,
+} from "@/components/semester/semesterFormContext";
+
+import { SemesterPlacement, SemesterTerm } from "@/types/semester";
+import { User } from "@/types/user";
+
+export default function Demo() {
+    const [placements, setPlacements] = useState<SemesterPlacement[]>([]);
+    const [user, setUser] = useState<User | null>(null);
+
+    // typically data would be first fetched in a server component and then passed down
+    // so this useEffect would not be required
+    useEffect(() => {
+        const getInfo = async () => {
+            const user = await getUser();
+            setUser(user);
+        };
+
+        getInfo();
+    }, []);
+
+    const form = useSemesterForm({
+        mode: "uncontrolled",
+        initialValues: {
+            semesterId: 0,
+            semesterName: "",
+            semesterYear: new Date(2024, 0, 1),
+            semesterTerm: SemesterTerm.SU,
+        },
+    });
+
+    return (
+        <SemesterPositionContext.Provider value={[placements, setPlacements]}>
+            <SemesterFormProvider form={form}>
+                <ReactFlowProvider>
+                    {user && (
+                        <NavBar
+                            displayName={user.displayName}
+                            userPhoto={user.userPhoto}
+                        />
+                    )}
+                </ReactFlowProvider>
+            </SemesterFormProvider>
+        </SemesterPositionContext.Provider>
+    );
+}
+```
+
+## Description
+
+The NavBar that shows up on the top of the various dashboard pages. It shows the current
+user's display name, along with their profile picture. These are supplied within props, and
+should be fetched within a server component using the getUser server action.
+
+Additionally, NavBar provides a button to toggle between Mantine's dark and light mode, a dropdown menu
+to switch between the various pages, and a logout button.
+
+The NavBar has two different styles, one for screens set to Tailwind's `md` breakpoint. This determines
+which logo is shown to the user.
+
+## Props
+
+1. `displayName`: The current user's display name
+
+```javascript
+// A string
+```
+
+2. `userPhoto`: The current user's profile picture, encoded in Base64
+
+```javascript
+type Base64<imageType extends string> =
+    `data:image/${imageType};base64${string}`;
+
+// string in (png, jpg, jpeg)
+```

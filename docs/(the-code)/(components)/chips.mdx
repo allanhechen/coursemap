@@ -1,0 +1,92 @@
+---
+title: Chips
+full: false
+---
+
+import Link from "next/link";
+
+## Usage
+
+```javascript
+"use client";
+
+import Chip from "@/components/chip/Chip";
+import { ChipVariant } from "@/types/chipVariant";
+import { useState, useCallback } from "react";
+
+export default function Demo() {
+    const [includeFall, setIncludeFall] = useState(true);
+
+    const onClickFall = useCallback(() => {
+        setIncludeFall(!includeFall);
+    }, [includeFall]);
+
+    return (
+        <Chip
+            onClick={onClickFall}
+            variant={ChipVariant.FALL}
+            filled={includeFall}
+        />
+    );
+}
+```
+
+## Description
+
+A set of 3 components that serve two functions:
+
+1. Badges on <Link href="/docs/courseCard">CourseCards</Link>
+2. Filters on <Link href="/docs/courseSearch">CourseSearch</Link>
+
+The chips don't have any state management by themselves, but can be done in the parent component.
+The chips are glorified Text blocks from Mantine, with a background, border radius, and text added.
+
+## Props
+
+### Chip
+
+1. `variant`: Determines the colors of the chips
+
+```javascript
+// One of the following values
+
+export enum ChipVariant {
+    FALL = "Fall",
+    WINTER = "Winter",
+    SPRING = "Spring",
+    SUMMER = "Summer",
+    REQUIRED = "Required",
+    ELECTIVE = "Elective",
+    WARNING = "Warning",
+}
+```
+
+2. `filled`: Determines which variant of the chip is displayed
+
+```javascript
+// Either true or false
+```
+
+### ChipUnfilled and ChipFilled
+
+1. `variant`: Determines the colors of the chips
+
+```javascript
+// One of the following values
+
+export enum ChipVariant {
+    FALL = "Fall",
+    WINTER = "Winter",
+    SPRING = "Spring",
+    SUMMER = "Summer",
+    REQUIRED = "Required",
+    ELECTIVE = "Elective",
+    WARNING = "Warning",
+}
+```
+
+2. `clickable`: Determines whether the cursor is changed on hover
+
+```javascript
+// Either true or false
+```

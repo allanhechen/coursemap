@@ -1,0 +1,28 @@
+---
+title: DeleteArea
+full: false
+---
+
+import Link from "next/link";
+
+## Usage
+
+```javascript
+// See how it is implemented in DashboardComponent for an example
+// In short, it needs to be added as a nodeType and then added to the nodes
+```
+
+## Description
+
+This component lives solely in ReactFlow as a "deletion area." All CourseCards intersecting with it
+upon drop are deleted.
+
+DeleteArea is pushed last within the placement function because it needs to be displayed above
+all other nodes (in order to ensure visibility on drag). DeleteArea relies on the onViewportMove handler
+defined within the <Link href="/docs/placement">placement library</Link>.
+
+In other words, it is quite simply a rectangle that deletes elements that doesn't do anything by itself.
+
+## Props
+
+DeleteArea does not take in any props.
