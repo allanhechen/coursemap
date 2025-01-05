@@ -1,7 +1,7 @@
 import { screen } from "@testing-library/react";
 import { renderWithMantineProvider } from "@/../test_utils";
 
-import { CourseCard } from "@/components/CourseCard";
+import { CourseCard } from "@/components/courseCard/CourseCard";
 import { ChipVariant } from "@/types/chipVariant";
 
 describe("CourseCard Component", () => {

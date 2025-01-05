@@ -12,7 +12,7 @@ import {
 } from "@xyflow/react";
 import { useWindowSize } from "@uidotdev/usehooks";
 
-import CourseCardWrapper from "@/components/CourseCard";
+import CourseCardWrapper from "@/components/courseCard/CourseCard";
 import DeleteArea from "@/components/DeleteArea";
 import Semester from "@/components/semester/Semester";
 import NavBar from "@/components/header/NavBar";

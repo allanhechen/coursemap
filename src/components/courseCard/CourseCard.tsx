@@ -6,6 +6,8 @@ import { useScrollHandler } from "@/lib/placement";
 import { useCallback } from "react";
 import { Node, useNodeId, useReactFlow } from "@xyflow/react";
 
+import "@/components/courseCard/CourseCard.css";
+
 export default function CourseCardWrapper({ data }: CardWrapper) {
     const { getNode, getIntersectingNodes } = useReactFlow();
     const node_id = useNodeId() as string; // we are sure this is a string
@@ -52,12 +54,20 @@ export function CourseCard({
     courseName,
     faculty,
     chips,
+    termWarning,
+    prerequisiteWarning,
     ...rest
 }: CourseInformation & React.HTMLAttributes<HTMLDivElement>) {
+    const warningClasses = prerequisiteWarning
+        ? "border-2 border-rose-500"
+        : termWarning
+        ? "border-2 border-yellow-500"
+        : "";
+
     return (
         <Card
             {...rest}
-            className="h-44 w-80 min-h-44 select-none not-prose nowheel"
+            className={`h-44 w-80 min-h-44 select-none nowheel course-card ${warningClasses}`}
             radius="lg"
             shadow="sm"
             padding="lg"

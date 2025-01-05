@@ -1,7 +1,7 @@
 import { Stack } from "@mantine/core";
 import { useCallback, useContext } from "react";
 
-import { CourseCard } from "@/components/CourseCard";
+import { CourseCard } from "@/components/courseCard/CourseCard";
 import { CourseInformation } from "@/types/courseCard";
 import { DnDContext } from "@/app/(main)/dashboard/dndContext";
 

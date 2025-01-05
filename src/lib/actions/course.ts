@@ -75,7 +75,14 @@ export async function getAllCourseSemesters(): Promise<
                 courseCode: "CPS 706",
                 courseName: "Computer Networks",
                 faculty: "Computer Science",
-                chips: [ChipVariant.WINTER],
+                chips: [
+                    ChipVariant.WINTER,
+                    ChipVariant.FALL,
+                    ChipVariant.SPRING,
+                    ChipVariant.SUMMER,
+                    ChipVariant.ELECTIVE,
+                    ChipVariant.REQUIRED,
+                ],
             },
         },
         {
