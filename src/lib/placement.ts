@@ -189,6 +189,7 @@ function placeNodes(
 ): Node[] {
     const finalNodes: Node[] = [];
     const newPlacements: SemesterPlacement[] = [];
+    const seenCourses = new Set();
 
     let semesterPosition = SEMESTER_STARTING_POSITION_X;
 
@@ -244,6 +245,7 @@ function placeNodes(
                 CARD_GAP * (courses.length - 1),
         });
 
+        const newSeenCourses = new Set();
         courses.forEach((course) => {
             course.position = {
                 x: cardPositionX,
@@ -252,8 +254,36 @@ function placeNodes(
             cardPositionY += CARD_HEIGHT + CARD_GAP;
             course.id = `course-${course.data.courseCode}`;
             course.type = "courseNode" as const;
+
+            const courseData = course.data;
+            const prerequisites = courseData.prerequisites;
+            // check for term
+            if (
+                !courseData.chips.includes(
+                    termToChipVariant[semester.data.semesterTerm]
+                )
+            ) {
+                courseData.termWarning = true;
+            }
+
+            // check for prerequisites
+            newSeenCourses.add(courseData.courseCode);
+            if (prerequisites !== "") {
+                // this gets all items in {brackets} and extracts the text
+                // we see if the extracted text (a course code) has already been seen
+                // if it is, we set it to true
+                const prerequisite_eval = prerequisites.replace(
+                    /{([\w\s]+)}/g,
+                    (_, prerequisite) => {
+                        return seenCourses.has(prerequisite).toString();
+                    }
+                );
+                courseData.prerequisiteWarning = !eval(prerequisite_eval);
+            }
+
             finalNodes.push(course as unknown as Node);
         });
+        newSeenCourses.forEach((value) => seenCourses.add(value));
         semesterPosition += SEMESTER_WIDTH + SEMESTER_GAP;
     }
     setPlacements(newPlacements);
