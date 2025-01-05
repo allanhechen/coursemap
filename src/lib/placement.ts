@@ -6,11 +6,23 @@ import {
     useReactFlow,
     Viewport,
 } from "@xyflow/react";
-import { SemesterPlacement, SemesterWrapper } from "@/types/semester";
-import { CardWrapper } from "@/types/courseCard";
+import {
+    SemesterPlacement,
+    SemesterTerm,
+    SemesterWrapper,
+} from "@/types/semester";
+import { CardWrapper, CourseInformation } from "@/types/courseCard";
 import { getAllSemesters } from "./actions/semester";
 import { getAllCourseSemesters } from "./actions/course";
 import { SemesterPositionContext } from "@/app/(main)/dashboard/semesterPositionContext";
+import { ChipVariant } from "@/types/chipVariant";
+
+const termToChipVariant = {
+    [SemesterTerm.FA]: ChipVariant.FALL,
+    [SemesterTerm.WI]: ChipVariant.WINTER,
+    [SemesterTerm.SP]: ChipVariant.SPRING,
+    [SemesterTerm.SU]: ChipVariant.SUMMER,
+};
 
 // always fix to the bottom of the screen
 if (typeof window !== "undefined") {
@@ -137,6 +149,7 @@ export const useScrollHandler = () => {
             const updatedPlacements = placements.slice();
             updatedPlacements[targetSemesterPositionIndex] = {
                 semesterId: targetSemesterPosition.semesterId,
+                semesterTerm: targetSemesterPosition.semesterTerm,
                 intervalStart: targetSemesterPosition.intervalStart,
                 intervalEnd: targetSemesterPosition.intervalEnd,
                 top: targetSemesterPosition.top + distance,
@@ -214,6 +227,7 @@ function placeNodes(
 
         newPlacements.push({
             semesterId: semester.data.semesterId,
+            semesterTerm: semester.data.semesterTerm,
             intervalStart: semester.position.x + INTERVAL_OFFSET,
             intervalEnd:
                 semester.position.x +
@@ -376,7 +390,7 @@ export const useGroupCards = () => {
                 if (node.id === "deleteArea") {
                     const newNodes = removeNode(droppedNode.id, nodes);
                     setNodes(newNodes);
-                    const deleteArea = getNode("deleteArea") as Node;
+                    const deleteArea = getNode("deleteArea")!;
                     updateNode("deleteArea", {
                         position: {
                             x: deleteArea.position.x,
@@ -403,6 +417,18 @@ export const useGroupCards = () => {
             if (y > relatedSemester.bottom) {
                 // node was placed too low, we will fix it
                 droppedNode.position.y = relatedSemester.bottom - 1;
+            }
+
+            // ensure that the found semester corresponds with the dropped course's chips
+            const droppedNodeData =
+                droppedNode.data as unknown as CourseInformation;
+            const courseChips = droppedNodeData.chips;
+            if (
+                !courseChips.includes(
+                    termToChipVariant[relatedSemester.semesterTerm]
+                )
+            ) {
+                droppedNodeData.termWarning = true;
             }
 
             // x position was found, now we need to find the y position
@@ -538,7 +564,7 @@ export const useDragStartHandler = () => {
                 },
             });
 
-            const { x, y } = draggedNode.position;
+            const { x, y } = draggedNode.position!;
             const { interval: relatedSemester, index: relatedSemesterIndex } =
                 findInterval(placements, x) as {
                     interval: SemesterPlacement;
@@ -571,7 +597,11 @@ export const useDragStartHandler = () => {
             placements[relatedSemesterIndex].bottom -= semesterBottomAdjustment;
             setPlacements(placements);
 
-            updateNode(draggedNode.id, {
+            // reset warnings on the node
+            draggedNode.data.prerequisiteWarning = false;
+            draggedNode.data.termWarning = false;
+
+            updateNode(draggedNode.id!, {
                 style: {
                     zIndex: 100,
                 },
