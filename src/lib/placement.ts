@@ -438,6 +438,13 @@ export const useGroupCards = () => {
             if (!foundInterval) {
                 const newNodes = removeNode(droppedNode.id, nodes);
                 setNodes(newNodes);
+                const deleteArea = getNode("deleteArea")!;
+                updateNode("deleteArea", {
+                    position: {
+                        x: deleteArea.position.x,
+                        y: DELETEAREA_DEFAULT_POSITION,
+                    },
+                });
                 return;
             }
 
