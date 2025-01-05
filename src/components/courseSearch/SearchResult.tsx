@@ -42,6 +42,9 @@ export default function SearchResult({
                 courseName={card.courseName}
                 faculty={card.faculty}
                 chips={card.chips}
+                prerequisites={card.prerequisites}
+                postrequisites={card.postrequisites}
+                antirequisites={card.antirequisites}
             />
         );
     });

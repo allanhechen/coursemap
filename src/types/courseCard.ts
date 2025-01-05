@@ -1,5 +1,6 @@
 import { XYPosition } from "@xyflow/react";
 import { ChipVariant } from "@/types/chipVariant";
+
 export interface CardWrapper {
     type?: string;
     id?: string;
@@ -13,6 +14,9 @@ export interface CourseInformation {
     courseName: string;
     faculty: string;
     chips: ChipVariant[];
+    prerequisites: string;
+    postrequisites: string[];
+    antirequisites: string[];
     termWarning?: boolean;
     prerequisiteWarning?: boolean;
     fresh?: boolean;

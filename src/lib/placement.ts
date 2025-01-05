@@ -431,6 +431,60 @@ export const useGroupCards = () => {
                 droppedNodeData.termWarning = true;
             }
 
+            // re-check all prerequisite information by doing the following:
+            // iterate through everything, and clear course prerequisite errors
+            // sort semesters by term and year
+            // keep track of all seen courses
+            // if the current semester is the same as the droppednode's related semester be sure to add it
+            const semesters: Node[] = [];
+            const seenCourses = new Set();
+
+            nodes.forEach((node) => {
+                if (node.type === "semesterNode") {
+                    // semesters are pre-sorted because of how they are added!
+                    semesters.push(node);
+                }
+            });
+
+            semesters.forEach((semester) => {
+                const newSeenCourses = new Set();
+                let touchingNodes = getIntersectingNodes(semester);
+                touchingNodes = touchingNodes.filter(
+                    (node) => node.id !== droppedNode.id
+                );
+                if (semester.data.semesterId === relatedSemester.semesterId) {
+                    touchingNodes.push(droppedNode);
+                }
+
+                touchingNodes.forEach((node: Node) => {
+                    if (node.type !== "courseNode") {
+                        return;
+                    }
+                    const courseData =
+                        node.data as unknown as CourseInformation;
+                    newSeenCourses.add(courseData.courseCode);
+                    const prerequisites = courseData.prerequisites;
+
+                    if (prerequisites === "") {
+                        return;
+                    }
+
+                    // this gets all items in {brackets} and extracts the text
+                    // we see if the extracted text (a course code) has already been seen
+                    // if it is, we set it to true
+                    const prerequisite_eval = prerequisites.replace(
+                        /{([\w\s]+)}/g,
+                        (_, prerequisite) => {
+                            return seenCourses.has(prerequisite).toString();
+                        }
+                    );
+                    courseData.prerequisiteWarning = !eval(prerequisite_eval);
+                });
+
+                // only add courses after the semester is done
+                newSeenCourses.forEach((value) => seenCourses.add(value));
+            });
+
             // x position was found, now we need to find the y position
             // get the nodes intersecting with the semester
             // for all card nodes lower than the dropped card (y is bigger)
@@ -525,6 +579,7 @@ export const useGroupCards = () => {
             });
             setNodes(newNodes);
             setPlacements(placements);
+
             // TODO: call update nodes server action here
         },
         [
