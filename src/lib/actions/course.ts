@@ -27,7 +27,7 @@ export async function searchCourses(
             chips: [ChipVariant.WINTER, ChipVariant.REQUIRED],
             prerequisites: "{CPS 109}",
             postrequisites: [],
-            antirequisites: [],
+            antirequisites: ["PHL 201"],
         },
         {
             courseCode: "PHL 201",
@@ -103,7 +103,7 @@ export async function getAllCourseSemesters(): Promise<
                 ],
                 prerequisites: "",
                 postrequisites: [],
-                antirequisites: [],
+                antirequisites: ["CPS 109"],
             },
         },
         {

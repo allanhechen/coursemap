@@ -55,10 +55,10 @@ export function CourseCard({
     faculty,
     chips,
     termWarning,
-    prerequisiteWarning,
+    requisiteWarning,
     ...rest
 }: CourseInformation & React.HTMLAttributes<HTMLDivElement>) {
-    const warningClasses = prerequisiteWarning
+    const warningClasses = requisiteWarning
         ? "border-2 border-rose-500"
         : termWarning
         ? "border-2 border-yellow-500"

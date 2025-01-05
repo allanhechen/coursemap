@@ -18,7 +18,7 @@ export interface CourseInformation {
     postrequisites: string[];
     antirequisites: string[];
     termWarning?: boolean;
-    prerequisiteWarning?: boolean;
+    requisiteWarning?: boolean;
     fresh?: boolean;
 }
 

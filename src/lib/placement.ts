@@ -3,6 +3,7 @@ import {
     applyNodeChanges,
     Node,
     NodePositionChange,
+    Rect,
     useReactFlow,
     Viewport,
 } from "@xyflow/react";
@@ -278,7 +279,7 @@ function placeNodes(
                         return seenCourses.has(prerequisite).toString();
                     }
                 );
-                courseData.prerequisiteWarning = !eval(prerequisite_eval);
+                courseData.requisiteWarning = !eval(prerequisite_eval);
             }
 
             finalNodes.push(course as unknown as Node);
@@ -287,6 +288,19 @@ function placeNodes(
         semesterPosition += SEMESTER_WIDTH + SEMESTER_GAP;
     }
     setPlacements(newPlacements);
+
+    // check for antirequisites
+    finalNodes.forEach((node) => {
+        if (node.id.startsWith("course-")) {
+            const courseNode = node as unknown as CardWrapper;
+
+            courseNode.data.antirequisites.forEach((antirequisite) => {
+                if (seenCourses.has(antirequisite)) {
+                    courseNode.data.requisiteWarning = true;
+                }
+            });
+        }
+    });
 
     // push this near the end so it appears on top of semesters
     const courseSearch: Node = {
@@ -390,6 +404,96 @@ function removeNode(id: string, initialNodes: Node[]): Node[] {
     return finalNodes;
 }
 
+// a helper function that checks for requisiteWarnings
+function checkRequisites(
+    nodes: Node[],
+    getIntersectingNodes: (
+        node: Node | Rect | { id: Node["id"] },
+        partially?: boolean,
+        nodes?: Node[] | undefined
+    ) => Node[],
+    relatedSemesterId?: number,
+    droppedNode?: Node,
+    deletedCourseCode?: string
+) {
+    // re-check all prerequisite information by doing the following:
+    // iterate through everything, and clear course prerequisite errors
+    // sort semesters by term and year
+    // keep track of all seen courses
+    // if the current semester is the same as the droppednode's related semester be sure to add it
+    const semesters: Node[] = [];
+    const seenCourses: Set<string> = new Set();
+
+    nodes.forEach((node) => {
+        if (node.type === "semesterNode") {
+            // semesters are pre-sorted because of how they are added!
+            semesters.push(node);
+        }
+    });
+
+    semesters.forEach((semester) => {
+        const newSeenCourses: Set<string> = new Set();
+        let touchingNodes = getIntersectingNodes(semester);
+        if (droppedNode) {
+            touchingNodes = touchingNodes.filter(
+                (node: Node) => node.id !== droppedNode.id
+            );
+            if (semester.data.semesterId === relatedSemesterId) {
+                touchingNodes.push(droppedNode);
+            }
+        }
+
+        touchingNodes.forEach((node: Node) => {
+            if (node.type !== "courseNode") {
+                return;
+            }
+
+            const courseData = node.data as unknown as CourseInformation;
+            // skip deleted course
+            if (courseData.courseCode === deletedCourseCode) {
+                return;
+            }
+            const prerequisites = courseData.prerequisites;
+            newSeenCourses.add(courseData.courseCode);
+
+            // first reset warning
+            courseData.requisiteWarning = false;
+
+            if (prerequisites === "") {
+                return;
+            }
+
+            // this gets all items in {brackets} and extracts the text
+            // we see if the extracted text (a course code) has already been seen
+            // if it is, we set it to true
+            const prerequisite_eval = prerequisites.replace(
+                /{([\w\s]+)}/g,
+                (_, prerequisite) => {
+                    return seenCourses.has(prerequisite).toString();
+                }
+            );
+            courseData.requisiteWarning = !eval(prerequisite_eval);
+        });
+
+        // only add courses after the semester is done
+        newSeenCourses.forEach((value) => seenCourses.add(value));
+    });
+
+    // check for antirequisite warnings by using the seen courses set and checking whether
+    // any antirequisites were seen
+    nodes.forEach((node) => {
+        if (node.id.startsWith("course-")) {
+            const courseNode = node as unknown as CardWrapper;
+
+            courseNode.data.antirequisites.forEach((antirequisite) => {
+                if (seenCourses.has(antirequisite)) {
+                    courseNode.data.requisiteWarning = true;
+                }
+            });
+        }
+    });
+}
+
 // arranges dropped nodes depending on where it's placed
 // if it overlaps with the destroy area it is deleted
 // finds the interval in semesterposition and then the related y position
@@ -427,6 +531,14 @@ export const useGroupCards = () => {
                             y: DELETEAREA_DEFAULT_POSITION,
                         },
                     });
+
+                    checkRequisites(
+                        nodes,
+                        getIntersectingNodes,
+                        undefined,
+                        undefined,
+                        droppedNode.data.courseCode as string
+                    );
                     return;
                 }
             }
@@ -445,6 +557,14 @@ export const useGroupCards = () => {
                         y: DELETEAREA_DEFAULT_POSITION,
                     },
                 });
+
+                checkRequisites(
+                    nodes,
+                    getIntersectingNodes,
+                    undefined,
+                    undefined,
+                    droppedNode.data.courseCode as string
+                );
                 return;
             }
 
@@ -468,59 +588,12 @@ export const useGroupCards = () => {
                 droppedNodeData.termWarning = true;
             }
 
-            // re-check all prerequisite information by doing the following:
-            // iterate through everything, and clear course prerequisite errors
-            // sort semesters by term and year
-            // keep track of all seen courses
-            // if the current semester is the same as the droppednode's related semester be sure to add it
-            const semesters: Node[] = [];
-            const seenCourses = new Set();
-
-            nodes.forEach((node) => {
-                if (node.type === "semesterNode") {
-                    // semesters are pre-sorted because of how they are added!
-                    semesters.push(node);
-                }
-            });
-
-            semesters.forEach((semester) => {
-                const newSeenCourses = new Set();
-                let touchingNodes = getIntersectingNodes(semester);
-                touchingNodes = touchingNodes.filter(
-                    (node) => node.id !== droppedNode.id
-                );
-                if (semester.data.semesterId === relatedSemester.semesterId) {
-                    touchingNodes.push(droppedNode);
-                }
-
-                touchingNodes.forEach((node: Node) => {
-                    if (node.type !== "courseNode") {
-                        return;
-                    }
-                    const courseData =
-                        node.data as unknown as CourseInformation;
-                    newSeenCourses.add(courseData.courseCode);
-                    const prerequisites = courseData.prerequisites;
-
-                    if (prerequisites === "") {
-                        return;
-                    }
-
-                    // this gets all items in {brackets} and extracts the text
-                    // we see if the extracted text (a course code) has already been seen
-                    // if it is, we set it to true
-                    const prerequisite_eval = prerequisites.replace(
-                        /{([\w\s]+)}/g,
-                        (_, prerequisite) => {
-                            return seenCourses.has(prerequisite).toString();
-                        }
-                    );
-                    courseData.prerequisiteWarning = !eval(prerequisite_eval);
-                });
-
-                // only add courses after the semester is done
-                newSeenCourses.forEach((value) => seenCourses.add(value));
-            });
+            checkRequisites(
+                nodes,
+                getIntersectingNodes,
+                relatedSemester.semesterId,
+                droppedNode
+            );
 
             // x position was found, now we need to find the y position
             // get the nodes intersecting with the semester
@@ -690,7 +763,7 @@ export const useDragStartHandler = () => {
             setPlacements(placements);
 
             // reset warnings on the node
-            draggedNode.data.prerequisiteWarning = false;
+            draggedNode.data.requisiteWarning = false;
             draggedNode.data.termWarning = false;
 
             updateNode(draggedNode.id!, {
