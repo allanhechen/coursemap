@@ -33,6 +33,9 @@ and height, and their background color is generated using the <Link href="/docs/
 The course code is used to generate one color, the course name is used to generate the other color, and their
 concatenation decides the angle of the gradient.
 
+This component can optionally display errors if passed in a termWarning or a prerequisiteWarning. The card will
+have a default background color, but have either a yellow or red border respectively to indicate the errors.
+
 The component is optionally wrapped in the CourseCardWrapper class when passed to ReactFlow, and it uses
 the <Link href="/docs/placement">placement</Link> module to handle scrolling.
 
@@ -74,4 +77,16 @@ export enum ChipVariant {
     ELECTIVE = "Elective",
     WARNING = "Warning",
 }
+```
+
+5. `termWarning`: An error related to the semester the card is placed in
+
+```javascript
+// A boolean
+```
+
+6. `prerequisiteWarning`: The card's prerequisites are not met
+
+```javascript
+// A boolean
 ```

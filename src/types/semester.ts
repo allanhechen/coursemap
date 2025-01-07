@@ -25,6 +25,7 @@ export interface SemesterInformation {
 
 export interface SemesterPlacement {
     semesterId: number;
+    semesterTerm: SemesterTerm;
     intervalStart: number;
     intervalEnd: number;
     top: number;

@@ -3,14 +3,27 @@ import {
     applyNodeChanges,
     Node,
     NodePositionChange,
+    Rect,
     useReactFlow,
     Viewport,
 } from "@xyflow/react";
-import { SemesterPlacement, SemesterWrapper } from "@/types/semester";
-import { CardWrapper } from "@/types/courseCard";
+import {
+    SemesterPlacement,
+    SemesterTerm,
+    SemesterWrapper,
+} from "@/types/semester";
+import { CardWrapper, CourseInformation } from "@/types/courseCard";
 import { getAllSemesters } from "./actions/semester";
 import { getAllCourseSemesters } from "./actions/course";
 import { SemesterPositionContext } from "@/app/(main)/dashboard/semesterPositionContext";
+import { ChipVariant } from "@/types/chipVariant";
+
+const termToChipVariant = {
+    [SemesterTerm.FA]: ChipVariant.FALL,
+    [SemesterTerm.WI]: ChipVariant.WINTER,
+    [SemesterTerm.SP]: ChipVariant.SPRING,
+    [SemesterTerm.SU]: ChipVariant.SUMMER,
+};
 
 // always fix to the bottom of the screen
 if (typeof window !== "undefined") {
@@ -137,6 +150,7 @@ export const useScrollHandler = () => {
             const updatedPlacements = placements.slice();
             updatedPlacements[targetSemesterPositionIndex] = {
                 semesterId: targetSemesterPosition.semesterId,
+                semesterTerm: targetSemesterPosition.semesterTerm,
                 intervalStart: targetSemesterPosition.intervalStart,
                 intervalEnd: targetSemesterPosition.intervalEnd,
                 top: targetSemesterPosition.top + distance,
@@ -176,6 +190,7 @@ function placeNodes(
 ): Node[] {
     const finalNodes: Node[] = [];
     const newPlacements: SemesterPlacement[] = [];
+    const seenCourses = new Set();
 
     let semesterPosition = SEMESTER_STARTING_POSITION_X;
 
@@ -214,6 +229,7 @@ function placeNodes(
 
         newPlacements.push({
             semesterId: semester.data.semesterId,
+            semesterTerm: semester.data.semesterTerm,
             intervalStart: semester.position.x + INTERVAL_OFFSET,
             intervalEnd:
                 semester.position.x +
@@ -230,6 +246,7 @@ function placeNodes(
                 CARD_GAP * (courses.length - 1),
         });
 
+        const newSeenCourses = new Set();
         courses.forEach((course) => {
             course.position = {
                 x: cardPositionX,
@@ -238,11 +255,52 @@ function placeNodes(
             cardPositionY += CARD_HEIGHT + CARD_GAP;
             course.id = `course-${course.data.courseCode}`;
             course.type = "courseNode" as const;
+
+            const courseData = course.data;
+            const prerequisites = courseData.prerequisites;
+            // check for term
+            if (
+                !courseData.chips.includes(
+                    termToChipVariant[semester.data.semesterTerm]
+                )
+            ) {
+                courseData.termWarning = true;
+            }
+
+            // check for prerequisites
+            newSeenCourses.add(courseData.courseCode);
+            if (prerequisites !== "") {
+                // this gets all items in {brackets} and extracts the text
+                // we see if the extracted text (a course code) has already been seen
+                // if it is, we set it to true
+                const prerequisite_eval = prerequisites.replace(
+                    /{([\w\s]+)}/g,
+                    (_, prerequisite) => {
+                        return seenCourses.has(prerequisite).toString();
+                    }
+                );
+                courseData.requisiteWarning = !eval(prerequisite_eval);
+            }
+
             finalNodes.push(course as unknown as Node);
         });
+        newSeenCourses.forEach((value) => seenCourses.add(value));
         semesterPosition += SEMESTER_WIDTH + SEMESTER_GAP;
     }
     setPlacements(newPlacements);
+
+    // check for antirequisites
+    finalNodes.forEach((node) => {
+        if (node.id.startsWith("course-")) {
+            const courseNode = node as unknown as CardWrapper;
+
+            courseNode.data.antirequisites.forEach((antirequisite) => {
+                if (seenCourses.has(antirequisite)) {
+                    courseNode.data.requisiteWarning = true;
+                }
+            });
+        }
+    });
 
     // push this near the end so it appears on top of semesters
     const courseSearch: Node = {
@@ -346,6 +404,96 @@ function removeNode(id: string, initialNodes: Node[]): Node[] {
     return finalNodes;
 }
 
+// a helper function that checks for requisiteWarnings
+function checkRequisites(
+    nodes: Node[],
+    getIntersectingNodes: (
+        node: Node | Rect | { id: Node["id"] },
+        partially?: boolean,
+        nodes?: Node[] | undefined
+    ) => Node[],
+    relatedSemesterId?: number,
+    droppedNode?: Node,
+    deletedCourseCode?: string
+) {
+    // re-check all prerequisite information by doing the following:
+    // iterate through everything, and clear course prerequisite errors
+    // sort semesters by term and year
+    // keep track of all seen courses
+    // if the current semester is the same as the droppednode's related semester be sure to add it
+    const semesters: Node[] = [];
+    const seenCourses: Set<string> = new Set();
+
+    nodes.forEach((node) => {
+        if (node.type === "semesterNode") {
+            // semesters are pre-sorted because of how they are added!
+            semesters.push(node);
+        }
+    });
+
+    semesters.forEach((semester) => {
+        const newSeenCourses: Set<string> = new Set();
+        let touchingNodes = getIntersectingNodes(semester);
+        if (droppedNode) {
+            touchingNodes = touchingNodes.filter(
+                (node: Node) => node.id !== droppedNode.id
+            );
+            if (semester.data.semesterId === relatedSemesterId) {
+                touchingNodes.push(droppedNode);
+            }
+        }
+
+        touchingNodes.forEach((node: Node) => {
+            if (node.type !== "courseNode") {
+                return;
+            }
+
+            const courseData = node.data as unknown as CourseInformation;
+            // skip deleted course
+            if (courseData.courseCode === deletedCourseCode) {
+                return;
+            }
+            const prerequisites = courseData.prerequisites;
+            newSeenCourses.add(courseData.courseCode);
+
+            // first reset warning
+            courseData.requisiteWarning = false;
+
+            if (prerequisites === "") {
+                return;
+            }
+
+            // this gets all items in {brackets} and extracts the text
+            // we see if the extracted text (a course code) has already been seen
+            // if it is, we set it to true
+            const prerequisite_eval = prerequisites.replace(
+                /{([\w\s]+)}/g,
+                (_, prerequisite) => {
+                    return seenCourses.has(prerequisite).toString();
+                }
+            );
+            courseData.requisiteWarning = !eval(prerequisite_eval);
+        });
+
+        // only add courses after the semester is done
+        newSeenCourses.forEach((value) => seenCourses.add(value));
+    });
+
+    // check for antirequisite warnings by using the seen courses set and checking whether
+    // any antirequisites were seen
+    nodes.forEach((node) => {
+        if (node.id.startsWith("course-")) {
+            const courseNode = node as unknown as CardWrapper;
+
+            courseNode.data.antirequisites.forEach((antirequisite) => {
+                if (seenCourses.has(antirequisite)) {
+                    courseNode.data.requisiteWarning = true;
+                }
+            });
+        }
+    });
+}
+
 // arranges dropped nodes depending on where it's placed
 // if it overlaps with the destroy area it is deleted
 // finds the interval in semesterposition and then the related y position
@@ -376,13 +524,21 @@ export const useGroupCards = () => {
                 if (node.id === "deleteArea") {
                     const newNodes = removeNode(droppedNode.id, nodes);
                     setNodes(newNodes);
-                    const deleteArea = getNode("deleteArea") as Node;
+                    const deleteArea = getNode("deleteArea")!;
                     updateNode("deleteArea", {
                         position: {
                             x: deleteArea.position.x,
                             y: DELETEAREA_DEFAULT_POSITION,
                         },
                     });
+
+                    checkRequisites(
+                        nodes,
+                        getIntersectingNodes,
+                        undefined,
+                        undefined,
+                        droppedNode.data.courseCode as string
+                    );
                     return;
                 }
             }
@@ -394,6 +550,21 @@ export const useGroupCards = () => {
             if (!foundInterval) {
                 const newNodes = removeNode(droppedNode.id, nodes);
                 setNodes(newNodes);
+                const deleteArea = getNode("deleteArea")!;
+                updateNode("deleteArea", {
+                    position: {
+                        x: deleteArea.position.x,
+                        y: DELETEAREA_DEFAULT_POSITION,
+                    },
+                });
+
+                checkRequisites(
+                    nodes,
+                    getIntersectingNodes,
+                    undefined,
+                    undefined,
+                    droppedNode.data.courseCode as string
+                );
                 return;
             }
 
@@ -404,6 +575,25 @@ export const useGroupCards = () => {
                 // node was placed too low, we will fix it
                 droppedNode.position.y = relatedSemester.bottom - 1;
             }
+
+            // ensure that the found semester corresponds with the dropped course's chips
+            const droppedNodeData =
+                droppedNode.data as unknown as CourseInformation;
+            const courseChips = droppedNodeData.chips;
+            if (
+                !courseChips.includes(
+                    termToChipVariant[relatedSemester.semesterTerm]
+                )
+            ) {
+                droppedNodeData.termWarning = true;
+            }
+
+            checkRequisites(
+                nodes,
+                getIntersectingNodes,
+                relatedSemester.semesterId,
+                droppedNode
+            );
 
             // x position was found, now we need to find the y position
             // get the nodes intersecting with the semester
@@ -499,6 +689,7 @@ export const useGroupCards = () => {
             });
             setNodes(newNodes);
             setPlacements(placements);
+
             // TODO: call update nodes server action here
         },
         [
@@ -538,7 +729,7 @@ export const useDragStartHandler = () => {
                 },
             });
 
-            const { x, y } = draggedNode.position;
+            const { x, y } = draggedNode.position!;
             const { interval: relatedSemester, index: relatedSemesterIndex } =
                 findInterval(placements, x) as {
                     interval: SemesterPlacement;
@@ -571,7 +762,11 @@ export const useDragStartHandler = () => {
             placements[relatedSemesterIndex].bottom -= semesterBottomAdjustment;
             setPlacements(placements);
 
-            updateNode(draggedNode.id, {
+            // reset warnings on the node
+            draggedNode.data.requisiteWarning = false;
+            draggedNode.data.termWarning = false;
+
+            updateNode(draggedNode.id!, {
                 style: {
                     zIndex: 100,
                 },
