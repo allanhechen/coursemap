@@ -1,5 +1,6 @@
 "use client";
 
+import { signOut } from "next-auth/react";
 import { User } from "@/types/user";
 import { Avatar, Text, Group, Menu, rem } from "@mantine/core";
 import {
@@ -81,6 +82,9 @@ export default function UserMenu(props: User) {
                                 style={{ width: rem(14), height: rem(14) }}
                             />
                         }
+                        onClick={() => {
+                            signOut();
+                        }}
                     >
                         {" "}
                         Sign Out

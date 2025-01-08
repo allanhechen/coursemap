@@ -1,13 +1,23 @@
 "use server";
 
 import { ReactFlowProvider } from "@xyflow/react";
+import { redirect } from "next/navigation";
 
 import DashboardWrapper from "@/app/(main)/dashboard/DashboardWrapper";
-
-import { getUser } from "@/lib/actions/user";
+import { auth } from "@/lib/auth";
+import { User } from "@/types/user";
 
 export default async function Page() {
-    const user = await getUser();
+    const session = await auth();
+
+    if (!session) {
+        redirect("/login");
+    }
+
+    const user: User = {
+        displayName: session.user!.name!,
+        userPhoto: session.user!.image!,
+    };
 
     return (
         <ReactFlowProvider>
