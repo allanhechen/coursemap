@@ -3,16 +3,55 @@ import { Pool, PoolClient, neonConfig } from "@neondatabase/serverless";
 import ws from "ws";
 
 async function createTables(client: PoolClient) {
+    // auth related tables
     await client.query(`
-        CREATE TABLE IF NOT EXISTS app_user (
-            userid SERIAL PRIMARY KEY,
-            email VARCHAR(255) UNIQUE NOT NULL,
-            hashedpassword CHAR(60),
-            firstname VARCHAR(64),
-            displayname VARCHAR(64),
-            userphoto BYTEA
+        CREATE TABLE IF NOT EXISTS accounts (
+            id SERIAL,
+            "userId" INTEGER NOT NULL,
+            type VARCHAR(255) NOT NULL,
+            provider VARCHAR(255) NOT NULL,
+            "providerAccountId" VARCHAR(255) NOT NULL,
+            refresh_token TEXT,
+            access_token TEXT,
+            expires_at BIGINT,
+            token_type TEXT,
+            scope TEXT,
+            id_token TEXT,
+            session_state TEXT,
+            PRIMARY KEY (id)
+        );
+`);
+
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS sessions (
+            id SERIAL,
+            "sessionToken" VARCHAR(255) NOT NULL,
+            "userId" INTEGER NOT NULL,
+            expires TIMESTAMPTZ NOT NULL,
+            PRIMARY KEY (id)
         );
     `);
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS verification_tokens (
+            identifier TEXT,
+            token TEXT,
+            expires TIMESTAMPTZ NOT NULL,
+            PRIMARY KEY (identifier, token)
+        );
+    `);
+
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL,
+            name VARCHAR(255),
+            email VARCHAR(255),
+            "emailVerified" TIMESTAMPTZ,
+            image TEXT,
+            PRIMARY KEY (id)
+        );
+    `);
+
+    // application related tables
 
     await client.query(`
         CREATE TABLE IF NOT EXISTS institution (
@@ -32,11 +71,11 @@ async function createTables(client: PoolClient) {
 
     await client.query(`
         CREATE TABLE IF NOT EXISTS userprogram (
-            userid INT REFERENCES app_user(userid),
+            id INT REFERENCES users(id),
             institutionid INT,
             programname VARCHAR(64),
             FOREIGN KEY (institutionid, programname) REFERENCES program(institutionid, programname),
-            PRIMARY KEY (userid, institutionid, programname)
+            PRIMARY KEY (id, institutionid, programname)
         );
     `);
 
@@ -97,13 +136,13 @@ async function createTables(client: PoolClient) {
     await client.query(`
         CREATE TABLE IF NOT EXISTS semester (
             semesterid SERIAL PRIMARY KEY,
-            userid INT,
+            id INT,
             institutionid INT,
             programname VARCHAR(64),
             semestername VARCHAR(32) NOT NULL,
             semesteryear INT NOT NULL,
             semesterterm CHAR(2) NOT NULL,
-            FOREIGN KEY (userid, institutionid, programname) REFERENCES userprogram(userid, institutionid, programname)
+            FOREIGN KEY (id, institutionid, programname) REFERENCES userprogram(id, institutionid, programname)
         );
     `);
 
