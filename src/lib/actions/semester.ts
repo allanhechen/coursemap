@@ -15,7 +15,7 @@ export async function putSemester(
     console.log(
         `Create a new semester with ${semesterName}, ${semesterYear}, and ${semesterTerm}`
     );
-    return 1;
+    return 3;
 }
 
 export async function getAllSemesters(): Promise<SemesterInformation[]> {
