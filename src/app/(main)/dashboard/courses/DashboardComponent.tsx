@@ -4,14 +4,13 @@ import { useState, useCallback, useContext, useEffect } from "react";
 import { ReactFlow, Node, Edge, useReactFlow, MiniMap } from "@xyflow/react";
 
 import { CourseCardDropdownWrapper } from "@/components/courseCard/CourseCard";
-import DeleteArea from "@/components/DeleteArea";
-import Semester from "@/components/semester/Semester";
 import NavBar from "@/components/header/NavBar";
 
 import "@/app/(main)/dashboard/courses/DashboardComponent.css";
 import {
     parsePrerequisite,
     placeNodes,
+    placeWrappers,
     PrerequisiteNodeType,
     Wrapper,
 } from "@/lib/tree";
@@ -21,14 +20,19 @@ import {
     getAllCourseSemesters,
     getCourseInformation,
 } from "@/lib/actions/course";
-import { CourseToSemesterIdDict } from "@/types/courseCard";
-import { CourseSemesterContext } from "./courseSemesterContext";
+import {
+    CourseToSemesterIdDict,
+    DropdownCardWrapper,
+    WrapperWrapper,
+} from "@/types/courseCard";
+import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/courseSemesterContext";
+import AndWrapper from "@/components/wrapper/AndWrapper";
+import OrWrapper from "@/components/wrapper/OrWrapper";
 
 const nodeTypes = {
     courseDropdownNode: CourseCardDropdownWrapper,
-    semesterNode: Semester,
-    deleteNode: DeleteArea,
-    searchNode: CourseSearch,
+    andWrapperNode: AndWrapper,
+    orWrapperNode: OrWrapper,
 };
 
 export default function DashboardComponent({
@@ -120,7 +124,10 @@ export default function DashboardComponent({
                     ...courseStates,
                 }));
 
-                const dropdownCourses = filledCourses.map((course) => {
+                const dropdownCourses: (
+                    | DropdownCardWrapper
+                    | WrapperWrapper
+                )[] = filledCourses.map((course) => {
                     return {
                         id: course.id,
                         data: {
@@ -133,9 +140,10 @@ export default function DashboardComponent({
                     };
                 });
 
-                placeNodes(dropdownCourses, wrapperOutput);
+                placeNodes(dropdownCourses);
+                placeWrappers(dropdownCourses, wrapperOutput);
 
-                setNodes(dropdownCourses);
+                setNodes(dropdownCourses as Node[]);
                 setEdges(edgeOutput);
             };
 

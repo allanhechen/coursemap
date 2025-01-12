@@ -1,4 +1,4 @@
-import { DropdownCardWrapper } from "@/types/courseCard";
+import { DropdownCardWrapper, WrapperWrapper } from "@/types/courseCard";
 import { Edge } from "@xyflow/react";
 
 export interface PrerequisiteNodeType {
@@ -7,6 +7,7 @@ export interface PrerequisiteNodeType {
 }
 
 export interface Wrapper {
+    id: string;
     wrapperType: "AND" | "OR";
     innerNodeKeys: string[];
 }
@@ -89,11 +90,7 @@ export function parsePrerequisite(
 const CARD_HEIGHT = 256;
 const CARD_WIDTH = 352;
 const CARD_GAP = 50;
-
-export function placeNodes(
-    nodes: DropdownCardWrapper[],
-    wrappers: { [key: string]: Wrapper }
-) {
+export function placeNodes(nodes: (DropdownCardWrapper | WrapperWrapper)[]) {
     const nodeChildren: {
         [nodeId: string]:
             | { highest: number; lowest: number; stale: boolean }
@@ -190,11 +187,15 @@ export function placeNodes(
     });
 
     nodes.sort((a, b) => b.id!.split("-").length - a.id!.split("-").length);
-    nodes.forEach((node) => {
+    nodes.forEach((node: DropdownCardWrapper | WrapperWrapper) => {
         const id = node.id!;
         const currentNodeChildren = nodeChildren[id];
         const idTokens = id.split("-");
         const parentId = idTokens.slice(0, -1).join("-");
+        node.measured = {
+            width: CARD_WIDTH,
+            height: CARD_HEIGHT,
+        };
 
         const newY = currentNodeChildren
             ? (currentNodeChildren.highest + currentNodeChildren.lowest) / 2
@@ -215,8 +216,96 @@ export function placeNodes(
             };
         }
     });
+}
 
-    console.log(wrappers);
+const WRAPPER_PADDING = 16;
+
+export function placeWrappers(
+    nodes: (DropdownCardWrapper | WrapperWrapper)[],
+    wrapperObject: { [key: string]: Wrapper }
+): void {
+    const wrappers: Wrapper[] = [];
+    for (const key in wrapperObject) {
+        wrappers.push(wrapperObject[key]);
+    }
+
+    wrappers.sort((a: Wrapper, b: Wrapper) => {
+        const aTokens = a.id.split("-");
+        const bTokens = b.id.split("-");
+
+        return aTokens[aTokens.length - 1].localeCompare(
+            bTokens[bTokens.length - 1]
+        );
+    });
+    wrappers.sort((a: Wrapper, b: Wrapper) => {
+        const aTokens = a.id.split("-");
+        const bTokens = b.id.split("-");
+
+        return bTokens.length - aTokens.length;
+    });
+
+    for (let i = 0; i < wrappers.length; i++) {
+        const wrapper = wrappers[i];
+        let upperBounds: number | undefined; // the bottom of the node, a larger number
+        let lowerBounds: number | undefined;
+        let leftBounds: number | undefined;
+        let rightBounds: number | undefined;
+        wrapper.innerNodeKeys.forEach((innerNodeKey: string) => {
+            for (let j = 0; j < nodes.length; j++) {
+                const node = nodes[j];
+                const nodeTop = node.position!.y + node.measured!.height;
+                const nodeBottom = node.position!.y;
+                const nodeLeft = node.position!.x;
+                const nodeRight = node.position!.x + node.measured!.width;
+
+                if (node.id === innerNodeKey) {
+                    upperBounds =
+                        upperBounds !== undefined
+                            ? Math.max(nodeTop, upperBounds)
+                            : nodeTop;
+                    lowerBounds =
+                        lowerBounds !== undefined
+                            ? Math.min(nodeBottom, lowerBounds)
+                            : nodeBottom;
+                    leftBounds =
+                        leftBounds !== undefined
+                            ? Math.min(nodeLeft, leftBounds)
+                            : nodeLeft;
+                    rightBounds =
+                        rightBounds !== undefined
+                            ? Math.max(nodeRight, rightBounds)
+                            : nodeRight;
+                    break;
+                }
+            }
+        });
+
+        const width = rightBounds! - leftBounds! + 2 * WRAPPER_PADDING;
+        const height = upperBounds! - lowerBounds! + 4 * WRAPPER_PADDING;
+
+        const wrapperNode: WrapperWrapper = {
+            type:
+                wrapper.wrapperType === "AND"
+                    ? "andWrapperNode"
+                    : "orWrapperNode",
+            id: wrapper.id,
+            position: {
+                x: leftBounds! - WRAPPER_PADDING,
+                y: lowerBounds! - 3 * WRAPPER_PADDING,
+            },
+            style: {
+                width: width,
+                height: height,
+                zIndex: -i - 1,
+            },
+            measured: {
+                width: width,
+                height: height,
+            },
+        };
+        console.log(wrapperNode.id, wrapperNode);
+        nodes.push(wrapperNode);
+    }
 }
 
 function handleANDRequirement(
@@ -274,6 +363,7 @@ function handleANDRequirement(
                     wrapperOutput[outerNodeKey].innerNodeKeys.push(newKey);
                 } else {
                     wrapperOutput[outerNodeKey] = {
+                        id: outerNodeKey,
                         wrapperType: "AND",
                         innerNodeKeys: [newKey],
                     };
@@ -330,6 +420,7 @@ function handleORRequirement(
                 wrapperOutput[outerNodeKey].innerNodeKeys.push(innerNodeKey);
             } else {
                 wrapperOutput[outerNodeKey] = {
+                    id: outerNodeKey,
                     wrapperType: "OR",
                     innerNodeKeys: [innerNodeKey],
                 };
@@ -359,6 +450,7 @@ function handleORRequirement(
                 wrapperOutput[outerNodeKey].innerNodeKeys.push(newKey);
             } else {
                 wrapperOutput[outerNodeKey] = {
+                    id: outerNodeKey,
                     wrapperType: "OR",
                     innerNodeKeys: [newKey],
                 };

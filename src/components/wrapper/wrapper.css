@@ -1,0 +1,7 @@
+.and-wrapper.mantine-Paper-root {
+    background-color: rgba(1, 58, 190, 0.25) !important;
+}
+
+.or-wrapper.mantine-Paper-root {
+    background-color: rgba(179, 101, 101, 0.25) !important;
+}

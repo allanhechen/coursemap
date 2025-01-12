@@ -24,6 +24,16 @@ export interface DropdownCardWrapper {
     data: CourseDropdownInformation;
     isConnectable?: boolean;
     position?: XYPosition;
+    measured?: { width: number; height: number };
+}
+
+export interface WrapperWrapper {
+    type?: string;
+    id?: string;
+    isConnectable?: boolean;
+    position?: XYPosition;
+    measured?: { width: number; height: number };
+    style?: React.CSSProperties;
 }
 
 export interface CourseDropdownInformation {
