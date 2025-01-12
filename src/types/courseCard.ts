@@ -1,6 +1,5 @@
 import { XYPosition } from "@xyflow/react";
 import { ChipVariant } from "@/types/chipVariant";
-import { SemesterInformation } from "@/types/semester";
 
 export interface CardWrapper {
     type?: string;
@@ -29,9 +28,6 @@ export interface DropdownCardWrapper {
 
 export interface CourseDropdownInformation {
     courseInformation: CourseInformation;
-    semesters: {
-        [semesterId: number]: SemesterInformation;
-    };
     selectSemester: (
         courseCode: string,
         semesterId: number | undefined

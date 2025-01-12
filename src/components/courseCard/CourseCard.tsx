@@ -59,13 +59,12 @@ export function CourseCardDropdownWrapper({
 }: {
     data: CourseDropdownInformation;
 }) {
-    const { courseInformation, semesters, selectSemester } = data;
+    const { courseInformation, selectSemester } = data;
 
     return (
         <>
             <CourseCardForm
                 courseCode={courseInformation.courseCode}
-                semesters={semesters}
                 selectSemester={selectSemester}
             />
             <CourseCard {...courseInformation} />

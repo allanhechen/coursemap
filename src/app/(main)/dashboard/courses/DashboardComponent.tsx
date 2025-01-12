@@ -21,8 +21,6 @@ import {
     getAllCourseSemesters,
     getCourseInformation,
 } from "@/lib/actions/course";
-import { getAllSemesters } from "@/lib/actions/semester";
-import { SemesterInformation } from "@/types/semester";
 import { CourseToSemesterIdDict } from "@/types/courseCard";
 import { CourseSemesterContext } from "./courseSemesterContext";
 
@@ -109,14 +107,6 @@ export default function DashboardComponent({
                     data: courseInformation[node.courseName],
                 }));
 
-                const semesterInformation = await getAllSemesters();
-                const semesterObject: {
-                    [semesterId: number]: SemesterInformation;
-                } = {};
-                semesterInformation.forEach((semester) => {
-                    semesterObject[semester.semesterId] = semester;
-                });
-
                 const courseSemesters = await getAllCourseSemesters();
                 courseSemesters.forEach((courseSemester) => {
                     courseStates[courseSemester.course.courseCode] =
@@ -135,7 +125,6 @@ export default function DashboardComponent({
                         id: course.id,
                         data: {
                             courseInformation: course.data,
-                            semesters: semesterObject,
                             courseToSemesters: () => relatedSemesterId,
                             selectSemester: selectSemester,
                         },
