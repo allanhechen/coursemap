@@ -11,7 +11,7 @@ import { useCallback } from "react";
 import { Node, useNodeId, useReactFlow } from "@xyflow/react";
 
 import "@/components/courseCard/CourseCard.css";
-import CourseCardForm from "./CourseCardForm";
+import CourseCardForm from "@/components/courseCard/CourseCardForm";
 
 export default function CourseCardWrapper({ data }: CardWrapper) {
     const { getNode, getIntersectingNodes } = useReactFlow();
