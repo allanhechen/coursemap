@@ -1,12 +1,17 @@
 import { Card, Group, Text } from "@mantine/core";
 import Chip from "@/components/chip/ChipFilled";
 import { stringToColor, stringToDeg } from "@/lib/color";
-import { CardWrapper, CourseInformation } from "@/types/courseCard";
+import {
+    CardWrapper,
+    CourseDropdownInformation,
+    CourseInformation,
+} from "@/types/courseCard";
 import { useScrollHandler } from "@/lib/placement";
 import { useCallback } from "react";
 import { Node, useNodeId, useReactFlow } from "@xyflow/react";
 
 import "@/components/courseCard/CourseCard.css";
+import CourseCardForm from "./CourseCardForm";
 
 export default function CourseCardWrapper({ data }: CardWrapper) {
     const { getNode, getIntersectingNodes } = useReactFlow();
@@ -47,6 +52,25 @@ export default function CourseCardWrapper({ data }: CardWrapper) {
     );
 
     return <CourseCard onWheel={onWheel} {...data} />;
+}
+
+export function CourseCardDropdownWrapper({
+    data,
+}: {
+    data: CourseDropdownInformation;
+}) {
+    const { courseInformation, semesters, selectSemester } = data;
+
+    return (
+        <>
+            <CourseCardForm
+                courseCode={courseInformation.courseCode}
+                semesters={semesters}
+                selectSemester={selectSemester}
+            />
+            <CourseCard {...courseInformation} />
+        </>
+    );
 }
 
 export function CourseCard({
