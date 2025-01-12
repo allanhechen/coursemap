@@ -76,13 +76,13 @@ export default function CourseSearch() {
 
     return (
         <Paper
-            className="p-5 w-96 flex flex-col items-center justify-center"
+            className="p-5 w-96 flex flex-col items-center justify-center ml-5"
             h={
                 typeof window !== "undefined"
                     ? window.innerWidth >= 768
                         ? window.innerHeight - 126
                         : window.innerHeight - 134
-                    : "100vh"
+                    : "100%"
             }
             style={{
                 width: "23rem",

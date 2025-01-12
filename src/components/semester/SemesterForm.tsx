@@ -41,7 +41,12 @@ export default function SemesterForm({
     const [opened, { open, close }] = useDisclosure(false);
     const [visible, setVisible] = useState(false);
 
-    const { updateNodes } = useUpdateNodes();
+    let updateNodes: () => Promise<number> | undefined;
+
+    try {
+        const result = useUpdateNodes();
+        updateNodes = result.updateNodes;
+    } catch {}
 
     const onMouseEnter = useCallback(() => {
         setVisible(true);
@@ -93,7 +98,9 @@ export default function SemesterForm({
                             );
                         }
 
-                        updateNodes();
+                        if (updateNodes) {
+                            updateNodes();
+                        }
                     })}
                 >
                     <div className="mt-3">
