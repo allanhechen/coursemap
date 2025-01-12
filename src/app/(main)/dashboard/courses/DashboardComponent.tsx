@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useContext, useEffect } from "react";
-import { ReactFlow, Node, Edge } from "@xyflow/react";
+import { ReactFlow, Node, Edge, useReactFlow, MiniMap } from "@xyflow/react";
 
 import { CourseCardDropdownWrapper } from "@/components/courseCard/CourseCard";
 import DeleteArea from "@/components/DeleteArea";
@@ -9,7 +9,12 @@ import Semester from "@/components/semester/Semester";
 import NavBar from "@/components/header/NavBar";
 
 import "@/app/(main)/dashboard/courses/DashboardComponent.css";
-import { parsePrerequisite, PrerequisiteNodeType, Wrapper } from "@/lib/tree";
+import {
+    parsePrerequisite,
+    placeNodes,
+    PrerequisiteNodeType,
+    Wrapper,
+} from "@/lib/tree";
 import CourseSearch from "@/components/courseSearch/CourseSearch";
 import { DnDContext } from "@/components/dndContext";
 import {
@@ -38,6 +43,7 @@ export default function DashboardComponent({
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
     const [height, setHeight] = useState(1);
+    const { fitView } = useReactFlow();
 
     const courseSemesterContextItem = useContext(CourseSemesterContext);
     if (!courseSemesterContextItem) {
@@ -114,9 +120,7 @@ export default function DashboardComponent({
                     ...courseStates,
                 }));
 
-                let counter = 0;
                 const dropdownCourses = filledCourses.map((course) => {
-                    counter += 400;
                     return {
                         id: course.id,
                         data: {
@@ -125,12 +129,11 @@ export default function DashboardComponent({
                             selectSemester: selectSemester,
                         },
                         type: "courseDropdownNode",
-                        position: {
-                            x: 0,
-                            y: counter,
-                        },
+                        position: { x: 0, y: 0 },
                     };
                 });
+
+                placeNodes(dropdownCourses, wrapperOutput);
 
                 setNodes(dropdownCourses);
                 setEdges(edgeOutput);
@@ -165,6 +168,10 @@ export default function DashboardComponent({
         }
     }, []);
 
+    useEffect(() => {
+        setTimeout(() => fitView(), 10);
+    }, [nodes, fitView]);
+
     return (
         <>
             <div className="dashboard-component">
@@ -179,13 +186,19 @@ export default function DashboardComponent({
                 >
                     <CourseSearch />
                     <ReactFlow
+                        minZoom={0.1}
+                        maxZoom={1}
                         edges={edges}
                         nodes={nodes}
                         nodeTypes={nodeTypes}
                         proOptions={{ hideAttribution: true }}
                         onDragOver={onDragOver}
                         onDrop={onDrop}
-                    />
+                        nodesDraggable={false}
+                        nodesConnectable={false}
+                    >
+                        <MiniMap />
+                    </ReactFlow>
                 </div>
             </div>
         </>

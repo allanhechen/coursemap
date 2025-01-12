@@ -19,13 +19,7 @@ html {
 }
 
 [class*="react-flow"] {
-    transition: transform 0.1s ease;
-}
-
-@media (pointer: coarse) {
-    [class*="react-flow"] {
-        transition: none;
-    }
+    transition: transform 0s ease;
 }
 
 .react-flow__handle {
