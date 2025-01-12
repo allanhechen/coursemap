@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 
-import DashboardComponent from "@/app/(main)/dashboard/DashboardComponent";
-import { SemesterPositionContext } from "@/app/(main)/dashboard/semesterPositionContext";
-import { DnDContext } from "@/app/(main)/dashboard/dndContext";
+import DashboardComponent from "@/app/(main)/dashboard/overview/DashboardComponent";
+import { SemesterPositionContext } from "@/app/(main)/dashboard/overview/semesterPositionContext";
+import { DnDContext } from "@/components/dndContext";
 import {
     SemesterFormProvider,
     useSemesterForm,
