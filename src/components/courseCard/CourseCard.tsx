@@ -1,12 +1,17 @@
 import { Card, Group, Text } from "@mantine/core";
 import Chip from "@/components/chip/ChipFilled";
 import { stringToColor, stringToDeg } from "@/lib/color";
-import { CardWrapper, CourseInformation } from "@/types/courseCard";
+import {
+    CardWrapper,
+    CourseDropdownInformation,
+    CourseInformation,
+} from "@/types/courseCard";
 import { useScrollHandler } from "@/lib/placement";
 import { useCallback } from "react";
-import { Node, useNodeId, useReactFlow } from "@xyflow/react";
+import { Handle, Node, Position, useNodeId, useReactFlow } from "@xyflow/react";
 
 import "@/components/courseCard/CourseCard.css";
+import CourseCardForm from "@/components/courseCard/CourseCardForm";
 
 export default function CourseCardWrapper({ data }: CardWrapper) {
     const { getNode, getIntersectingNodes } = useReactFlow();
@@ -47,6 +52,30 @@ export default function CourseCardWrapper({ data }: CardWrapper) {
     );
 
     return <CourseCard onWheel={onWheel} {...data} />;
+}
+
+export function CourseCardDropdownWrapper({
+    data,
+}: {
+    data: CourseDropdownInformation;
+}) {
+    const { courseInformation, selectSemester } = data;
+
+    return (
+        <Card
+            className="h-64 flex content-between justify-between"
+            radius="lg"
+            shadow="sm"
+        >
+            <CourseCardForm
+                courseCode={courseInformation.courseCode}
+                selectSemester={selectSemester}
+            />
+            <CourseCard {...courseInformation} />
+            <Handle type="target" position={Position.Right} />
+            <Handle type="source" position={Position.Left} />
+        </Card>
+    );
 }
 
 export function CourseCard({

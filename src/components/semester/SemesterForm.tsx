@@ -10,13 +10,15 @@ import {
     Title,
 } from "@mantine/core";
 import { YearPickerInput } from "@mantine/dates";
-import { SemesterTerm } from "@/types/semester";
-import { useSemesterFormContext } from "@/components/semester/semesterFormContext";
-import { putSemester, updateSemester } from "@/lib/actions/semester";
-import { useCallback, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
-import { useUpdateNodes } from "@/lib/placement";
 
+import { useSemesterFormContext } from "@/components/semester/semesterFormContext";
+
+import { useUpdateNodes } from "@/lib/placement";
+import { putSemester, updateSemester } from "@/lib/actions/semester";
+import { SemesterDict, SemesterTerm } from "@/types/semester";
+import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
 import "@/components/semester/SemesterForm.css";
 
 // semseterForm will be called in two places
@@ -41,7 +43,21 @@ export default function SemesterForm({
     const [opened, { open, close }] = useDisclosure(false);
     const [visible, setVisible] = useState(false);
 
-    const { updateNodes } = useUpdateNodes();
+    let updateNodes: () => Promise<number> | undefined;
+    let semesterDict: SemesterDict | undefined;
+    let setSemesterDict:
+        | React.Dispatch<React.SetStateAction<SemesterDict>>
+        | undefined;
+
+    try {
+        const result = useUpdateNodes();
+        updateNodes = result.updateNodes;
+    } catch {}
+
+    try {
+        const semesterContextType = useContext(SemesterContext);
+        [semesterDict, setSemesterDict] = semesterContextType!;
+    } catch {}
 
     const onMouseEnter = useCallback(() => {
         setVisible(true);
@@ -77,7 +93,7 @@ export default function SemesterForm({
                 }}
             >
                 <form
-                    onSubmit={form.onSubmit((values) => {
+                    onSubmit={form.onSubmit(async (values) => {
                         if (semesterId) {
                             updateSemester(
                                 semesterId,
@@ -86,14 +102,28 @@ export default function SemesterForm({
                                 values.semesterTerm
                             );
                         } else {
-                            putSemester(
+                            semesterId = await putSemester(
                                 values.semesterName,
                                 values.semesterYear,
                                 values.semesterTerm
                             );
+                            if (semesterDict && setSemesterDict) {
+                                const newSemesterDict = {
+                                    ...semesterDict,
+                                    [semesterId]: {
+                                        semesterId: semesterId,
+                                        semesterName: values.semesterName,
+                                        semesterYear: values.semesterYear,
+                                        semesterTerm: values.semesterTerm,
+                                    },
+                                };
+                                setSemesterDict(newSemesterDict);
+                            }
                         }
 
-                        updateNodes();
+                        if (updateNodes) {
+                            updateNodes();
+                        }
                     })}
                 >
                     <div className="mt-3">

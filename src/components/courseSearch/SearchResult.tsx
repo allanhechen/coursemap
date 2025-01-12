@@ -3,7 +3,7 @@ import { useCallback, useContext } from "react";
 
 import { CourseCard } from "@/components/courseCard/CourseCard";
 import { CourseInformation } from "@/types/courseCard";
-import { DnDContext } from "@/app/(main)/dashboard/dndContext";
+import { DnDContext } from "@/components/dndContext";
 
 import "@/components/courseSearch/SearchResult.css";
 

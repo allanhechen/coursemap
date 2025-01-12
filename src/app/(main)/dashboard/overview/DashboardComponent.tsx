@@ -24,10 +24,10 @@ import {
     useOnViewportMove,
     useScrollHandler,
 } from "@/lib/placement";
-import "@/app/(main)/dashboard/DashboardComponent.css";
+import "@/app/(main)/dashboard/overview/DashboardComponent.css";
 import { User } from "@/types/user";
 import CourseSearch from "@/components/courseSearch/CourseSearch";
-import { DnDContext } from "@/app/(main)/dashboard/dndContext";
+import { DnDContext } from "@/components/dndContext";
 import { CardWrapper } from "@/types/courseCard";
 
 // ipmlementation notes:

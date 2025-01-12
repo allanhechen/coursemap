@@ -14,8 +14,8 @@ import {
 } from "@/types/semester";
 import { CardWrapper, CourseInformation } from "@/types/courseCard";
 import { getAllSemesters } from "./actions/semester";
-import { getAllCourseSemesters } from "./actions/course";
-import { SemesterPositionContext } from "@/app/(main)/dashboard/semesterPositionContext";
+import { getAllCourseSemesters } from "@/lib/actions/course";
+import { SemesterPositionContext } from "@/app/(main)/dashboard/overview/semesterPositionContext";
 import { ChipVariant } from "@/types/chipVariant";
 
 const termToChipVariant = {
@@ -308,7 +308,7 @@ function placeNodes(
         data: {},
         type: "searchNode" as const,
         position: {
-            x: SEARCHAREA_POSITION_X,
+            x: 0,
             y: SEARCHAREA_POSITION_Y, //for testing
         },
         className: "nopan nodrag",
@@ -797,7 +797,7 @@ export const useOnViewportMove = () => {
 
             updateNode("courseSearch", {
                 position: {
-                    x: x + SEARCHAREA_POSITION_X,
+                    x: x,
                     y: SEARCHAREA_POSITION_Y,
                 },
             });
