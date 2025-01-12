@@ -1,5 +1,14 @@
 import { XYPosition } from "@xyflow/react";
 
+export type SemesterDict = {
+    [semesterId: number]: SemesterInformation;
+};
+
+export type SemesterDictContextType = [
+    SemesterDict,
+    React.Dispatch<React.SetStateAction<SemesterDict>>
+];
+
 export interface SemesterWrapper {
     data: SemesterInformation;
     isConnectable?: boolean;
