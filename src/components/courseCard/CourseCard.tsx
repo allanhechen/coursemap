@@ -8,7 +8,7 @@ import {
 } from "@/types/courseCard";
 import { useScrollHandler } from "@/lib/placement";
 import { useCallback } from "react";
-import { Node, useNodeId, useReactFlow } from "@xyflow/react";
+import { Handle, Node, Position, useNodeId, useReactFlow } from "@xyflow/react";
 
 import "@/components/courseCard/CourseCard.css";
 import CourseCardForm from "@/components/courseCard/CourseCardForm";
@@ -72,6 +72,8 @@ export function CourseCardDropdownWrapper({
                 selectSemester={selectSemester}
             />
             <CourseCard {...courseInformation} />
+            <Handle type="target" position={Position.Right} />
+            <Handle type="source" position={Position.Left} />
         </Card>
     );
 }

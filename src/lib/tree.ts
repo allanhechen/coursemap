@@ -1,11 +1,8 @@
+import { Edge } from "@xyflow/react";
+
 export interface PrerequisiteNodeType {
     courseName: string;
     key: string;
-}
-
-export interface Edge {
-    inputNodeKey: string;
-    outputNodeKey: string;
 }
 
 export interface Wrapper {
@@ -132,7 +129,11 @@ function handleANDRequirement(
                 courseName: currentTransformed,
                 key: newKey,
             });
-            edgeOutput.push({ inputNodeKey: newKey, outputNodeKey: key });
+            edgeOutput.push({
+                source: newKey,
+                target: key,
+                id: `[${newKey}]-[${key}]`,
+            });
 
             if (outerNodeKey) {
                 if (wrapperOutput[outerNodeKey]) {
@@ -212,7 +213,11 @@ function handleORRequirement(
                 courseName: currentTransformed,
                 key: newKey,
             });
-            edgeOutput.push({ inputNodeKey: newKey, outputNodeKey: key });
+            edgeOutput.push({
+                source: newKey,
+                target: key,
+                id: `[${newKey}]-[${key}]`,
+            });
 
             if (wrapperOutput[outerNodeKey]) {
                 wrapperOutput[outerNodeKey].innerNodeKeys.push(newKey);

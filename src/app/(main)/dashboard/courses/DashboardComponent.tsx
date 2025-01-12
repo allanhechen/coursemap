@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useContext, useEffect } from "react";
-import { ReactFlow, Node } from "@xyflow/react";
+import { ReactFlow, Node, Edge } from "@xyflow/react";
 
 import { CourseCardDropdownWrapper } from "@/components/courseCard/CourseCard";
 import DeleteArea from "@/components/DeleteArea";
@@ -9,12 +9,7 @@ import Semester from "@/components/semester/Semester";
 import NavBar from "@/components/header/NavBar";
 
 import "@/app/(main)/dashboard/courses/DashboardComponent.css";
-import {
-    parsePrerequisite,
-    PrerequisiteNodeType,
-    Edge,
-    Wrapper,
-} from "@/lib/tree";
+import { parsePrerequisite, PrerequisiteNodeType, Wrapper } from "@/lib/tree";
 import CourseSearch from "@/components/courseSearch/CourseSearch";
 import { DnDContext } from "@/components/dndContext";
 import {
@@ -41,6 +36,7 @@ export default function DashboardComponent({
     prerequisites: { [key: string]: string };
 }) {
     const [nodes, setNodes] = useState<Node[]>([]);
+    const [edges, setEdges] = useState<Edge[]>([]);
     const [height, setHeight] = useState(1);
 
     const courseSemesterContextItem = useContext(CourseSemesterContext);
@@ -137,6 +133,7 @@ export default function DashboardComponent({
                 });
 
                 setNodes(dropdownCourses);
+                setEdges(edgeOutput);
             };
 
             handler();
@@ -160,13 +157,8 @@ export default function DashboardComponent({
                 );
             };
 
-            // Set initial height
             updateHeight();
-
-            // Add resize listener
             window.addEventListener("resize", updateHeight);
-
-            // Cleanup on unmount
             return () => {
                 window.removeEventListener("resize", updateHeight);
             };
@@ -187,6 +179,7 @@ export default function DashboardComponent({
                 >
                     <CourseSearch />
                     <ReactFlow
+                        edges={edges}
                         nodes={nodes}
                         nodeTypes={nodeTypes}
                         proOptions={{ hideAttribution: true }}
