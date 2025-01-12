@@ -1,3 +1,4 @@
+import { DropdownCardWrapper } from "@/types/courseCard";
 import { Edge } from "@xyflow/react";
 
 export interface PrerequisiteNodeType {
@@ -85,7 +86,138 @@ export function parsePrerequisite(
     }
 }
 
-// export function placeNodes(nodes, edges, wrappers) {}
+const CARD_HEIGHT = 256;
+const CARD_WIDTH = 352;
+const CARD_GAP = 50;
+
+export function placeNodes(
+    nodes: DropdownCardWrapper[],
+    wrappers: { [key: string]: Wrapper }
+) {
+    const nodeChildren: {
+        [nodeId: string]:
+            | { highest: number; lowest: number; stale: boolean }
+            | undefined;
+    } = {};
+
+    let lastSeenTokenCount = 0;
+    let lastSeenY = 0;
+    let highestSeenY = 0;
+
+    nodes.forEach((node) => {
+        const id = node.id!;
+        const idTokens = id.split("-");
+        const idTokenCount = idTokens.length;
+        const parentId = idTokens.slice(0, -1).join("-");
+
+        // if more tokens then we are child of the last node
+        // we move right
+        if (idTokenCount > lastSeenTokenCount) {
+            const x =
+                (idTokenCount - 1) * CARD_WIDTH + (idTokenCount - 2) * CARD_GAP;
+            const y = lastSeenY;
+            node.position = {
+                x: x,
+                y: y,
+            };
+
+            if (!nodeChildren[parentId]) {
+                nodeChildren[parentId] = {
+                    highest: y,
+                    lowest: y,
+                    stale: true,
+                };
+            }
+            lastSeenTokenCount = idTokenCount;
+            lastSeenY = y;
+
+            // if same tokens then we are below the last node
+            // we move down
+        } else if (idTokenCount === lastSeenTokenCount) {
+            const x =
+                (idTokenCount - 1) * CARD_WIDTH + (idTokenCount - 2) * CARD_GAP;
+            const y = lastSeenY + CARD_GAP + CARD_HEIGHT;
+            node.position = {
+                x: x,
+                y: y,
+            };
+
+            if (nodeChildren[parentId]) {
+                nodeChildren[parentId] = {
+                    highest: y,
+                    lowest: nodeChildren[parentId]!.lowest,
+                    stale: true,
+                };
+            } else {
+                nodeChildren[parentId] = {
+                    highest: y,
+                    lowest: y,
+                    stale: true,
+                };
+            }
+            lastSeenTokenCount = idTokenCount;
+            lastSeenY = y;
+            highestSeenY = Math.max(highestSeenY, y);
+
+            // we are moving right + we need to calculate the x position
+            // we are moving below the lowest we've seen for sure
+        } else {
+            const x =
+                (idTokenCount - 1) * CARD_WIDTH + (idTokenCount - 2) * CARD_GAP;
+            const y = highestSeenY + CARD_GAP + CARD_HEIGHT;
+            node.position = {
+                x: x,
+                y: y,
+            };
+
+            if (nodeChildren[parentId]) {
+                nodeChildren[parentId] = {
+                    highest: y,
+                    lowest: nodeChildren[parentId]!.lowest,
+                    stale: true,
+                };
+            } else {
+                nodeChildren[parentId] = {
+                    highest: y,
+                    lowest: y,
+                    stale: true,
+                };
+            }
+            lastSeenTokenCount = idTokenCount;
+            lastSeenY = y;
+            highestSeenY = y;
+        }
+    });
+
+    nodes.sort((a, b) => b.id!.split("-").length - a.id!.split("-").length);
+    nodes.forEach((node) => {
+        const id = node.id!;
+        const currentNodeChildren = nodeChildren[id];
+        const idTokens = id.split("-");
+        const parentId = idTokens.slice(0, -1).join("-");
+
+        const newY = currentNodeChildren
+            ? (currentNodeChildren.highest + currentNodeChildren.lowest) / 2
+            : node.position!.y;
+
+        node.position!.y = newY;
+        if (nodeChildren[parentId] && nodeChildren[parentId].stale) {
+            nodeChildren[parentId] = {
+                highest: newY,
+                lowest: newY,
+                stale: false,
+            };
+        } else {
+            nodeChildren[parentId] = {
+                highest: Math.max(nodeChildren[parentId]!.highest, newY),
+                lowest: Math.min(nodeChildren[parentId]!.lowest, newY),
+                stale: false,
+            };
+        }
+    });
+
+    console.log(wrappers);
+}
 
 function handleANDRequirement(
     prerequisites: { [key: string]: string },
@@ -130,6 +262,8 @@ function handleANDRequirement(
                 key: newKey,
             });
             edgeOutput.push({
+                selectable: false,
+                style: { strokeWidth: 3 },
                 source: newKey,
                 target: key,
                 id: `[${newKey}]-[${key}]`,
@@ -214,6 +348,8 @@ function handleORRequirement(
                 key: newKey,
             });
             edgeOutput.push({
+                style: { strokeWidth: 3 },
+                selectable: false,
                 source: newKey,
                 target: key,
                 id: `[${newKey}]-[${key}]`,
