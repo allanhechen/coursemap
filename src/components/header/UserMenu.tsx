@@ -1,6 +1,8 @@
 "use client";
 
 import { signOut } from "next-auth/react";
+import Link from "next/link";
+
 import { User } from "@/types/user";
 import { Avatar, Text, Group, Menu, rem } from "@mantine/core";
 import {
@@ -34,7 +36,9 @@ export default function UserMenu(props: User) {
                             src={props.userPhoto}
                             alt={`${displayName}'s avatar'`}
                         />
-                        <Text size="md">{displayName}</Text>
+                        <Text className="hidden md:block" size="md">
+                            {displayName}
+                        </Text>
                         {menuOpened ? (
                             <IconChevronDown size="1rem" />
                         ) : (
@@ -44,27 +48,31 @@ export default function UserMenu(props: User) {
                 </Menu.Target>
 
                 <Menu.Dropdown>
-                    <Menu.Item
-                        leftSection={
-                            <IconCarouselVertical
-                                style={{ width: rem(14), height: rem(14) }}
-                            />
-                        }
-                    >
-                        Overview
-                    </Menu.Item>
-                    <Menu.Item
-                        leftSection={
-                            <IconVectorBezier2
-                                style={{
-                                    width: rem(14),
-                                    height: rem(14),
-                                }}
-                            />
-                        }
-                    >
-                        Courses
-                    </Menu.Item>
+                    <Link href="/dashboard/overview">
+                        <Menu.Item
+                            leftSection={
+                                <IconCarouselVertical
+                                    style={{ width: rem(14), height: rem(14) }}
+                                />
+                            }
+                        >
+                            Overview
+                        </Menu.Item>
+                    </Link>
+                    <Link href="/dashboard/courses">
+                        <Menu.Item
+                            leftSection={
+                                <IconVectorBezier2
+                                    style={{
+                                        width: rem(14),
+                                        height: rem(14),
+                                    }}
+                                />
+                            }
+                        >
+                            Courses
+                        </Menu.Item>
+                    </Link>
                     <Menu.Divider />
                     <Menu.Item
                         leftSection={
