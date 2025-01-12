@@ -62,13 +62,17 @@ export function CourseCardDropdownWrapper({
     const { courseInformation, selectSemester } = data;
 
     return (
-        <>
+        <Card
+            className="h-64 flex content-between justify-between"
+            radius="lg"
+            shadow="sm"
+        >
             <CourseCardForm
                 courseCode={courseInformation.courseCode}
                 selectSemester={selectSemester}
             />
             <CourseCard {...courseInformation} />
-        </>
+        </Card>
     );
 }
 

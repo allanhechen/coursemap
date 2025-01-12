@@ -120,7 +120,7 @@ export default function DashboardComponent({
 
                 let counter = 0;
                 const dropdownCourses = filledCourses.map((course) => {
-                    counter += 200;
+                    counter += 400;
                     return {
                         id: course.id,
                         data: {
@@ -192,9 +192,6 @@ export default function DashboardComponent({
                         proOptions={{ hideAttribution: true }}
                         onDragOver={onDragOver}
                         onDrop={onDrop}
-                        style={{
-                            backgroundColor: "grey",
-                        }}
                     />
                 </div>
             </div>

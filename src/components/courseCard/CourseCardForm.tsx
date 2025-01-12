@@ -1,6 +1,12 @@
 import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/courseSemesterContext";
 import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
-import { Combobox, Input, InputBase, useCombobox } from "@mantine/core";
+import {
+    CloseButton,
+    Combobox,
+    Input,
+    InputBase,
+    useCombobox,
+} from "@mantine/core";
 import { useContext } from "react";
 
 export default function CourseCardForm({
@@ -63,14 +69,29 @@ export default function CourseCardForm({
                     type="button"
                     pointer
                     onClick={() => combobox.toggleDropdown()}
-                    rightSection={<Combobox.Chevron />}
+                    rightSection={
+                        selection !== null ? (
+                            <CloseButton
+                                size="sm"
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() =>
+                                    selectSemester(courseCode, undefined)
+                                }
+                                aria-label="Clear value"
+                            />
+                        ) : (
+                            <Combobox.Chevron />
+                        )
+                    }
                 >
                     {selection ? (
                         `${semesterDict[selection].semesterYear.getFullYear()}${
                             semesterDict[selection].semesterTerm
                         } - ${semesterDict[selection].semesterName}`
                     ) : (
-                        <Input.Placeholder>Pick Value</Input.Placeholder>
+                        <Input.Placeholder>
+                            Course Not Included
+                        </Input.Placeholder>
                     )}
                 </InputBase>
             </Combobox.Target>
