@@ -1,32 +1,24 @@
-import { signIn, auth, signOut } from "@/lib/auth";
+import { signIn, auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function Page() {
     const session = await auth();
 
+    if (session) {
+        redirect("/dashboard/overview");
+    }
+
     console.log(session);
     return (
         <>
-            {session ? (
-                <>
-                    <p
-                        onClick={async () => {
-                            "use server";
-                            await signOut();
-                        }}
-                    >
-                        HI {session.user!.name!}
-                    </p>
-                </>
-            ) : (
-                <form
-                    action={async () => {
-                        "use server";
-                        await signIn("github");
-                    }}
-                >
-                    <button type="submit">Signin with GitHub</button>
-                </form>
-            )}
+            <form
+                action={async () => {
+                    "use server";
+                    await signIn("github");
+                }}
+            >
+                <button type="submit">Signin with GitHub</button>
+            </form>
         </>
     );
 }
