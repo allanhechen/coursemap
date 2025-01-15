@@ -4,10 +4,14 @@ services:
         environment:
             DEPLOYMENT_TYPE: ${DEPLOYMENT_TYPE:-docker}
             POSTGRES_URL: ${POSTGRES_URL:-postgresql://postgres:password@postgres:5432/postgres}
+            AUTH_URL: http://localhost:3000/api/auth
+            AUTH_TRUST_HOST: 1
         ports:
             - "3000:3000"
         depends_on:
             - pg_proxy
+        env_file:
+            - .env
     postgres:
         image: postgres:16.4
         environment:
@@ -16,10 +20,11 @@ services:
             - "54320:5432"
         volumes:
             - ./pgdata:/var/lib/postgresql/data
+        env_file:
+            - .env
     pg_proxy:
         image: ghcr.io/neondatabase/wsproxy:latest
         environment:
-            APPEND_PORT: ${APPEND_PORT:-}
             ALLOW_ADDR_REGEX: ".*"
             LOG_TRAFFIC: "true"
         ports:
