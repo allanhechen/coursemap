@@ -13,14 +13,18 @@ is stored within the pgdata folder, and your application is located at
 ```yaml
 services:
     coursemap:
-        image: ghcr.io/allanhechen/coursemap:latest
+        build: .
         environment:
             DEPLOYMENT_TYPE: ${DEPLOYMENT_TYPE:-docker}
             POSTGRES_URL: ${POSTGRES_URL:-postgresql://postgres:password@postgres:5432/postgres}
+            AUTH_URL: http://localhost:3000/api/auth
+            AUTH_TRUST_HOST: 1
         ports:
             - "3000:3000"
         depends_on:
             - pg_proxy
+        env_file:
+            - .env
     postgres:
         image: postgres:16.4
         environment:
@@ -29,10 +33,11 @@ services:
             - "54320:5432"
         volumes:
             - ./pgdata:/var/lib/postgresql/data
+        env_file:
+            - .env
     pg_proxy:
         image: ghcr.io/neondatabase/wsproxy:latest
         environment:
-            APPEND_PORT: ${APPEND_PORT:-}
             ALLOW_ADDR_REGEX: ".*"
             LOG_TRAFFIC: "true"
         ports:
@@ -41,13 +46,21 @@ services:
             - postgres
 ```
 
-Optionally, you can configure some additional parameters within a `.env` file for additional
-security measures, or to customize the database connection string.
+You must configure some additional parameters within a `.env` file for the authentication
+providers, along with optionally changing the connection string.
 
-```
+```bash
 DEPLOYMENT_TYPE=docker
 POSTGRES_PASSWORD=password
 POSTGRES_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
+
+# generate your own key by running "openssl rand -base64 32"
+AUTH_SECRET="your_secret_here"
+
+# add your own app with information from https://github.com/settings/applications/new
+# detailed instructions at https://authjs.dev/guides/configuring-github
+AUTH_GITHUB_ID="your_id_here"
+AUTH_GITHUB_SECRET="your_secret_here"
 ```
 
 To deploy, copy the files into the same folder and run the following command in the folder:
@@ -56,70 +69,32 @@ To deploy, copy the files into the same folder and run the following command in 
 docker compose up -d
 ```
 
-## Method Two: Locally
+## Method Two: Development Environment
 
-It is possible to deploy coursemap without a Docker container built around it. There is no
-benefit to doing so, especially since you still need to start Postgres and the `pg_proxy`
-service.
+1. Install [Docker](https://docs.docker.com/get-started/get-docker/)
 
-Regardless, the following steps will get you up and running.
+-   We will be using Docker for a local Postgres database, in addition to routing the database traffic through a proxy to emulate Vercel's serverless environment.
 
-1. Clone this repository
+2. Clone this repository
 
 ```sh
 git clone https://github.com/allanhechen/coursemap.git
 cd coursemap
 ```
 
-2.  Install npm dependencies
+3.  Install npm dependencies
 
 ```sh
 npm i
 ```
 
-3.  Build the app and copy dependencies
-
-```sh
-npm run build
-cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/
-cp .env.exmaple .env
-```
-
-4. Start the Docker services and the server
-
-```sh
-docker compose -f docker-compose.prod.yml up postgres -d && APPEND_PORT="postgres:5432" docker compose -f docker-compose.prod.yml up pg_proxy -d
-DEPLOYMENT_TYPE=local POSTGRES_PASSWORD="password" POSTGRES_URL="postgresql://postgres:${POSTGRES_PASSWORD}@localhost:54320/postgres" node .next/standalone/server.js
-```
-
-This method sets the `APPEND_PORT` environment variable to the `pg_proxy` container. It is
-not required for deploying within Docker itself, but is for deploying locally. This idea
-is reused in the following section with the `.env.development` file.
-
-## Method Three: Development Environment
-
-This section is similar to the one above, but we will not compile Next.js into binaries
-and instead run the development script in `package.json`. For completeness, the steps are
-listed here below:
-
-1. Clone this repository
-
-```sh
-git clone https://github.com/allanhechen/coursemap.git
-cd coursemap
-```
-
-2.  Install npm dependencies
-
-```sh
-npm i
-```
-
-3. Run the development server
+4. Run the development server
 
 ```sh
 npm run dev
 ```
+
+5. Head to [port 3000](http://localhost:3000)
 
 ## The Plus One: Vercel Deployment
 
