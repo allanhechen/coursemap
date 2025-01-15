@@ -32,7 +32,7 @@ Some features to be implemented include:
 Many of the features mentioned above are still in progress!
 ```
 
-To deploy Coursemap, you can simply use the following Docker compose file and optionally a .env file:
+To deploy Coursemap, you can simply use the following Docker compose file and an .env file:
 
 ```yaml
 services:
@@ -41,10 +41,14 @@ services:
         environment:
             DEPLOYMENT_TYPE: ${DEPLOYMENT_TYPE:-docker}
             POSTGRES_URL: ${POSTGRES_URL:-postgresql://postgres:password@postgres:5432/postgres}
+            AUTH_URL: http://localhost:3000/api/auth
+            AUTH_TRUST_HOST: 1
         ports:
             - "3000:3000"
         depends_on:
             - pg_proxy
+        env_file:
+            - .env
     postgres:
         image: postgres:16.4
         environment:
@@ -53,10 +57,11 @@ services:
             - "54320:5432"
         volumes:
             - ./pgdata:/var/lib/postgresql/data
+        env_file:
+            - .env
     pg_proxy:
         image: ghcr.io/neondatabase/wsproxy:latest
         environment:
-            APPEND_PORT: ${APPEND_PORT:-}
             ALLOW_ADDR_REGEX: ".*"
             LOG_TRAFFIC: "true"
         ports:
@@ -65,13 +70,21 @@ services:
             - postgres
 ```
 
-```
+```bash
 DEPLOYMENT_TYPE=docker
 POSTGRES_PASSWORD=password
 POSTGRES_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
+
+# generate your own key by running "openssl rand -base64 32"
+AUTH_SECRET="your_secret_here"
+
+# add your own app with information from https://github.com/settings/applications/new
+# detailed instructions at https://authjs.dev/guides/configuring-github
+AUTH_GITHUB_ID="your_id_here"
+AUTH_GITHUB_SECRET="your_secret_here"
 ```
 
-## Building From Source
+## Configuring the development environment
 
 1. Install [Docker](https://docs.docker.com/get-started/get-docker/)
 
@@ -90,22 +103,13 @@ cd coursemap
 npm i
 ```
 
-4.  Build the app and copy dependencies
+4. Run the development server
 
 ```sh
-npm run build
-cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/
-cp .env.exmaple .env
+npm run dev
 ```
 
-5. Start the Docker services and the server!
-
-```sh
-docker compose -f docker-compose.prod.yml up postgres -d && APPEND_PORT="postgres:5432" docker compose -f docker-compose.prod.yml up pg_proxy -d
-DEPLOYMENT_TYPE=local POSTGRES_PASSWORD="password" POSTGRES_URL="postgresql://postgres:${POSTGRES_PASSWORD}@localhost:54320/postgres" node .next/standalone/server.js
-```
-
-6. Head to [port 3000](http://localhost:3000)
+5. Head to [port 3000](http://localhost:3000)
 
 ## Contributing
 

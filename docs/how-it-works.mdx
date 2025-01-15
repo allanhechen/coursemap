@@ -8,7 +8,7 @@ library interacts with Postgres, skip to [Deployment Options](/docs/instructions
 for actual instructions.
 
 1. In the `docker` mode, it looks for a local address named `pg_proxy` to send the traffic to.
-2. In the `development` and `local` modes, it sends the traffic to `localhost:54330`, which is
+2. In the `development` mode, it sends the traffic to `localhost:54330`, which is
    the port exposed for `pg_proxy` on your machine.
 3. For any other values, default behavior is retained, which means that the database
    library searches for environment variables to Vercel's databases.

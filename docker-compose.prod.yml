@@ -1,6 +1,6 @@
 services:
     coursemap:
-        build: .
+        image: ghcr.io/allanhechen/coursemap:latest
         environment:
             DEPLOYMENT_TYPE: ${DEPLOYMENT_TYPE:-docker}
             POSTGRES_URL: ${POSTGRES_URL:-postgresql://postgres:password@postgres:5432/postgres}
