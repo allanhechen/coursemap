@@ -13,8 +13,8 @@ import {
     SemesterWrapper,
 } from "@/types/semester";
 import { CardWrapper, CourseInformation } from "@/types/courseCard";
-import { getAllSemesters } from "./actions/semester";
-import { getAllCourseSemesters } from "@/lib/actions/course";
+import { getAllSemesters } from "../actions/semester";
+import { getAllCourseSemesters } from "@/actions/course";
 import { SemesterPositionContext } from "@/app/(main)/dashboard/overview/semesterPositionContext";
 import { ChipVariant } from "@/types/chipVariant";
 

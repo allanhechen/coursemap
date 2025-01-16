@@ -16,7 +16,7 @@ import { IconEdit } from "@tabler/icons-react";
 import { useSemesterFormContext } from "@/components/semester/semesterFormContext";
 
 import { useUpdateNodes } from "@/lib/placement";
-import { putSemester, updateSemester } from "@/lib/actions/semester";
+import { putSemester, updateSemester } from "@/actions/semester";
 import { SemesterDict, SemesterTerm } from "@/types/semester";
 import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
 import "@/components/semester/SemesterForm.css";

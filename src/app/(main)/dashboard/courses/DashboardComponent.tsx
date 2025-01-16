@@ -16,10 +16,7 @@ import {
 } from "@/lib/tree";
 import CourseSearch from "@/components/courseSearch/CourseSearch";
 import { DnDContext } from "@/components/dndContext";
-import {
-    getAllCourseSemesters,
-    getCourseInformation,
-} from "@/lib/actions/course";
+import { getAllCourseSemesters, getCourseInformation } from "@/actions/course";
 import {
     CourseToSemesterIdDict,
     DropdownCardWrapper,

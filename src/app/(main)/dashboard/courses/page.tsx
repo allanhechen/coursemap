@@ -5,8 +5,8 @@ import { redirect } from "next/navigation";
 
 import DashboardWrapper from "@/app/(main)/dashboard/courses/DashboardWrapper";
 import { auth } from "@/lib/auth";
-import { getPrerequsuites } from "@/lib/actions/course";
-import { getAllSemesters } from "@/lib/actions/semester";
+import { getPrerequsuites } from "@/actions/course";
+import { getAllSemesters } from "@/actions/semester";
 import { SemesterInformation } from "@/types/semester";
 
 export default async function Page() {

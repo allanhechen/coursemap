@@ -9,7 +9,7 @@ import Chip from "@/components/chip/Chip";
 import { ChipVariant } from "@/types/chipVariant";
 import SearchResult from "@/components/courseSearch/SearchResult";
 import { CourseInformation } from "@/types/courseCard";
-import { searchCourses } from "@/lib/actions/course";
+import { searchCourses } from "@/actions/course";
 
 export default function CourseSearch() {
     const [searchQuery, setSearchQuery] = useState("");
