@@ -65,6 +65,8 @@ async function createTables(client: PoolClient) {
         CREATE TABLE IF NOT EXISTS program (
             institutionid INT REFERENCES institution(institutionid),
             programname VARCHAR(64),
+            year INT,
+            faculty VARCHAR(64),
             PRIMARY KEY (institutionid, programname)
         );
     `);
@@ -86,17 +88,8 @@ async function createTables(client: PoolClient) {
             faculty VARCHAR(64) NOT NULL,
             coursecode VARCHAR(10) NOT NULL,
             coursetitle VARCHAR(64) NOT NULL,
-            coursedescription VARCHAR(1024),
-            useradded BOOLEAN
-        );
-    `);
-
-    await client.query(`
-        CREATE TABLE IF NOT EXISTS courseprerequisite (
-            courseid INT REFERENCES course(courseid),
-            prerequisite INT REFERENCES course(courseid),
-            groupid INT NOT NULL,
-            PRIMARY KEY (courseid, prerequisite)
+            coursedescription VARCHAR(2048),
+            courseprerequisites VARCHAR(256)
         );
     `);
 
@@ -149,6 +142,7 @@ async function createTables(client: PoolClient) {
     // TODO: insert userid into this instead of semesterid -> technically breaks 3nf but we need to uniquely identify courseid within semesters
     await client.query(`
         CREATE TABLE IF NOT EXISTS coursesemester (
+            id INT,
             semesterid INT REFERENCES semester(semesterid),
             courseid INT REFERENCES course(courseid),
             PRIMARY KEY (semesterid, courseid)
@@ -161,6 +155,7 @@ async function createTables(client: PoolClient) {
             programname VARCHAR(64),
             courseid INT,
             recommendedsemester INT NOT NULL,
+            requirementyear INT,
             PRIMARY KEY (institutionid, programname, courseid),
             FOREIGN KEY (institutionid, programname) REFERENCES program(institutionid, programname)
         );

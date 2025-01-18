@@ -6,9 +6,7 @@ import SemesterForm from "@/components/semester/SemesterForm";
 import ThemeSwitcher from "@/components/header/ThemeSwitcher";
 import UserMenu from "@/components/header/UserMenu";
 
-import { User } from "@/types/user";
-
-export default function NavBar(props: User) {
+export default function NavBar() {
     return (
         <Paper
             shadow="sm"
@@ -24,7 +22,7 @@ export default function NavBar(props: User) {
             <Group gap="xs" className="items-center">
                 <SemesterForm />
                 <ThemeSwitcher />
-                <UserMenu {...props} />
+                <UserMenu />
             </Group>
         </Paper>
     );

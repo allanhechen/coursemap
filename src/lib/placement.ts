@@ -13,10 +13,11 @@ import {
     SemesterWrapper,
 } from "@/types/semester";
 import { CardWrapper, CourseInformation } from "@/types/courseCard";
-import { getAllSemesters } from "../actions/semester";
-import { getAllCourseSemesters } from "@/actions/course";
+import { getSemesters } from "@/actions/semester";
+import { getCourseSemesters } from "@/actions/course";
 import { SemesterPositionContext } from "@/app/(main)/dashboard/overview/semesterPositionContext";
 import { ChipVariant } from "@/types/chipVariant";
+import { Session } from "next-auth";
 
 const termToChipVariant = {
     [SemesterTerm.FA]: ChipVariant.FALL,
@@ -348,32 +349,41 @@ export const useUpdateNodes = () => {
     }
     const [, setPlacements] = contextItem;
 
-    const updateNodes = useCallback(async () => {
-        // these are already sorted so we don't need to sort them again
-        const semesters = await getAllSemesters();
-        const courseSemesters = await getAllCourseSemesters();
+    const updateNodes = useCallback(
+        async (session: Session) => {
+            const { userId, institutionId, programName } = session.user;
 
-        // we need to group all the courseSemesters by semesters and convert them into nodes
-        const semesterGroupDict: Dictionary<SemesterGroup> = {};
-        semesters.forEach((semester) => {
-            const key = semester.semesterId.toString();
-            semesterGroupDict[key] = {
-                semester: { data: semester },
-                courses: [],
-            };
-        });
+            // these are already sorted so we don't need to sort them again
+            const semesters = await getSemesters(
+                userId,
+                institutionId,
+                programName
+            );
+            const courseSemesters = await getCourseSemesters(userId);
 
-        courseSemesters.forEach(({ semesterId, course }) => {
-            const key = semesterId.toString();
-            const { courses } = semesterGroupDict[key];
+            // we need to group all the courseSemesters by semesters and convert them into nodes
+            const semesterGroupDict: Dictionary<SemesterGroup> = {};
+            semesters.forEach((semester) => {
+                const key = semester.semesterId.toString();
+                semesterGroupDict[key] = {
+                    semester: { data: semester },
+                    courses: [],
+                };
+            });
 
-            courses.push({ data: course });
-        });
+            courseSemesters.forEach(({ semesterId, course }) => {
+                const key = semesterId.toString();
+                const { courses } = semesterGroupDict[key];
 
-        const nodes = placeNodes(semesterGroupDict, setPlacements);
-        setNodes(nodes);
-        return nodes.length;
-    }, [setNodes, setPlacements]);
+                courses.push({ data: course });
+            });
+
+            const nodes = placeNodes(semesterGroupDict, setPlacements);
+            setNodes(nodes);
+            return nodes.length;
+        },
+        [setNodes, setPlacements]
+    );
 
     return { updateNodes };
 };

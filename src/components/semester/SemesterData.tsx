@@ -1,6 +1,13 @@
 import SemesterForm from "@/components/semester/SemesterForm";
-import { SemesterInformation } from "@/types/semester";
+import { SemesterTerm } from "@/types/semester";
 
-export default function SemesterData(props: SemesterInformation) {
+interface SemesterDataProps {
+    semesterId: number;
+    semesterName: string;
+    semesterYear: Date;
+    semesterTerm: SemesterTerm;
+}
+
+export default function SemesterData(props: SemesterDataProps) {
     return <SemesterForm {...props} />;
 }

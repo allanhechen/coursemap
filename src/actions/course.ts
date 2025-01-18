@@ -1,12 +1,12 @@
 "use server";
 
 import { ChipVariant } from "@/types/chipVariant";
-import {
-    CourseInformation,
-    SemesterCourseInformation,
-} from "@/types/courseCard";
+import { CourseInformation } from "@/types/courseCard";
 
-export async function getPrerequsuites(): Promise<{ [key: string]: string }> {
+export async function getPrerequsuites(
+    institutionId: number // eslint-disable-line
+): Promise<{ [key: string]: string }> {
+    // gets all prerequisites available for this institution
     console.log(
         "Returning all prerequisites (should probably check user's program"
     );
@@ -49,6 +49,7 @@ export async function getCourseInformation(
     console.log(`returning course information for ${courses}`);
     return {
         "BLG 143": {
+            courseId: 1,
             courseCode: "BLG 143",
             courseName: "Biology I",
             faculty: "Biology",
@@ -57,246 +58,12 @@ export async function getCourseInformation(
             postrequisites: [],
             antirequisites: [],
         },
-        "CPS 109": {
-            courseCode: "CPS 109",
-            courseName: "Computer Science I",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["CPS 209"],
-            antirequisites: ["PHL 201"],
-        },
-        "CPS 106": {
-            courseCode: "CPS 106",
-            courseName: "Programming Fundamentals",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["CPS 501"],
-            antirequisites: [],
-        },
-        "CPS 118": {
-            courseCode: "CPS 118",
-            courseName: "Introduction to Computer Science",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["CPS 501"],
-            antirequisites: [],
-        },
-        "CPS 125": {
-            courseCode: "CPS 125",
-            courseName: "Digital Computation and Programming",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["CPS 501"],
-            antirequisites: [],
-        },
-        "CHY 102": {
-            courseCode: "CHY 102",
-            courseName: "General Chemistry",
-            faculty: "Chemistry",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["COE 318"],
-            antirequisites: [],
-        },
-        "CPS 188": {
-            courseCode: "CPS 188",
-            courseName: "Computer Organization",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["COE 318"],
-            antirequisites: [],
-        },
-        "ELE 202": {
-            courseCode: "ELE 202",
-            courseName: "Electric Circuits",
-            faculty: "Electrical Engineering",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["COE 318"],
-            antirequisites: [],
-        },
-        "PCS 211": {
-            courseCode: "PCS 211",
-            courseName: "Physics I",
-            faculty: "Physics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["COE 318"],
-            antirequisites: [],
-        },
-        "MTH 131": {
-            courseCode: "MTH 131",
-            courseName: "Calculus I",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["MTH 231", "MTH 380"],
-            antirequisites: [],
-        },
-        "MTH 207": {
-            courseCode: "MTH 207",
-            courseName: "Calculus II",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["MTH 310", "MTH 380"],
-            antirequisites: [],
-        },
-        "MTH 140": {
-            courseCode: "MTH 140",
-            courseName: "Discrete Mathematics",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["MTH 240"],
-            antirequisites: [],
-        },
-        "MTH 304": {
-            courseCode: "MTH 304",
-            courseName: "Advanced Mathematics",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{MTH 310} || {MTH 240} || {MTH 231}",
-            postrequisites: [],
-            antirequisites: [],
-        },
-        "MTH 310": {
-            courseCode: "MTH 310",
-            courseName: "Advanced Calculus",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{MTH 207}",
-            postrequisites: ["MTH 304"],
-            antirequisites: [],
-        },
-        "MTH 240": {
-            courseCode: "MTH 240",
-            courseName: "Linear Algebra",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{MTH 140}",
-            postrequisites: ["COE 318", "MTH 304"],
-            antirequisites: [],
-        },
-        "MTH 380": {
-            courseCode: "MTH 380",
-            courseName: "Probability and Statistics",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{MTH 131} || {MTH 207}",
-            postrequisites: ["CPS 521"],
-            antirequisites: [],
-        },
-        "MTH 231": {
-            courseCode: "MTH 231",
-            courseName: "Multivariable Calculus",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{MTH 131}",
-            postrequisites: ["MTH 304"],
-            antirequisites: [],
-        },
-        "COE 428": {
-            courseCode: "COE 428",
-            courseName: "Computer Organization",
-            faculty: "Computer Engineering",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{COE 318}",
-            postrequisites: ["CPS 510"],
-            antirequisites: [],
-        },
-        "COE 528": {
-            courseCode: "COE 528",
-            courseName: "Advanced Computer Organization",
-            faculty: "Computer Engineering",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{COE 318}",
-            postrequisites: ["CPS 510"],
-            antirequisites: [],
-        },
-        "COE 318": {
-            courseCode: "COE 318",
-            courseName: "Introduction to Engineering Design",
-            faculty: "Computer Engineering",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites:
-                "{CHY 102} && {CPS 188} && {ELE 202} && {MTH 240} && {PCS 211}",
-            postrequisites: ["COE 428", "COE 528"],
-            antirequisites: [],
-        },
-        "CPS 209": {
-            courseCode: "CPS 209",
-            courseName: "Computer Science II",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{CPS 109}",
-            postrequisites: ["CPS 305", "CPS 393", "CPS 521"],
-            antirequisites: [],
-        },
-        "CPS 305": {
-            courseCode: "CPS 305",
-            courseName: "Data Structures",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{CPS 209}",
-            postrequisites: ["CPS 590", "CPS 510"],
-            antirequisites: [],
-        },
-        "CPS 393": {
-            courseCode: "CPS 393",
-            courseName: "Operating Systems",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{CPS 209}",
-            postrequisites: ["CPS 590"],
-            antirequisites: [],
-        },
-        "CPS 521": {
-            courseCode: "CPS 521",
-            courseName: "Artificial Intelligence",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{CPS 209} && ( {MTH 380} || {MTH 304} )",
-            postrequisites: [],
-            antirequisites: [],
-        },
-        "CPS 590": {
-            courseCode: "CPS 590",
-            courseName: "Advanced Programming Techniques",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{CPS 305} && {CPS 393}",
-            postrequisites: [],
-            antirequisites: [],
-        },
-        "CPS 510": {
-            courseCode: "CPS 510",
-            courseName: "Advanced Systems Programming",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{CPS 305} || ( {COE 428} && {COE 528} )",
-            postrequisites: [],
-            antirequisites: [],
-        },
-        "CPS 501": {
-            courseCode: "CPS 501",
-            courseName: "Introduction to Bioinformatics",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites:
-                "( {CPS 106} || {CPS 109} || {CPS 118} || {CPS 125} ) && {BLG 143}",
-            postrequisites: [],
-            antirequisites: [],
-        },
     };
 }
 
 export async function searchCourses(
+    institutionId: number,
+    programName: string,
     searchQuery: string,
     includeFall: boolean,
     includeWinter: boolean,
@@ -311,266 +78,27 @@ export async function searchCourses(
     );
     return [
         {
-            courseCode: "BLG 143",
-            courseName: "Biology I",
-            faculty: "Biology",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: [],
-            antirequisites: [],
-        },
-        {
-            courseCode: "CPS 109",
-            courseName: "Computer Science I",
+            courseId: 1,
+            courseCode: "CPS 616",
+            courseName: "Algorithms",
             faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
+            chips: [ChipVariant.SPRING],
             prerequisites: "",
-            postrequisites: ["CPS 209"],
-            antirequisites: ["PHL 201"],
-        },
-        {
-            courseCode: "CPS 106",
-            courseName: "Programming Fundamentals",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["CPS 501"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "CPS 118",
-            courseName: "Introduction to Computer Science",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["CPS 501"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "CPS 125",
-            courseName: "Digital Computation and Programming",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["CPS 501"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "CHY 102",
-            courseName: "General Chemistry",
-            faculty: "Chemistry",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["COE 318"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "CPS 188",
-            courseName: "Computer Organization",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["COE 318"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "ELE 202",
-            courseName: "Electric Circuits",
-            faculty: "Electrical Engineering",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["COE 318"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "PCS 211",
-            courseName: "Physics I",
-            faculty: "Physics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["COE 318"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "MTH 131",
-            courseName: "Calculus I",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["MTH 231", "MTH 380"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "MTH 207",
-            courseName: "Calculus II",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["MTH 310", "MTH 380"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "MTH 140",
-            courseName: "Discrete Mathematics",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "",
-            postrequisites: ["MTH 240"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "MTH 304",
-            courseName: "Advanced Mathematics",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{MTH 310} || {MTH 240} || {MTH 231}",
-            postrequisites: [],
-            antirequisites: [],
-        },
-        {
-            courseCode: "MTH 310",
-            courseName: "Advanced Calculus",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{MTH 207}",
-            postrequisites: ["MTH 304"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "MTH 240",
-            courseName: "Linear Algebra",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{MTH 140}",
-            postrequisites: ["COE 318", "MTH 304"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "MTH 380",
-            courseName: "Probability and Statistics",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{MTH 131} || {MTH 207}",
-            postrequisites: ["CPS 521"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "MTH 231",
-            courseName: "Multivariable Calculus",
-            faculty: "Mathematics",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{MTH 131}",
-            postrequisites: ["MTH 304"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "COE 428",
-            courseName: "Computer Organization",
-            faculty: "Computer Engineering",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{COE 318}",
-            postrequisites: ["CPS 510"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "COE 528",
-            courseName: "Advanced Computer Organization",
-            faculty: "Computer Engineering",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{COE 318}",
-            postrequisites: ["CPS 510"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "COE 318",
-            courseName: "Introduction to Engineering Design",
-            faculty: "Computer Engineering",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites:
-                "{CHY 102} && {CPS 188} && {ELE 202} && {MTH 240} && {PCS 211}",
-            postrequisites: ["COE 428", "COE 528"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "CPS 209",
-            courseName: "Computer Science II",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{CPS 109}",
-            postrequisites: ["CPS 305", "CPS 393", "CPS 521"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "CPS 305",
-            courseName: "Data Structures",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{CPS 209}",
-            postrequisites: ["CPS 590", "CPS 510"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "CPS 393",
-            courseName: "Operating Systems",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{CPS 209}",
-            postrequisites: ["CPS 590"],
-            antirequisites: [],
-        },
-        {
-            courseCode: "CPS 521",
-            courseName: "Artificial Intelligence",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{CPS 209} && ( {MTH 380} || {MTH 304} )",
-            postrequisites: [],
-            antirequisites: [],
-        },
-        {
-            courseCode: "CPS 590",
-            courseName: "Advanced Programming Techniques",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{CPS 305} && {CPS 393}",
-            postrequisites: [],
-            antirequisites: [],
-        },
-        {
-            courseCode: "CPS 510",
-            courseName: "Advanced Systems Programming",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites: "{CPS 305} || ( {COE 428} && {COE 528} )",
-            postrequisites: [],
-            antirequisites: [],
-        },
-        {
-            courseCode: "CPS 501",
-            courseName: "Introduction to Bioinformatics",
-            faculty: "Computer Science",
-            chips: [ChipVariant.FALL, ChipVariant.REQUIRED],
-            prerequisites:
-                "( {CPS 106} || {CPS 109} || {CPS 118} || {CPS 125} ) && {BLG 143}",
             postrequisites: [],
             antirequisites: [],
         },
     ];
 }
 
-export async function getAllCourseSemesters(): Promise<
-    SemesterCourseInformation[]
-> {
-    // validate semeseter name is string of correct length, semester year is a valid year, and semseter term is in the four codes
-    // get user, program from auth system
-    // ensure that semester does not exist with this combination
-    // insert semester
-    // return semester id
-    console.log(`Getting all courses and their related semesters`);
+export async function getCourseSemesters(
+    userId: number // eslint-disable-line
+): Promise<{ semesterId: number; course: CourseInformation }[]> {
+    // put course with courseId into semester with semesterId
     return [
         {
             semesterId: 1,
             course: {
+                courseId: 1,
                 courseCode: "CPS 706",
                 courseName: "Computer Networks",
                 faculty: "Computer Science",
@@ -587,29 +115,19 @@ export async function getAllCourseSemesters(): Promise<
                 antirequisites: ["CPS 109"],
             },
         },
-        {
-            semesterId: 1,
-            course: {
-                courseCode: "CPS 109",
-                courseName: "Computer Science I",
-                faculty: "Computer Science",
-                chips: [ChipVariant.FALL],
-                prerequisites: "",
-                postrequisites: [],
-                antirequisites: [],
-            },
-        },
-        {
-            semesterId: 2,
-            course: {
-                courseCode: "CPS 616",
-                courseName: "Algorithms",
-                faculty: "Computer Science",
-                chips: [ChipVariant.SPRING],
-                prerequisites: "",
-                postrequisites: [],
-                antirequisites: [],
-            },
-        },
     ];
+}
+
+export async function updateCourseSemester(
+    semesterId: number, // eslint-disable-line
+    courseId: number // eslint-disable-line
+): Promise<void> {
+    // put course with courseId into semester with semesterId
+}
+
+export async function deleteCourseSemester(
+    semesterId: number, // eslint-disable-line
+    courseId: number // eslint-disable-line
+): Promise<void> {
+    // put course with courseId into semester with semesterId
 }

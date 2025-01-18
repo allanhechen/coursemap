@@ -45,6 +45,7 @@ export default function SearchResult({
                 prerequisites={card.prerequisites}
                 postrequisites={card.postrequisites}
                 antirequisites={card.antirequisites}
+                courseId={card.courseId}
             />
         );
     });

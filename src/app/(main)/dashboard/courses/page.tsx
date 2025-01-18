@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import DashboardWrapper from "@/app/(main)/dashboard/courses/DashboardWrapper";
 import { auth } from "@/lib/auth";
 import { getPrerequsuites } from "@/actions/course";
-import { getAllSemesters } from "@/actions/semester";
+import { getSemesters } from "@/actions/semester";
 import { SemesterInformation } from "@/types/semester";
 
 export default async function Page() {
@@ -14,9 +14,14 @@ export default async function Page() {
     if (!session) {
         redirect("/login");
     }
+    const { userId, institutionId, programName } = session.user;
 
-    const prerequisites = await getPrerequsuites();
-    const semesterInformation = await getAllSemesters();
+    const prerequisites = await getPrerequsuites(institutionId!);
+    const semesterInformation = await getSemesters(
+        userId,
+        institutionId,
+        programName
+    );
     const semesterObject: {
         [semesterId: number]: SemesterInformation;
     } = {};
@@ -27,8 +32,7 @@ export default async function Page() {
     return (
         <ReactFlowProvider>
             <DashboardWrapper
-                displayName={session.user!.name!}
-                userPhoto={session.user!.image!}
+                session={session}
                 prerequisites={prerequisites}
                 allSemesters={semesterObject}
             />

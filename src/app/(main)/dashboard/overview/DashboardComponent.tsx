@@ -25,10 +25,10 @@ import {
     useScrollHandler,
 } from "@/lib/placement";
 import "@/app/(main)/dashboard/overview/DashboardComponent.css";
-import { User } from "@/types/user";
 import CourseSearch from "@/components/courseSearch/CourseSearch";
 import { DnDContext } from "@/components/dndContext";
 import { CardWrapper } from "@/types/courseCard";
+import { SessionContext } from "@/components/sessionContext";
 
 // ipmlementation notes:
 // 1. pan on drag false -> can't move the viewport with mouse
@@ -45,7 +45,7 @@ const nodeTypes = {
     searchNode: CourseSearch,
 };
 
-export default function DashboardComponent(props: User) {
+export default function DashboardComponent() {
     const [lastX, setLastX] = useState(0);
     const [nodes, setNodes] = useState<Node[]>([]);
     const [nodesLength, setNodesLength] = useState(0);
@@ -58,8 +58,9 @@ export default function DashboardComponent(props: User) {
     const { onViewportMove } = useOnViewportMove();
     const { getViewport, setViewport, getNodes } = useReactFlow();
 
-    const contextItem = useContext(DnDContext);
+    const session = useContext(SessionContext)!;
 
+    const contextItem = useContext(DnDContext);
     if (!contextItem) {
         throw new Error("DashboardComponent must be used in a DnDContext");
     }
@@ -73,13 +74,13 @@ export default function DashboardComponent(props: User) {
     // get initial node state
     useEffect(() => {
         const loadData = async () => {
-            const countNodes = await updateNodes();
+            const countNodes = await updateNodes(session);
             setNodesLength(countNodes);
         };
         loadData();
         // I am unsure why my viewport is being set to something else, hacky way to fix this
         setViewport({ x: 0, y: 0, zoom: 1 });
-    }, [updateNodes, setViewport]);
+    }, [updateNodes, setViewport, session]);
 
     const onNodesChange = useCallback((changes: NodeChange[]) => {
         setNodes((nds) => applyNodeChanges(changes, nds));
@@ -181,7 +182,7 @@ export default function DashboardComponent(props: User) {
 
     return (
         <>
-            <NavBar {...props} />
+            <NavBar />
             <div
                 style={{
                     height: "100vh",

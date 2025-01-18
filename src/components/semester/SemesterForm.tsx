@@ -16,10 +16,12 @@ import { IconEdit } from "@tabler/icons-react";
 import { useSemesterFormContext } from "@/components/semester/semesterFormContext";
 
 import { useUpdateNodes } from "@/lib/placement";
-import { putSemester, updateSemester } from "@/actions/semester";
+import { createSemester, updateSemester } from "@/actions/semester";
 import { SemesterDict, SemesterTerm } from "@/types/semester";
 import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
 import "@/components/semester/SemesterForm.css";
+import { Session } from "next-auth";
+import { SessionContext } from "@/components/sessionContext";
 
 // semseterForm will be called in two places
 // the first is the create page on a semester, where all fields will initially be fileld in
@@ -43,7 +45,9 @@ export default function SemesterForm({
     const [opened, { open, close }] = useDisclosure(false);
     const [visible, setVisible] = useState(false);
 
-    let updateNodes: () => Promise<number> | undefined;
+    const session = useContext(SessionContext)!;
+    const { userId, institutionId, programName } = session.user;
+    let updateNodes: (session: Session) => Promise<number>;
     let semesterDict: SemesterDict | undefined;
     let setSemesterDict:
         | React.Dispatch<React.SetStateAction<SemesterDict>>
@@ -102,7 +106,10 @@ export default function SemesterForm({
                                 values.semesterTerm
                             );
                         } else {
-                            semesterId = await putSemester(
+                            semesterId = await createSemester(
+                                userId,
+                                institutionId,
+                                programName,
                                 values.semesterName,
                                 values.semesterYear,
                                 values.semesterTerm
@@ -122,7 +129,7 @@ export default function SemesterForm({
                         }
 
                         if (updateNodes) {
-                            updateNodes();
+                            updateNodes(session);
                         }
                     })}
                 >

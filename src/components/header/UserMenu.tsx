@@ -3,7 +3,6 @@
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 
-import { User } from "@/types/user";
 import { Avatar, Text, Group, Menu, rem } from "@mantine/core";
 import {
     IconChevronDown,
@@ -13,14 +12,16 @@ import {
     IconMenu,
     IconSettings,
 } from "@tabler/icons-react";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { SessionContext } from "@/components/sessionContext";
 
 // why does menuItems render twice?
 // it is undefined the second time, is it becaus react is automatically doing "use-scrict"?
 
-export default function UserMenu(props: User) {
+export default function UserMenu() {
+    const session = useContext(SessionContext)!;
+    const { image, name } = session.user;
     const [menuOpened, setMenuOpened] = useState(false);
-    const displayName = props.displayName;
 
     return (
         <div className="cursor-pointer">
@@ -32,12 +33,9 @@ export default function UserMenu(props: User) {
             >
                 <Menu.Target>
                     <Group>
-                        <Avatar
-                            src={props.userPhoto}
-                            alt={`${displayName}'s avatar'`}
-                        />
+                        <Avatar src={image} alt={`${name}'s avatar'`} />
                         <Text className="hidden md:block" size="md">
-                            {displayName}
+                            {name}
                         </Text>
                         {menuOpened ? (
                             <IconChevronDown size="1rem" />

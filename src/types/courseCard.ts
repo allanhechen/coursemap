@@ -45,6 +45,7 @@ export interface CourseDropdownInformation {
 }
 
 export interface CourseInformation {
+    courseId: number;
     courseCode: string;
     courseName: string;
     faculty: string;
@@ -55,9 +56,4 @@ export interface CourseInformation {
     termWarning?: boolean;
     requisiteWarning?: boolean;
     fresh?: boolean;
-}
-
-export interface SemesterCourseInformation {
-    semesterId: number;
-    course: CourseInformation;
 }

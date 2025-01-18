@@ -1,4 +1,7 @@
 import { neonConfig } from "@neondatabase/serverless";
+import ws from "ws";
+
+neonConfig.webSocketConstructor = ws;
 
 // Gathered from https://github.com/vercel/storage/issues/123#issuecomment-2326100123
 // Connect to postgres through a proxy when developing locally or deploying to Docker

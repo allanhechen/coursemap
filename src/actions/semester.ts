@@ -1,24 +1,51 @@
 "use server";
 
+import { sql } from "@/lib/db";
+
 import { SemesterInformation, SemesterTerm } from "@/types/semester";
 
-export async function putSemester(
+export async function createSemester(
+    userId: number,
+    institutionId: number,
+    programName: string,
     semesterName: string,
     semesterYear: Date,
     semesterTerm: SemesterTerm
 ): Promise<number> {
-    // validate semeseter name is string of correct length, semester year is a valid year, and semseter term is in the four codes
-    // get user, program from auth system
-    // ensure that semester does not exist with this combination
-    // insert semester
-    // return semester id
-    console.log(
-        `Create a new semester with ${semesterName}, ${semesterYear}, and ${semesterTerm}`
+    const result = await sql.query<{ semesterid: number }>(
+        `
+        INSERT INTO semester(
+            userid,
+            programname,
+            institutionid,
+            semestername,
+            semesteryear,
+            semesterterm
+        ) VALUES (
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?
+        ) RETURNING semesterid`,
+        [
+            userId,
+            institutionId,
+            programName,
+            semesterName,
+            semesterYear.getFullYear(),
+            semesterTerm,
+        ]
     );
-    return 3;
+    return result.rows[0].semesterid;
 }
 
-export async function getAllSemesters(): Promise<SemesterInformation[]> {
+export async function getSemesters(
+    userId: number, // eslint-disable-line
+    institutionId: number, // eslint-disable-line
+    programName: string // eslint-disable-line
+): Promise<SemesterInformation[]> {
     // get user, program from auth system
     // return all semesters belonging to the user in this program
     console.log(`We are reading semester information`);
