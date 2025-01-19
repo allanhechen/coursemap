@@ -44,15 +44,24 @@ CREATE TABLE IF NOT EXISTS program (
     programname VARCHAR(64),
     startingyear INT,
     faculty VARCHAR(64),
+<<<<<<< HEAD
     PRIMARY KEY (institutionid, programname, startingyear)
+=======
+    PRIMARY KEY (institutionid, programname)
+>>>>>>> c34fa89 (Add initialization scripts for local Postgres databases)
 );
 CREATE TABLE IF NOT EXISTS userprogram (
     userId INT REFERENCES users(id),
     institutionid INT,
     programname VARCHAR(64),
+<<<<<<< HEAD
     startingyear INT NOT NULL,
     active BOOLEAN,
     FOREIGN KEY (institutionid, programname, startingyear) REFERENCES program(institutionid, programname, startingyear),
+=======
+    active BOOLEAN,
+    FOREIGN KEY (institutionid, programname) REFERENCES program(institutionid, programname),
+>>>>>>> c34fa89 (Add initialization scripts for local Postgres databases)
     PRIMARY KEY (userId, institutionid, programname)
 );
 CREATE TABLE IF NOT EXISTS course (
@@ -62,7 +71,11 @@ CREATE TABLE IF NOT EXISTS course (
     coursecode VARCHAR(10) NOT NULL,
     coursetitle VARCHAR(64) NOT NULL,
     coursedescription VARCHAR(2048),
+<<<<<<< HEAD
     courseprerequisites VARCHAR(512)
+=======
+    courseprerequisites VARCHAR(256)
+>>>>>>> c34fa89 (Add initialization scripts for local Postgres databases)
 );
 CREATE TABLE IF NOT EXISTS coursepostrequisite (
     courseid INT REFERENCES course(courseid),
@@ -74,6 +87,15 @@ CREATE TABLE IF NOT EXISTS courseantirequisite (
     antirequisite INT REFERENCES course(courseid),
     PRIMARY KEY (courseid, antirequisite)
 );
+<<<<<<< HEAD
+=======
+CREATE TABLE IF NOT EXISTS coursehistory (
+    courseid INT REFERENCES course(courseid),
+    pastyear INT,
+    pastterm CHAR(2),
+    PRIMARY KEY (courseid, pastyear, pastterm)
+);
+>>>>>>> c34fa89 (Add initialization scripts for local Postgres databases)
 CREATE TABLE IF NOT EXISTS courseattribute (
     courseid INT REFERENCES course(courseid),
     attribute CHAR(2),
@@ -87,10 +109,17 @@ CREATE TABLE IF NOT EXISTS semester (
     semestername VARCHAR(32) NOT NULL,
     semesteryear INT NOT NULL,
     semesterterm CHAR(2) NOT NULL,
+<<<<<<< HEAD
     FOREIGN KEY (userId, institutionid, programname) REFERENCES userprogram(userId, institutionid, programname),
     UNIQUE (userId, institutionid, programname, semesteryear, semesterterm)
 );
 CREATE TABLE IF NOT EXISTS coursesemester (
+=======
+    FOREIGN KEY (userId, institutionid, programname) REFERENCES userprogram(userId, institutionid, programname)
+);
+CREATE TABLE IF NOT EXISTS coursesemester (
+    userId INT REFERENCES users(id),
+>>>>>>> c34fa89 (Add initialization scripts for local Postgres databases)
     semesterid INT REFERENCES semester(semesterid),
     courseid INT REFERENCES course(courseid),
     sortorder INT,
@@ -103,5 +132,9 @@ CREATE TABLE IF NOT EXISTS programrequirement (
     recommendedsemester INT NOT NULL,
     requirementyear INT,
     PRIMARY KEY (institutionid, programname, courseid),
+<<<<<<< HEAD
     FOREIGN KEY (institutionid, programname, requirementyear) REFERENCES program(institutionid, programname, startingyear)
+=======
+    FOREIGN KEY (institutionid, programname) REFERENCES program(institutionid, programname)
+>>>>>>> c34fa89 (Add initialization scripts for local Postgres databases)
 );

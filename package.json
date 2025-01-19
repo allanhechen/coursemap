@@ -7,7 +7,11 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
+<<<<<<< HEAD
         "test": "jest --runInBand",
+=======
+        "test": "jest",
+>>>>>>> c34fa89 (Add initialization scripts for local Postgres databases)
         "reset-database": "docker compose -f docker-compose.dev.yml rm -fsv && rm -rf ./pgdata"
     },
     "dependencies": {

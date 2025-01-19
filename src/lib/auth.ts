@@ -5,7 +5,7 @@ import NextAuth, { DefaultSession } from "next-auth";
 import GitHub from "next-auth/providers/github";
 import PostgresAdapter from "@auth/pg-adapter";
 
-import { getUserProgram } from "@/actions/user";
+import { getActiveUserProgram } from "@/actions/program";
 
 declare module "next-auth" {
     interface Session {
@@ -27,9 +27,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => {
             async session({ session }) {
                 const userId = parseInt(session.user.id);
                 session.user.userId = userId;
-                const { institutionId, programName } = await getUserProgram(
-                    userId
-                );
+                const { institutionId, programName } =
+                    await getActiveUserProgram(userId);
                 session.user.institutionId = institutionId;
                 session.user.programName = programName;
 
