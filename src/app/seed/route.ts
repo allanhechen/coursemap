@@ -73,11 +73,11 @@ async function createTables(client: PoolClient) {
 
     await client.query(`
         CREATE TABLE IF NOT EXISTS userprogram (
-            id INT REFERENCES users(id),
+            userId INT REFERENCES users(userId),
             institutionid INT,
             programname VARCHAR(64),
             FOREIGN KEY (institutionid, programname) REFERENCES program(institutionid, programname),
-            PRIMARY KEY (id, institutionid, programname)
+            PRIMARY KEY (userId, institutionid, programname)
         );
     `);
 
@@ -129,22 +129,23 @@ async function createTables(client: PoolClient) {
     await client.query(`
         CREATE TABLE IF NOT EXISTS semester (
             semesterid SERIAL PRIMARY KEY,
-            id INT,
+            userId INT,
             institutionid INT,
             programname VARCHAR(64),
             semestername VARCHAR(32) NOT NULL,
             semesteryear INT NOT NULL,
             semesterterm CHAR(2) NOT NULL,
-            FOREIGN KEY (id, institutionid, programname) REFERENCES userprogram(id, institutionid, programname)
+            FOREIGN KEY (userId, institutionid, programname) REFERENCES userprogram(userId, institutionid, programname)
         );
     `);
 
     // TODO: insert userid into this instead of semesterid -> technically breaks 3nf but we need to uniquely identify courseid within semesters
     await client.query(`
         CREATE TABLE IF NOT EXISTS coursesemester (
-            id INT,
+            userId INT REFERENCES account(userId),
             semesterid INT REFERENCES semester(semesterid),
             courseid INT REFERENCES course(courseid),
+            sortorder INT,
             PRIMARY KEY (semesterid, courseid)
         );
     `);

@@ -51,8 +51,8 @@ export interface CourseInformation {
     faculty: string;
     chips: ChipVariant[];
     prerequisites: string;
-    postrequisites: string[];
-    antirequisites: string[];
+    postrequisites: number[];
+    antirequisites: number[];
     termWarning?: boolean;
     requisiteWarning?: boolean;
     fresh?: boolean;
