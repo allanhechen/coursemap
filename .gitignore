@@ -1,5 +1,6 @@
 todo.txt
 
+*.sql
 # Postgres database
 pgdata
 
