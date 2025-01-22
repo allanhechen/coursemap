@@ -13,6 +13,7 @@ declare module "next-auth" {
             userId: number;
             institutionId: number;
             programName: string;
+            startingYear: number;
         } & DefaultSession["user"];
     }
 }
@@ -27,10 +28,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => {
             async session({ session }) {
                 const userId = parseInt(session.user.id);
                 session.user.userId = userId;
-                const { institutionId, programName } =
+                const { institutionId, programName, startingYear } =
                     await getActiveUserProgram(userId);
                 session.user.institutionId = institutionId;
                 session.user.programName = programName;
+                session.user.startingYear = startingYear;
 
                 return session;
             },
