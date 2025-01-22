@@ -8,16 +8,16 @@ import {
     Viewport,
 } from "@xyflow/react";
 import {
+    SemesterInformation,
     SemesterPlacement,
     SemesterTerm,
     SemesterWrapper,
 } from "@/types/semester";
 import { CardWrapper, CourseInformation } from "@/types/courseCard";
-import { getSemesters } from "@/actions/semester";
-import { getCourseSemesters } from "@/actions/course";
 import { SemesterPositionContext } from "@/app/(main)/dashboard/overview/semesterPositionContext";
 import { ChipVariant } from "@/types/chipVariant";
-import { Session } from "next-auth";
+import useSWR from "swr";
+import fetcher from "@/lib/fetcher";
 
 const termToChipVariant = {
     [SemesterTerm.FA]: ChipVariant.FALL,
@@ -182,6 +182,13 @@ export const useScrollHandler = () => {
     return { verticalScrollHandler, horizontalScrollHandler };
 };
 
+const termOrder: { [key in SemesterTerm]: number } = {
+    [SemesterTerm.WI]: 1,
+    [SemesterTerm.SP]: 2,
+    [SemesterTerm.SU]: 3,
+    [SemesterTerm.FA]: 4,
+};
+
 // a helper funciton that calculates where the nodes should go
 // initializes semesterpositions for intervals
 // also adds the delete bar (and the search bar in the future)
@@ -195,10 +202,23 @@ function placeNodes(
 
     let semesterPosition = SEMESTER_STARTING_POSITION_X;
 
-    for (const key in semesterGroupDict) {
+    const semesters = Object.values(semesterGroupDict);
+    semesters.sort((a, b) => {
+        const yearDiff =
+            a.semester.data.semesterYear.getFullYear() -
+            b.semester.data.semesterYear.getFullYear();
+        if (yearDiff !== 0) return yearDiff;
+
+        return (
+            termOrder[a.semester.data.semesterTerm] -
+            termOrder[b.semester.data.semesterTerm]
+        );
+    });
+
+    semesters.forEach(({ semester, courses }) => {
+        const key = semester.data.semesterId.toString();
         const cardPositionX = semesterPosition + SEMESTER_PADDING_X;
         let cardPositionY = SEMESTER_PADDING_TOP + SEMESTER_STARTING_POSITION_Y;
-        const { semester, courses } = semesterGroupDict[key];
         semester.position = {
             x: semesterPosition,
             y: SEMESTER_STARTING_POSITION_Y,
@@ -287,7 +307,7 @@ function placeNodes(
         });
         newSeenCourses.forEach((value) => seenCourses.add(value));
         semesterPosition += SEMESTER_WIDTH + SEMESTER_GAP;
-    }
+    });
     setPlacements(newPlacements);
 
     // check for antirequisites
@@ -349,41 +369,42 @@ export const useUpdateNodes = () => {
     }
     const [, setPlacements] = contextItem;
 
-    const updateNodes = useCallback(
-        async (session: Session) => {
-            const { userId, institutionId, programName } = session.user;
+    const updateNodes = useCallback(async () => {
+        // these are already sorted so we don't need to sort them again
+        const semesterResponse = await fetch("/api/semester");
+        const { semesters }: { semesters: SemesterInformation[] } =
+            await semesterResponse.json();
 
-            // these are already sorted so we don't need to sort them again
-            const semesters = await getSemesters(
-                userId,
-                institutionId,
-                programName
-            );
-            const courseSemesters = await getCourseSemesters(userId);
+        semesters.forEach((semester) => {
+            semester.semesterYear = new Date(semester.semesterYear);
+        });
+        const courseSemestersResponse = await fetch("/api/course/semesters");
+        const courseSemesters: {
+            semesterId: number;
+            course: CourseInformation;
+        }[] = await courseSemestersResponse.json();
 
-            // we need to group all the courseSemesters by semesters and convert them into nodes
-            const semesterGroupDict: Dictionary<SemesterGroup> = {};
-            semesters.forEach((semester) => {
-                const key = semester.semesterId.toString();
-                semesterGroupDict[key] = {
-                    semester: { data: semester },
-                    courses: [],
-                };
-            });
+        // we need to group all the courseSemesters by semesters and convert them into nodes
+        const semesterGroupDict: Dictionary<SemesterGroup> = {};
+        semesters.forEach((semester) => {
+            const key = semester.semesterId.toString();
+            semesterGroupDict[key] = {
+                semester: { data: semester },
+                courses: [],
+            };
+        });
 
-            courseSemesters.forEach(({ semesterId, course }) => {
-                const key = semesterId.toString();
-                const { courses } = semesterGroupDict[key];
+        courseSemesters.forEach(({ semesterId, course }) => {
+            const key = semesterId.toString();
+            const { courses } = semesterGroupDict[key];
 
-                courses.push({ data: course });
-            });
+            courses.push({ data: course });
+        });
 
-            const nodes = placeNodes(semesterGroupDict, setPlacements);
-            setNodes(nodes);
-            return nodes.length;
-        },
-        [setNodes, setPlacements]
-    );
+        const nodes = placeNodes(semesterGroupDict, setPlacements);
+        setNodes(nodes);
+        return nodes.length;
+    }, [setNodes, setPlacements]);
 
     return { updateNodes };
 };
@@ -422,6 +443,7 @@ function checkRequisites(
         partially?: boolean,
         nodes?: Node[] | undefined
     ) => Node[],
+    courseNames: { [courseId: number]: string },
     relatedSemesterId?: number,
     droppedNode?: Node,
     deletedCourseCode?: string
@@ -496,12 +518,26 @@ function checkRequisites(
             const courseNode = node as unknown as CardWrapper;
 
             courseNode.data.antirequisites.forEach((antirequisite) => {
-                if (seenCourses.has(antirequisite)) {
+                const courseCode = courseNames[antirequisite];
+                if (seenCourses.has(courseCode)) {
                     courseNode.data.requisiteWarning = true;
                 }
             });
         }
     });
+}
+
+async function sendDeleteFetch(courseId: number) {
+    try {
+        const params = new URLSearchParams("");
+        params.append("courseId", courseId.toString());
+        fetch("/api/course/semesters?" + params, {
+            method: "DELETE",
+        });
+    } catch (e) {
+        // TODO: send notification if deletefetch is rejected
+        console.log(e);
+    }
 }
 
 // arranges dropped nodes depending on where it's placed
@@ -522,8 +558,19 @@ export const useGroupCards = () => {
     // create a copy of placements so we can just modify in place and not worry about it
     const placements = oldPlacements.slice();
 
+    const courseNamesSWR = useSWR<{ [courseId: number]: string }, string>(
+        "/api/course/ids",
+        fetcher
+    );
+
+    // TODO: add notification if swr fails
+    if (courseNamesSWR.error) {
+        console.log(courseNamesSWR.error);
+    }
+    const courseNames: { [courseId: number]: string } = courseNamesSWR.data!;
+
     const groupCards = useCallback(
-        (_: React.MouseEvent | null, droppedNode: Node) => {
+        (notIsInsert: React.MouseEvent | null, droppedNode: Node) => {
             const nodes = getNodes();
             const intersectingNodes = getIntersectingNodes(droppedNode);
 
@@ -545,10 +592,13 @@ export const useGroupCards = () => {
                     checkRequisites(
                         nodes,
                         getIntersectingNodes,
+                        courseNames,
                         undefined,
                         undefined,
                         droppedNode.data.courseCode as string
                     );
+
+                    sendDeleteFetch(droppedNode.data.courseId as number);
                     return;
                 }
             }
@@ -571,10 +621,13 @@ export const useGroupCards = () => {
                 checkRequisites(
                     nodes,
                     getIntersectingNodes,
+                    courseNames,
                     undefined,
                     undefined,
                     droppedNode.data.courseCode as string
                 );
+
+                sendDeleteFetch(droppedNode.data.courseId as number);
                 return;
             }
 
@@ -601,6 +654,7 @@ export const useGroupCards = () => {
             checkRequisites(
                 nodes,
                 getIntersectingNodes,
+                courseNames,
                 relatedSemester.semesterId,
                 droppedNode
             );
@@ -619,6 +673,7 @@ export const useGroupCards = () => {
             });
 
             let touchingCards = 0;
+            const courseNodeIds: { courseId: number; yPosition: number }[] = [];
             const alreadyUpdated = new Set();
             nodesInInterval.forEach((node) => {
                 // ignore non course items
@@ -641,6 +696,24 @@ export const useGroupCards = () => {
                 }
                 touchingCards += 1;
             });
+
+            nodesInInterval.forEach((node) => {
+                if (!node.id.startsWith("course-")) {
+                    return;
+                }
+                courseNodeIds.push({
+                    courseId: node.data.courseId as number,
+                    yPosition: node.position.y,
+                });
+            });
+            // don't forget the newly dropped card if it's an insert
+            // it's an insert if the first element is null
+            if (!notIsInsert) {
+                courseNodeIds.push({
+                    courseId: droppedNode.data.courseId as number,
+                    yPosition: droppedNode.position.y,
+                });
+            }
 
             let newYPosition = 0;
             // ceiling takes care moving card in the correct spot
@@ -697,12 +770,31 @@ export const useGroupCards = () => {
                     });
                 }
             });
+
+            const sortedCourseNodeIds = courseNodeIds.sort((a, b) => {
+                return a.yPosition - b.yPosition;
+            });
+            const courseIds = sortedCourseNodeIds.map(({ courseId }) => {
+                return courseId;
+            });
+
+            const updateReponse = fetch("/api/course/semesters", {
+                method: "PUT",
+                body: JSON.stringify({
+                    courseIds: courseIds,
+                    semesterId: relatedSemester.semesterId,
+                }),
+            });
+            // TODO: add message if the coursesemester update is rejected
+            updateReponse.catch((e) => {
+                console.log(e);
+            });
+
             setNodes(newNodes);
             setPlacements(placements);
-
-            // TODO: call update nodes server action here
         },
         [
+            courseNames,
             placements,
             getIntersectingNodes,
             getNodes,
@@ -731,56 +823,62 @@ export const useDragStartHandler = () => {
 
     const dragStartHandler = useCallback(
         (_: React.MouseEvent, draggedNode: Node) => {
-            const deleteArea = getNode("deleteArea") as Node; // will always be defined
-            updateNode("deleteArea", {
-                position: {
-                    x: deleteArea.position.x,
-                    y: DELETEAREA_ACTIVE_POSITION,
-                },
-            });
+            async function asyncWrapper() {
+                const deleteArea = getNode("deleteArea") as Node; // will always be defined
+                updateNode("deleteArea", {
+                    position: {
+                        x: deleteArea.position.x,
+                        y: DELETEAREA_ACTIVE_POSITION,
+                    },
+                });
 
-            const { x, y } = draggedNode.position!;
-            const { interval: relatedSemester, index: relatedSemesterIndex } =
-                findInterval(placements, x) as {
+                const { x, y } = draggedNode.position!;
+                const {
+                    interval: relatedSemester,
+                    index: relatedSemesterIndex,
+                } = findInterval(placements, x) as {
                     interval: SemesterPlacement;
                     index: number;
                 };
-            const nodesInInterval = getIntersectingNodes({
-                id: `semester-${relatedSemester.semesterId}`,
-            });
+                const nodesInInterval = getIntersectingNodes({
+                    id: `semester-${relatedSemester.semesterId}`,
+                });
 
-            let touchingCards = 0;
-            nodesInInterval.forEach((node) => {
-                // ignore non course items
-                if (
-                    !node.id.startsWith("course") ||
-                    node.id === draggedNode.id
-                ) {
-                    return;
-                } else if (node.position.y >= y) {
-                    updateNode(node.id, {
-                        position: {
-                            x: node.position.x,
-                            y: node.position.y - CARD_GAP - CARD_HEIGHT,
-                        },
-                    });
-                }
-                touchingCards += 1;
-            });
-            const semesterBottomAdjustment =
-                touchingCards > 0 ? CARD_GAP + CARD_HEIGHT : CARD_HEIGHT;
-            placements[relatedSemesterIndex].bottom -= semesterBottomAdjustment;
-            setPlacements(placements);
+                let touchingCards = 0;
+                nodesInInterval.forEach((node) => {
+                    // ignore non course items
+                    if (
+                        !node.id.startsWith("course") ||
+                        node.id === draggedNode.id
+                    ) {
+                        return;
+                    } else if (node.position.y >= y) {
+                        updateNode(node.id, {
+                            position: {
+                                x: node.position.x,
+                                y: node.position.y - CARD_GAP - CARD_HEIGHT,
+                            },
+                        });
+                    }
+                    touchingCards += 1;
+                });
+                const semesterBottomAdjustment =
+                    touchingCards > 0 ? CARD_GAP + CARD_HEIGHT : CARD_HEIGHT;
+                placements[relatedSemesterIndex].bottom -=
+                    semesterBottomAdjustment;
+                setPlacements(placements);
 
-            // reset warnings on the node
-            draggedNode.data.requisiteWarning = false;
-            draggedNode.data.termWarning = false;
+                // reset warnings on the node
+                draggedNode.data.requisiteWarning = false;
+                draggedNode.data.termWarning = false;
 
-            updateNode(draggedNode.id!, {
-                style: {
-                    zIndex: 100,
-                },
-            });
+                updateNode(draggedNode.id!, {
+                    style: {
+                        zIndex: 100,
+                    },
+                });
+            }
+            asyncWrapper();
         },
         [updateNode, getNode, getIntersectingNodes, placements, setPlacements]
     );

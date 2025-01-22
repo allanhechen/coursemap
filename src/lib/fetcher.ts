@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 export default async function fetcher<JSON = any>(
     input: RequestInfo,
     init?: RequestInit

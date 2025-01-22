@@ -9,13 +9,12 @@ import Chip from "@/components/chip/Chip";
 import { ChipVariant } from "@/types/chipVariant";
 import SearchResult from "@/components/courseSearch/SearchResult";
 import { CourseInformation } from "@/types/courseCard";
-import { searchCourses } from "@/actions/course";
 import { SessionContext } from "@/components/sessionContext";
 
 export default function CourseSearch() {
     const [searchQuery, setSearchQuery] = useState("");
     const [courses, setCourses] = useState<CourseInformation[]>([]);
-    const [value] = useDebounce(searchQuery, 1000);
+    const [value] = useDebounce(searchQuery, 100);
 
     const [includeFall, setIncludeFall] = useState(true);
     const [includeWinter, setIncludeWinter] = useState(true);
@@ -27,38 +26,38 @@ export default function CourseSearch() {
     const session = useContext(SessionContext)!;
     const { institutionId, programName } = session.user;
 
+    const url = new URLSearchParams("");
+    url.append("includeFall", includeFall.toString());
+    url.append("includeWinter", includeWinter.toString());
+    url.append("includeSpring", includeSpring.toString());
+    url.append("includeSummer", includeSummer.toString());
+    url.append("includeRequired", includeRequired.toString());
+    url.append("includeElective", includeElective.toString());
+    url.append("searchQuery", searchQuery);
+
     useEffect(() => {
-        const fetchData = async () => {
-            const data = await searchCourses(
-                institutionId,
-                programName,
-                value,
-                includeFall,
-                includeWinter,
-                includeSpring,
-                includeSummer,
-                includeRequired,
-                includeElective
+        async function getData() {
+            const response = await fetch(
+                "/api/course/search?" + url.toString()
             );
-            setCourses(data);
-        };
-        fetchData();
+            const courseInformation = await response.json();
+            setCourses(courseInformation);
+        }
+
+        getData();
     }, [
-        institutionId,
-        programName,
         value,
         includeFall,
         includeWinter,
         includeSpring,
         includeSummer,
-        includeRequired,
         includeElective,
+        includeRequired,
     ]);
 
     const onChange = useCallback(
         (event: React.FormEvent<HTMLInputElement>) => {
             setSearchQuery(event.currentTarget.value);
-            console.log(searchQuery);
         },
         [searchQuery]
     );
