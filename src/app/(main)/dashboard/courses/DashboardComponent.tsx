@@ -16,10 +16,7 @@ import {
 } from "@/lib/tree";
 import CourseSearch from "@/components/courseSearch/CourseSearch";
 import { DnDContext } from "@/components/dndContext";
-import {
-    getAllCourseSemesters,
-    getCourseInformation,
-} from "@/lib/actions/course";
+import { getCourseSemesters, getCourseInformation } from "@/actions/course";
 import {
     CourseToSemesterIdDict,
     DropdownCardWrapper,
@@ -28,6 +25,7 @@ import {
 import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/courseSemesterContext";
 import AndWrapper from "@/components/wrapper/AndWrapper";
 import OrWrapper from "@/components/wrapper/OrWrapper";
+import { SessionContext } from "@/components/sessionContext";
 
 const nodeTypes = {
     courseDropdownNode: CourseCardDropdownWrapper,
@@ -36,18 +34,16 @@ const nodeTypes = {
 };
 
 export default function DashboardComponent({
-    displayName,
-    userPhoto,
     prerequisites,
 }: {
-    displayName: string;
-    userPhoto: string;
     prerequisites: { [key: string]: string };
 }) {
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
     const [height, setHeight] = useState(1);
     const { fitView } = useReactFlow();
+
+    const session = useContext(SessionContext)!;
 
     const courseSemesterContextItem = useContext(CourseSemesterContext);
     if (!courseSemesterContextItem) {
@@ -113,7 +109,9 @@ export default function DashboardComponent({
                     data: courseInformation[node.courseName],
                 }));
 
-                const courseSemesters = await getAllCourseSemesters();
+                const courseSemesters = await getCourseSemesters(
+                    session.user.userId
+                );
                 courseSemesters.forEach((courseSemester) => {
                     courseStates[courseSemester.course.courseCode] =
                         courseSemester.semesterId;
@@ -150,6 +148,7 @@ export default function DashboardComponent({
             handler();
         },
         [
+            session.user.userId,
             type,
             prerequisites,
             selectSemester,
@@ -184,7 +183,7 @@ export default function DashboardComponent({
         <>
             <div className="dashboard-component">
                 <div className="row header">
-                    <NavBar displayName={displayName} userPhoto={userPhoto} />
+                    <NavBar />
                 </div>
                 <div
                     className="row content flex"

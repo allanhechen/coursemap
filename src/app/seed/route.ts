@@ -57,7 +57,7 @@ async function createTables(client: PoolClient) {
         CREATE TABLE IF NOT EXISTS institution (
             institutionid SERIAL PRIMARY KEY,
             institutionname VARCHAR(64) NOT NULL,
-            institutionphoto BYTEA
+            institutionphoto VARCHAR(256)
         );
     `);
 
@@ -65,17 +65,20 @@ async function createTables(client: PoolClient) {
         CREATE TABLE IF NOT EXISTS program (
             institutionid INT REFERENCES institution(institutionid),
             programname VARCHAR(64),
+            year INT,
+            faculty VARCHAR(64),
             PRIMARY KEY (institutionid, programname)
         );
     `);
 
     await client.query(`
         CREATE TABLE IF NOT EXISTS userprogram (
-            id INT REFERENCES users(id),
+            userId INT REFERENCES users(id),
             institutionid INT,
             programname VARCHAR(64),
+            active BOOLEAN,
             FOREIGN KEY (institutionid, programname) REFERENCES program(institutionid, programname),
-            PRIMARY KEY (id, institutionid, programname)
+            PRIMARY KEY (userId, institutionid, programname)
         );
     `);
 
@@ -86,17 +89,8 @@ async function createTables(client: PoolClient) {
             faculty VARCHAR(64) NOT NULL,
             coursecode VARCHAR(10) NOT NULL,
             coursetitle VARCHAR(64) NOT NULL,
-            coursedescription VARCHAR(1024),
-            useradded BOOLEAN
-        );
-    `);
-
-    await client.query(`
-        CREATE TABLE IF NOT EXISTS courseprerequisite (
-            courseid INT REFERENCES course(courseid),
-            prerequisite INT REFERENCES course(courseid),
-            groupid INT NOT NULL,
-            PRIMARY KEY (courseid, prerequisite)
+            coursedescription VARCHAR(2048),
+            courseprerequisites VARCHAR(256)
         );
     `);
 
@@ -136,21 +130,23 @@ async function createTables(client: PoolClient) {
     await client.query(`
         CREATE TABLE IF NOT EXISTS semester (
             semesterid SERIAL PRIMARY KEY,
-            id INT,
+            userId INT,
             institutionid INT,
             programname VARCHAR(64),
             semestername VARCHAR(32) NOT NULL,
             semesteryear INT NOT NULL,
             semesterterm CHAR(2) NOT NULL,
-            FOREIGN KEY (id, institutionid, programname) REFERENCES userprogram(id, institutionid, programname)
+            FOREIGN KEY (userId, institutionid, programname) REFERENCES userprogram(userId, institutionid, programname)
         );
     `);
 
     // TODO: insert userid into this instead of semesterid -> technically breaks 3nf but we need to uniquely identify courseid within semesters
     await client.query(`
         CREATE TABLE IF NOT EXISTS coursesemester (
+            userId INT REFERENCES users(id),
             semesterid INT REFERENCES semester(semesterid),
             courseid INT REFERENCES course(courseid),
+            sortorder INT,
             PRIMARY KEY (semesterid, courseid)
         );
     `);
@@ -161,6 +157,7 @@ async function createTables(client: PoolClient) {
             programname VARCHAR(64),
             courseid INT,
             recommendedsemester INT NOT NULL,
+            requirementyear INT,
             PRIMARY KEY (institutionid, programname, courseid),
             FOREIGN KEY (institutionid, programname) REFERENCES program(institutionid, programname)
         );

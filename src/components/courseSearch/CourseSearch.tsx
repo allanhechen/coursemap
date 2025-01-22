@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Paper, TextInput } from "@mantine/core";
 import { useDebounce } from "use-debounce";
 
@@ -9,7 +9,8 @@ import Chip from "@/components/chip/Chip";
 import { ChipVariant } from "@/types/chipVariant";
 import SearchResult from "@/components/courseSearch/SearchResult";
 import { CourseInformation } from "@/types/courseCard";
-import { searchCourses } from "@/lib/actions/course";
+import { searchCourses } from "@/actions/course";
+import { SessionContext } from "@/components/sessionContext";
 
 export default function CourseSearch() {
     const [searchQuery, setSearchQuery] = useState("");
@@ -23,9 +24,14 @@ export default function CourseSearch() {
     const [includeRequired, setIncludeRequired] = useState(true);
     const [includeElective, setIncludeElective] = useState(true);
 
+    const session = useContext(SessionContext)!;
+    const { institutionId, programName } = session.user;
+
     useEffect(() => {
         const fetchData = async () => {
             const data = await searchCourses(
+                institutionId,
+                programName,
                 value,
                 includeFall,
                 includeWinter,
@@ -38,6 +44,8 @@ export default function CourseSearch() {
         };
         fetchData();
     }, [
+        institutionId,
+        programName,
         value,
         includeFall,
         includeWinter,

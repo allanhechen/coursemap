@@ -13,15 +13,15 @@ import {
 import { CourseInformation, CourseToSemesterIdDict } from "@/types/courseCard";
 import { SemesterDict, SemesterTerm } from "@/types/semester";
 import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
+import { Session } from "next-auth";
+import { SessionContext } from "@/components/sessionContext";
 
 export default function DashboardWrapper({
-    displayName,
-    userPhoto,
+    session,
     prerequisites,
     allSemesters,
 }: {
-    displayName: string;
-    userPhoto: string;
+    session: Session;
     prerequisites: { [key: string]: string };
     allSemesters: SemesterDict;
 }) {
@@ -42,20 +42,18 @@ export default function DashboardWrapper({
     });
 
     return (
-        <SemesterContext.Provider value={[semesterDict, setSemesterDict]}>
-            <CourseSemesterContext.Provider
-                value={[relatedSemesterId, setRelatedSemesterId]}
-            >
-                <SemesterFormProvider form={form}>
-                    <DnDContext.Provider value={[type, setType]}>
-                        <DashboardComponent
-                            displayName={displayName}
-                            userPhoto={userPhoto}
-                            prerequisites={prerequisites}
-                        />
-                    </DnDContext.Provider>
-                </SemesterFormProvider>
-            </CourseSemesterContext.Provider>
-        </SemesterContext.Provider>
+        <SessionContext.Provider value={session}>
+            <SemesterContext.Provider value={[semesterDict, setSemesterDict]}>
+                <CourseSemesterContext.Provider
+                    value={[relatedSemesterId, setRelatedSemesterId]}
+                >
+                    <SemesterFormProvider form={form}>
+                        <DnDContext.Provider value={[type, setType]}>
+                            <DashboardComponent prerequisites={prerequisites} />
+                        </DnDContext.Provider>
+                    </SemesterFormProvider>
+                </CourseSemesterContext.Provider>
+            </SemesterContext.Provider>
+        </SessionContext.Provider>
     );
 }

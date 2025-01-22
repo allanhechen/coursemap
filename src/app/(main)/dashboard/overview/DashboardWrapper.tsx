@@ -13,9 +13,10 @@ import {
 import { CourseInformation } from "@/types/courseCard";
 import { SemesterPlacement } from "@/types/semester";
 import { SemesterTerm } from "@/types/semester";
-import { User } from "@/types/user";
+import { Session } from "next-auth";
+import { SessionContext } from "@/components/sessionContext";
 
-export default function DashboardWrapper(props: User) {
+export default function DashboardWrapper({ session }: { session: Session }) {
     const [placements, setPlacements] = useState<SemesterPlacement[]>([]);
     const [type, setType] = useState<[string, CourseInformation] | null>(null);
 
@@ -30,12 +31,16 @@ export default function DashboardWrapper(props: User) {
     });
 
     return (
-        <SemesterPositionContext.Provider value={[placements, setPlacements]}>
-            <SemesterFormProvider form={form}>
-                <DnDContext.Provider value={[type, setType]}>
-                    <DashboardComponent {...props} />
-                </DnDContext.Provider>
-            </SemesterFormProvider>
-        </SemesterPositionContext.Provider>
+        <SessionContext.Provider value={session}>
+            <SemesterPositionContext.Provider
+                value={[placements, setPlacements]}
+            >
+                <SemesterFormProvider form={form}>
+                    <DnDContext.Provider value={[type, setType]}>
+                        <DashboardComponent />
+                    </DnDContext.Provider>
+                </SemesterFormProvider>
+            </SemesterPositionContext.Provider>
+        </SessionContext.Provider>
     );
 }

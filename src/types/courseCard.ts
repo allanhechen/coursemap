@@ -45,19 +45,15 @@ export interface CourseDropdownInformation {
 }
 
 export interface CourseInformation {
+    courseId: number;
     courseCode: string;
     courseName: string;
     faculty: string;
     chips: ChipVariant[];
     prerequisites: string;
-    postrequisites: string[];
-    antirequisites: string[];
+    postrequisites: number[];
+    antirequisites: number[];
     termWarning?: boolean;
     requisiteWarning?: boolean;
     fresh?: boolean;
-}
-
-export interface SemesterCourseInformation {
-    semesterId: number;
-    course: CourseInformation;
 }

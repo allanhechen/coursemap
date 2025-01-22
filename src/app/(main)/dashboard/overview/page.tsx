@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 
 import DashboardWrapper from "@/app/(main)/dashboard/overview/DashboardWrapper";
 import { auth } from "@/lib/auth";
-import { User } from "@/types/user";
 
 export default async function Page() {
     const session = await auth();
@@ -14,14 +13,9 @@ export default async function Page() {
         redirect("/login");
     }
 
-    const user: User = {
-        displayName: session.user!.name!,
-        userPhoto: session.user!.image!,
-    };
-
     return (
         <ReactFlowProvider>
-            <DashboardWrapper {...user} />
+            <DashboardWrapper session={session} />
         </ReactFlowProvider>
     );
 }

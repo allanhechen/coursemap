@@ -5,6 +5,7 @@ services:
             - "54320:5432"
         volumes:
             - ./pgdata:/var/lib/postgresql/data
+            - ./initialization_scripts/:/docker-entrypoint-initdb.d/
         env_file: ".env.development"
     pg_proxy:
         image: ghcr.io/neondatabase/wsproxy:latest
