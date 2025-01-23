@@ -1,21 +1,19 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Paper, TextInput } from "@mantine/core";
-import { useDebounce } from "use-debounce";
+import useSWR from "swr";
 
 import Chip from "@/components/chip/Chip";
 
 import { ChipVariant } from "@/types/chipVariant";
 import SearchResult from "@/components/courseSearch/SearchResult";
 import { CourseInformation } from "@/types/courseCard";
-import { searchCourses } from "@/actions/course";
-import { SessionContext } from "@/components/sessionContext";
+import fetcher from "@/lib/fetcher";
 
 export default function CourseSearch() {
     const [searchQuery, setSearchQuery] = useState("");
     const [courses, setCourses] = useState<CourseInformation[]>([]);
-    const [value] = useDebounce(searchQuery, 1000);
 
     const [includeFall, setIncludeFall] = useState(true);
     const [includeWinter, setIncludeWinter] = useState(true);
@@ -24,44 +22,32 @@ export default function CourseSearch() {
     const [includeRequired, setIncludeRequired] = useState(true);
     const [includeElective, setIncludeElective] = useState(true);
 
-    const session = useContext(SessionContext)!;
-    const { institutionId, programName } = session.user;
+    const url = new URLSearchParams("");
+    url.append("includeFall", includeFall.toString());
+    url.append("includeWinter", includeWinter.toString());
+    url.append("includeSpring", includeSpring.toString());
+    url.append("includeSummer", includeSummer.toString());
+    url.append("includeRequired", includeRequired.toString());
+    url.append("includeElective", includeElective.toString());
+    url.append("searchQuery", searchQuery);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const data = await searchCourses(
-                institutionId,
-                programName,
-                value,
-                includeFall,
-                includeWinter,
-                includeSpring,
-                includeSummer,
-                includeRequired,
-                includeElective
-            );
-            setCourses(data);
-        };
-        fetchData();
-    }, [
-        institutionId,
-        programName,
-        value,
-        includeFall,
-        includeWinter,
-        includeSpring,
-        includeSummer,
-        includeRequired,
-        includeElective,
-    ]);
-
-    const onChange = useCallback(
-        (event: React.FormEvent<HTMLInputElement>) => {
-            setSearchQuery(event.currentTarget.value);
-            console.log(searchQuery);
-        },
-        [searchQuery]
+    const courseSWR = useSWR<CourseInformation[], string>(
+        "/api/course/search?" + url.toString(),
+        fetcher
     );
+
+    if (courseSWR.error) {
+        console.log(courseSWR.error);
+    }
+    useEffect(() => {
+        if (courseSWR.data) {
+            setCourses(courseSWR.data); // Only update `courses` when data changes
+        }
+    }, [courseSWR.data]);
+
+    const onChange = useCallback((event: React.FormEvent<HTMLInputElement>) => {
+        setSearchQuery(event.currentTarget.value);
+    }, []);
 
     const onClickFall = useCallback(() => {
         setIncludeFall(!includeFall);

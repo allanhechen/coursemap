@@ -3,6 +3,7 @@ import { Edge } from "@xyflow/react";
 
 export interface PrerequisiteNodeType {
     courseName: string;
+    courseId: number;
     key: string;
 }
 
@@ -18,6 +19,7 @@ export function parsePrerequisite(
     nodeOutput: PrerequisiteNodeType[],
     edgeOutput: Edge[],
     wrapperOutput: { [key: string]: Wrapper },
+    courseIds: { [courseCode: string]: number },
     key = ""
 ) {
     if (key === "") {
@@ -25,21 +27,21 @@ export function parsePrerequisite(
         nodeOutput.push({
             courseName: courseName,
             key: key,
+            courseId: courseIds[courseName],
         });
     }
 
-    const coursePrerequisites = prerequisites[courseName];
-    if (coursePrerequisites === "") {
+    const coursePrerequisites = prerequisites[courseIds[courseName]];
+    if (coursePrerequisites === "" || courseName === "") {
         return;
     }
-
-    const input_cleaned = coursePrerequisites.replace(
+    let input_cleaned = coursePrerequisites.replace(
         /{([\w\s]+)}/g,
         (_: string, prerequisite: string) => {
             return prerequisite.replaceAll(" ", "_");
         }
     );
-
+    input_cleaned = input_cleaned.replace(/\s+/g, " ").trim();
     const tokens = input_cleaned.split(" ");
 
     let andRequirement = false;
@@ -72,6 +74,7 @@ export function parsePrerequisite(
             nodeOutput,
             edgeOutput,
             wrapperOutput,
+            courseIds,
             key
         );
     } else {
@@ -82,6 +85,8 @@ export function parsePrerequisite(
             nodeOutput,
             edgeOutput,
             wrapperOutput,
+            courseIds,
+
             key
         );
     }
@@ -303,7 +308,6 @@ export function placeWrappers(
                 height: height,
             },
         };
-        console.log(wrapperNode.id, wrapperNode);
         nodes.push(wrapperNode);
     }
 }
@@ -315,6 +319,7 @@ function handleANDRequirement(
     nodeOutput: PrerequisiteNodeType[],
     edgeOutput: Edge[],
     wrapperOutput: { [key: string]: Wrapper },
+    courseIds: { [courseCode: string]: number },
     key: string,
     outerNodeKey?: string
 ): void {
@@ -337,6 +342,7 @@ function handleANDRequirement(
                 nodeOutput,
                 edgeOutput,
                 wrapperOutput,
+                courseIds,
                 key
             );
 
@@ -349,6 +355,7 @@ function handleANDRequirement(
             nodeOutput.push({
                 courseName: currentTransformed,
                 key: newKey,
+                courseId: courseIds[currentTransformed],
             });
             edgeOutput.push({
                 selectable: false,
@@ -376,6 +383,7 @@ function handleANDRequirement(
                 nodeOutput,
                 edgeOutput,
                 wrapperOutput,
+                courseIds,
                 newKey
             );
         }
@@ -389,6 +397,7 @@ function handleORRequirement(
     nodeOutput: PrerequisiteNodeType[],
     edgeOutput: Edge[],
     wrapperOutput: { [key: string]: Wrapper },
+    courseIds: { [courseCode: string]: number },
     key: string
 ): void {
     for (let i = 0; i < inputTokens.length; i++) {
@@ -410,6 +419,7 @@ function handleORRequirement(
                 nodeOutput,
                 edgeOutput,
                 wrapperOutput,
+                courseIds,
                 key,
                 key + "-innerWrapper"
             );
@@ -437,6 +447,7 @@ function handleORRequirement(
             nodeOutput.push({
                 courseName: currentTransformed,
                 key: newKey,
+                courseId: courseIds[currentTransformed],
             });
             edgeOutput.push({
                 style: { strokeWidth: 3 },
@@ -462,6 +473,7 @@ function handleORRequirement(
                 nodeOutput,
                 edgeOutput,
                 wrapperOutput,
+                courseIds,
                 newKey
             );
         }

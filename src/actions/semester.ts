@@ -16,9 +16,16 @@ export async function getSemesters(
         semesterterm: SemesterTerm;
     }>(
         `
-        SELECT semesterid, semestername, semesteryear, semesterterm
-        FROM semester
-        WHERE userId = $1 AND institutionid = $2 AND programname = $3;
+            SELECT semesterid, semestername, semesteryear, semesterterm
+            FROM semester
+            WHERE userId = $1 AND institutionid = $2 AND programname = $3
+            ORDER BY semesteryear ASC, 
+                    CASE semesterterm
+                        WHEN 'WI' THEN 1
+                        WHEN 'SP' THEN 2
+                        WHEN 'SU' THEN 3
+                        WHEN 'FA' THEN 4
+                    END;
         `,
         [userId, institutionId, programName]
     );

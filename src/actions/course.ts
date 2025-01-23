@@ -29,6 +29,50 @@ export async function getPrerequsuites(
     return result;
 }
 
+export async function getCourseIds(
+    institutionId: number
+): Promise<{ [courseCode: string]: number }> {
+    const queryResult = await sql.query<{
+        courseid: number;
+        coursecode: string;
+    }>(
+        `
+        SELECT courseid, coursecode
+        FROM course
+        WHERE institutionid = $1;
+        `,
+        [institutionId]
+    );
+
+    const result: { [courseCode: string]: number } = {};
+    queryResult.rows.forEach(({ courseid, coursecode }) => {
+        result[coursecode] = courseid;
+    });
+    return result;
+}
+
+export async function getCourseNames(
+    institutionId: number
+): Promise<{ [courseId: number]: string }> {
+    const queryResult = await sql.query<{
+        courseid: number;
+        coursecode: string;
+    }>(
+        `
+        SELECT courseid, coursecode
+        FROM course
+        WHERE institutionid = $1;
+        `,
+        [institutionId]
+    );
+
+    const result: { [courseId: number]: string } = {};
+    queryResult.rows.forEach(({ courseid, coursecode }) => {
+        result[courseid] = coursecode;
+    });
+    return result;
+}
+
 export async function getCourseInformation(
     institutionId: number,
     programName: string,
@@ -137,14 +181,28 @@ export async function getCourseInformation(
     });
 
     courseInformation.rows.forEach((row) => {
-        const chips = attributeProcessed[row.courseid]
-            ? attributeProcessed[row.courseid]
+        const attributes = attributeProcessed[row.courseid]
+            ? (attributeProcessed[row.courseid] as string[])
             : [];
+        const chips = [];
+        if (attributes.includes("FA")) {
+            chips.push(ChipVariant.FALL);
+        }
+        if (attributes.includes("WI")) {
+            chips.push(ChipVariant.WINTER);
+        }
+        if (attributes.includes("SP")) {
+            chips.push(ChipVariant.SPRING);
+        }
+        if (attributes.includes("SU")) {
+            chips.push(ChipVariant.SUMMER);
+        }
         if (programRequirements.includes(row.courseid)) {
             chips.push(ChipVariant.REQUIRED);
         } else {
             chips.push(ChipVariant.ELECTIVE);
         }
+
         courseProcessed[row.courseid] = {
             courseId: row.courseid,
             courseCode: row.coursecode,
@@ -184,42 +242,59 @@ export async function searchCourses(
         // returns courses without any courseattributes as well
     } else {
         if (includeFall) {
-            options.push("courseattribute = 'FA'");
+            options.push("courseattribute.attribute = 'FA'");
         }
         if (includeWinter) {
-            options.push("courseattribute = 'WI'");
+            options.push("courseattribute.attribute = 'WI'");
         }
         if (includeSpring) {
-            options.push("courseattribute = 'SP'");
+            options.push("courseattribute.attribute = 'SP'");
         }
         if (includeSummer) {
-            options.push("courseattribute = 'SU'");
+            options.push("courseattribute.attribute = 'SU'");
         }
     }
 
     const joinedOptions =
         options.length > 0 ? "(" + options.join(" OR ") + ") AND" : "";
 
-    const searchResult = await sql.query<{ courseid: number; rank: number }>(
-        `
-        SELECT courseid
-            FROM (
-                SELECT 
-                    course.courseid, TS_RANK(TO_TSVECTOR(coursecode || ' ' || coursetitle || ' ' || coursedescription), 
-                            WEBSEARCH_TO_TSQUERY( $1 )) AS rank
-                FROM 
-                    course
-                INNER JOIN 
-                    courseattribute ON course.courseid = courseattribute.courseid
-                WHERE ${joinedOptions} institutionid = $2
-              )
-        WHERE rank > 0.01
-        GROUP BY courseid, rank
-        ORDER BY rank DESC
-        LIMIT 20;
-        `,
-        [searchQuery, institutionId]
-    );
+    let searchResult;
+    if (searchQuery) {
+        searchResult = await sql.query<{ courseid: number }>(
+            `
+            SELECT courseid
+                FROM (
+                    SELECT 
+                        course.courseid, TS_RANK(TO_TSVECTOR(coursecode || ' ' || coursetitle), 
+                                WEBSEARCH_TO_TSQUERY( $1 )) AS rank
+                    FROM 
+                        course
+                    LEFT JOIN 
+                        courseattribute ON course.courseid = courseattribute.courseid
+                    WHERE ${joinedOptions} institutionid = $2
+                  )
+            WHERE rank > 0.01
+            GROUP BY courseid, rank
+            ORDER BY rank DESC
+            LIMIT 20;
+            `,
+            [searchQuery, institutionId]
+        );
+    } else {
+        searchResult = await sql.query<{ courseid: number }>(
+            `
+            SELECT course.courseid
+            FROM course
+            LEFT JOIN 
+                courseattribute ON course.courseid = courseattribute.courseid
+            WHERE ${joinedOptions} institutionid = $1
+            GROUP BY course.courseid
+            LIMIT 20;
+            `,
+            [institutionId]
+        );
+    }
+
     const courseIds: number[] = [];
     const courseRows = searchResult.rows;
     courseRows.forEach((course) => {
@@ -294,6 +369,10 @@ export async function updateCourseSemester(
     semesterId: number,
     courseIds: number[]
 ): Promise<void> {
+    if (courseIds.length === 0) {
+        return;
+    }
+
     const queryResult = await sql.query(
         `
         SELECT 1
@@ -307,26 +386,43 @@ export async function updateCourseSemester(
     }
     const client = await sql.connect();
     client.query("BEGIN");
-
     try {
+        const input = [];
+        for (let i = 1; i <= courseIds.length; i++) {
+            input.push(`$${i}`);
+        }
+        const set = input.join(",");
+        courseIds.push(userId);
+
+        await client.query(
+            `
+            DELETE FROM coursesemester
+            WHERE courseId IN (${set}) AND userId = $${courseIds.length};
+            `,
+            courseIds
+        );
+        courseIds.pop();
+
         for (let i = 0; i < courseIds.length; i++) {
             const courseId = courseIds[i];
 
             await client.query(
                 `
                 INSERT INTO coursesemester(
+                  userId,
                   semesterid,
                   courseid,
                   sortorder
                 ) VALUES (
                   $1, 
                   $2, 
-                  $3
+                  $3,
+                  $4
                 )
                 ON CONFLICT (semesterid, courseid) 
                 DO UPDATE SET sortorder = excluded.sortorder;
                 `,
-                [semesterId, courseId, i]
+                [userId, semesterId, courseId, i]
             );
         }
         client.query("COMMIT");
@@ -340,7 +436,6 @@ export async function updateCourseSemester(
 
 export async function deleteCourseSemester(
     userId: number,
-    semesterId: number,
     courseId: number
 ): Promise<void> {
     const queryResult = await sql.query(
@@ -357,8 +452,8 @@ export async function deleteCourseSemester(
     await sql.query(
         `
         DELETE FROM coursesemester
-        WHERE courseid = $1 AND semesterid = $2;
+        WHERE userId = $1 AND courseid = $2;
         `,
-        [courseId, semesterId]
+        [userId, courseId]
     );
 }

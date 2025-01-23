@@ -74,7 +74,7 @@ export default function DashboardComponent() {
     // get initial node state
     useEffect(() => {
         const loadData = async () => {
-            const countNodes = await updateNodes(session);
+            const countNodes = await updateNodes();
             setNodesLength(countNodes);
         };
         loadData();
@@ -134,14 +134,21 @@ export default function DashboardComponent() {
             const id = `course-${data.courseCode}`;
 
             const nodes = getNodes();
+            if (nodes.length === 2) {
+                // this means we have no semesters, there are no valid semesters for this course to be dropped on
+                // TODO: add toast to notify the user to add a semester
+                return;
+            }
             for (let i = 0; i < nodes.length; i++) {
                 if (nodes[i].id === id) {
                     return;
                 }
             }
 
+            const viewport = getViewport();
+            console.log(viewport);
             const position = {
-                x: event.clientX - 100, // offset to account for semester intervals, not precise but it should work
+                x: event.clientX - 100 - viewport.x, // offset to account for semester intervals, not precise but it should work
                 y: event.clientY,
             };
 
@@ -161,11 +168,11 @@ export default function DashboardComponent() {
                 return newNodes;
             });
         },
-        [type, getNodes]
+        [getViewport, type, getNodes]
     );
 
     useEffect(() => {
-        if (nodes.length > nodesLength) {
+        if (nodes.length > 3 && nodes.length > nodesLength) {
             const lastAddedNode = nodes[nodes.length - 3];
 
             // measured isn't added until after calculation

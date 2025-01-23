@@ -104,7 +104,7 @@ export async function updateUserProgram(
         } else {
             throw new Error("No userprograms were matched with given criteria");
         }
-    } catch (e) {
+    } catch {
         await client.query("ROLLBACK");
         throw new Error("Error updating user program");
     } finally {

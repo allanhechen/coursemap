@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useContext, useEffect } from "react";
 import { ReactFlow, Node, Edge, useReactFlow, MiniMap } from "@xyflow/react";
+import useSWR from "swr";
 
 import { CourseCardDropdownWrapper } from "@/components/courseCard/CourseCard";
 import NavBar from "@/components/header/NavBar";
@@ -16,8 +17,8 @@ import {
 } from "@/lib/tree";
 import CourseSearch from "@/components/courseSearch/CourseSearch";
 import { DnDContext } from "@/components/dndContext";
-import { getCourseSemesters, getCourseInformation } from "@/actions/course";
 import {
+    CourseInformation,
     CourseToSemesterIdDict,
     DropdownCardWrapper,
     WrapperWrapper,
@@ -25,7 +26,7 @@ import {
 import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/courseSemesterContext";
 import AndWrapper from "@/components/wrapper/AndWrapper";
 import OrWrapper from "@/components/wrapper/OrWrapper";
-import { SessionContext } from "@/components/sessionContext";
+import fetcher from "@/lib/fetcher";
 
 const nodeTypes = {
     courseDropdownNode: CourseCardDropdownWrapper,
@@ -43,7 +44,15 @@ export default function DashboardComponent({
     const [height, setHeight] = useState(1);
     const { fitView } = useReactFlow();
 
-    const session = useContext(SessionContext)!;
+    const courseIdsSWR = useSWR<{ [courseName: string]: number }, string>(
+        "/api/course/ids",
+        fetcher
+    );
+
+    if (courseIdsSWR.error) {
+        console.log(courseIdsSWR.error);
+    }
+    const courseIds: { [courseCode: string]: number } = courseIdsSWR.data!;
 
     const courseSemesterContextItem = useContext(CourseSemesterContext);
     if (!courseSemesterContextItem) {
@@ -86,7 +95,7 @@ export default function DashboardComponent({
                     return;
                 }
 
-                const [, data] = type;
+                const [, droppedNode] = type;
 
                 const nodeOutput: PrerequisiteNodeType[] = [];
                 const edgeOutput: Edge[] = [];
@@ -94,24 +103,39 @@ export default function DashboardComponent({
 
                 parsePrerequisite(
                     prerequisites,
-                    data.courseCode,
+                    droppedNode.courseCode,
                     nodeOutput,
                     edgeOutput,
-                    wrapperOutput
+                    wrapperOutput,
+                    courseIds
                 );
 
                 const courseStates: CourseToSemesterIdDict = {};
-                const courses = nodeOutput.map((node) => node.courseName);
-
-                const courseInformation = await getCourseInformation(courses);
-                const filledCourses = nodeOutput.map((node) => ({
-                    id: node.key,
-                    data: courseInformation[node.courseName],
-                }));
-
-                const courseSemesters = await getCourseSemesters(
-                    session.user.userId
+                const informationEndpoint = new URLSearchParams("");
+                nodeOutput.forEach((node) => {
+                    informationEndpoint.append(
+                        "courseIds",
+                        node.courseId.toString()
+                    );
+                });
+                const courseInformationResponse = await fetch(
+                    "/api/course/information?" + informationEndpoint
                 );
+                const courseInformation: {
+                    [courseId: number]: CourseInformation;
+                } = await courseInformationResponse.json();
+                const filledCourses = nodeOutput.map((node) => {
+                    const course = courseInformation[node.courseId];
+                    return { id: node.key, data: course };
+                });
+
+                const courseSemesterResponse = await fetch(
+                    "/api/course/semesters"
+                );
+                const courseSemesters: {
+                    semesterId: number;
+                    course: CourseInformation;
+                }[] = await courseSemesterResponse.json();
                 courseSemesters.forEach((courseSemester) => {
                     courseStates[courseSemester.course.courseCode] =
                         courseSemester.semesterId;
@@ -148,12 +172,12 @@ export default function DashboardComponent({
             handler();
         },
         [
-            session.user.userId,
             type,
             prerequisites,
             selectSemester,
             relatedSemesterId,
             setRelatedSemesterId,
+            courseIds,
         ]
     );
 
