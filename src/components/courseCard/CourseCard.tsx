@@ -68,6 +68,7 @@ export function CourseCardDropdownWrapper({
             shadow="sm"
         >
             <CourseCardForm
+                courseId={courseInformation.courseId}
                 courseCode={courseInformation.courseCode}
                 selectSemester={selectSemester}
             />

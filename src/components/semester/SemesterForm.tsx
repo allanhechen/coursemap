@@ -16,7 +16,6 @@ import { IconEdit } from "@tabler/icons-react";
 import { useSemesterFormContext } from "@/components/semester/semesterFormContext";
 
 import { useUpdateNodes } from "@/lib/placement";
-import { createSemester, updateSemester } from "@/actions/semester";
 import { SemesterDict, SemesterTerm } from "@/types/semester";
 import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
 import "@/components/semester/SemesterForm.css";
@@ -46,8 +45,7 @@ export default function SemesterForm({
     const [visible, setVisible] = useState(false);
 
     const session = useContext(SessionContext)!;
-    const { userId, institutionId, programName } = session.user;
-    let updateNodes: (session: Session) => Promise<number>;
+    let updateNodes: ((session: Session) => Promise<number>) | null = null;
     let semesterDict: SemesterDict | undefined;
     let setSemesterDict:
         | React.Dispatch<React.SetStateAction<SemesterDict>>
@@ -82,6 +80,23 @@ export default function SemesterForm({
         open();
     }, [form, open, semesterName, semesterTerm, semesterYear]);
 
+    const handleDelete = useCallback(async () => {
+        try {
+            const params = new URLSearchParams("");
+            params.append("semesterId", semesterId!.toString());
+            await fetch("/api/semester?" + params, {
+                method: "DELETE",
+            });
+            if (updateNodes) {
+                updateNodes(session);
+            }
+            close();
+        } catch (e) {
+            console.log(e);
+            // TODO: handle this error
+        }
+    }, [close, semesterId, session, updateNodes]);
+
     return (
         <>
             <Modal
@@ -98,39 +113,56 @@ export default function SemesterForm({
             >
                 <form
                     onSubmit={form.onSubmit(async (values) => {
-                        if (semesterId) {
-                            updateSemester(
-                                semesterId,
-                                values.semesterName,
-                                values.semesterYear,
-                                values.semesterTerm
-                            );
-                        } else {
-                            semesterId = await createSemester(
-                                userId,
-                                institutionId,
-                                programName,
-                                values.semesterName,
-                                values.semesterYear,
-                                values.semesterTerm
-                            );
-                            if (semesterDict && setSemesterDict) {
-                                const newSemesterDict = {
-                                    ...semesterDict,
-                                    [semesterId]: {
+                        // TODO: Add some client side validation to make sure name and year are filled
+                        try {
+                            if (semesterId) {
+                                await fetch("/api/semester", {
+                                    method: "PUT",
+                                    body: JSON.stringify({
                                         semesterId: semesterId,
                                         semesterName: values.semesterName,
-                                        semesterYear: values.semesterYear,
+                                        semesterYear:
+                                            values.semesterYear.getFullYear(),
                                         semesterTerm: values.semesterTerm,
-                                    },
-                                };
-                                setSemesterDict(newSemesterDict);
+                                    }),
+                                });
+                            } else {
+                                const semesterResponse = await fetch(
+                                    "/api/semester",
+                                    {
+                                        method: "POST",
+                                        body: JSON.stringify({
+                                            semesterName: values.semesterName,
+                                            semesterYear:
+                                                values.semesterYear.getFullYear(),
+                                            semesterTerm: values.semesterTerm,
+                                        }),
+                                    }
+                                );
+                                const { semesterId } =
+                                    await semesterResponse.json();
+                                if (semesterDict && setSemesterDict) {
+                                    const newSemesterDict = {
+                                        ...semesterDict,
+                                        [semesterId]: {
+                                            semesterId: semesterId,
+                                            semesterName: values.semesterName,
+                                            semesterYear: values.semesterYear,
+                                            semesterTerm: values.semesterTerm,
+                                        },
+                                    };
+                                    setSemesterDict(newSemesterDict);
+                                }
                             }
+                        } catch (e) {
+                            // TODO: add notification when this goes wrong
+                            console.log(e);
                         }
 
                         if (updateNodes) {
                             updateNodes(session);
                         }
+                        close();
                     })}
                 >
                     <div className="mt-3">
@@ -162,9 +194,14 @@ export default function SemesterForm({
                         </div>
                     </div>
 
-                    <Button className="mt-5 mb-3" type="submit">
-                        Submit
-                    </Button>
+                    <div className="mt-5 mb-3 flex justify-between">
+                        <Button type="submit">Submit</Button>
+                        {semesterId && (
+                            <Button color="red" onClick={handleDelete}>
+                                Delete
+                            </Button>
+                        )}
+                    </div>
                 </form>
             </Modal>
             <div className="cursor-pointer" onClick={openedWrapper}>

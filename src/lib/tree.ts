@@ -308,7 +308,6 @@ export function placeWrappers(
                 height: height,
             },
         };
-        console.log(wrapperNode.id, wrapperNode);
         nodes.push(wrapperNode);
     }
 }

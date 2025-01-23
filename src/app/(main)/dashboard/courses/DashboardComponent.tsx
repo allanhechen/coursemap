@@ -26,7 +26,6 @@ import {
 import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/courseSemesterContext";
 import AndWrapper from "@/components/wrapper/AndWrapper";
 import OrWrapper from "@/components/wrapper/OrWrapper";
-import { SessionContext } from "@/components/sessionContext";
 import fetcher from "@/lib/fetcher";
 
 const nodeTypes = {
@@ -54,8 +53,6 @@ export default function DashboardComponent({
         console.log(courseIdsSWR.error);
     }
     const courseIds: { [courseCode: string]: number } = courseIdsSWR.data!;
-
-    const session = useContext(SessionContext)!;
 
     const courseSemesterContextItem = useContext(CourseSemesterContext);
     if (!courseSemesterContextItem) {
@@ -175,12 +172,12 @@ export default function DashboardComponent({
             handler();
         },
         [
-            session.user.userId,
             type,
             prerequisites,
             selectSemester,
             relatedSemesterId,
             setRelatedSemesterId,
+            courseIds,
         ]
     );
 

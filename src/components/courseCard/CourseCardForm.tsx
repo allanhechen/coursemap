@@ -10,9 +10,11 @@ import {
 import { useContext } from "react";
 
 export default function CourseCardForm({
+    courseId,
     courseCode,
     selectSemester,
 }: {
+    courseId: number;
     courseCode: string;
     selectSemester: (
         courseCode: string,
@@ -21,14 +23,14 @@ export default function CourseCardForm({
 }) {
     const semesterDictContextItem = useContext(SemesterContext);
     if (!semesterDictContextItem) {
-        throw new Error("DashboardComponent must be used in a SemesterContext");
+        throw new Error("CourseCardForm must be used in a SemesterContext");
     }
     const [semesterDict] = semesterDictContextItem;
 
     const courseSemesterContextItem = useContext(CourseSemesterContext);
     if (!courseSemesterContextItem) {
         throw new Error(
-            "DashboardComponent must be used in a CourseSemesterContext"
+            "CourseCardForm must be used in a CourseSemesterContext"
         );
     }
     const [relatedSemesterId] = courseSemesterContextItem;
@@ -54,11 +56,29 @@ export default function CourseCardForm({
     return (
         <Combobox
             store={combobox}
-            onOptionSubmit={(semesterIdString: string | undefined) => {
+            onOptionSubmit={async (semesterIdString: string | undefined) => {
                 let semesterId;
-                if (semesterIdString) {
-                    semesterId = Number(semesterIdString);
+                try {
+                    if (semesterIdString) {
+                        semesterId = parseInt(semesterIdString);
+                        await fetch("/api/course/semesters", {
+                            method: "PUT",
+                            body: JSON.stringify({
+                                courseIds: [courseId],
+                                semesterId: semesterId,
+                            }),
+                        });
+                    } else {
+                        const params = new URLSearchParams("");
+                        params.append("courseId", courseId.toString());
+                        await fetch("/api/course/semesters?" + params, {
+                            method: "DELETE",
+                        });
+                    }
+                } catch (e) {
+                    console.log(e);
                 }
+
                 selectSemester(courseCode, semesterId);
                 combobox.closeDropdown();
             }}
