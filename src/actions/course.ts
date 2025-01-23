@@ -263,16 +263,17 @@ export async function searchCourses(
         searchResult = await sql.query<{ courseid: number }>(
             `
             SELECT courseid
-                FROM (
-                    SELECT 
-                        course.courseid, TS_RANK(TO_TSVECTOR(coursecode || ' ' || coursetitle), 
-                                WEBSEARCH_TO_TSQUERY( $1 )) AS rank
-                    FROM 
-                        course
-                    LEFT JOIN 
-                        courseattribute ON course.courseid = courseattribute.courseid
-                    WHERE ${joinedOptions} institutionid = $2
-                  )
+            FROM (
+                SELECT 
+                    course.courseid, 
+                    TS_RANK(TO_TSVECTOR(coursecode || ' ' || coursetitle), WEBSEARCH_TO_TSQUERY($1)) AS rank
+                FROM 
+                    course
+                LEFT JOIN 
+                    courseattribute ON course.courseid = courseattribute.courseid
+                WHERE 
+                    ${joinedOptions} institutionid = $2
+            ) AS subquery
             WHERE rank > 0.01
             GROUP BY courseid, rank
             ORDER BY rank DESC
