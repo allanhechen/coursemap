@@ -51,7 +51,7 @@ export default function CourseCardWrapper({ data }: CardWrapper) {
         ]
     );
 
-    return <CourseCard onWheel={onWheel} {...data} />;
+    return <CourseCard className="nowheel" onWheel={onWheel} {...data} />;
 }
 
 export function CourseCardDropdownWrapper({
@@ -97,7 +97,7 @@ export function CourseCard({
     return (
         <Card
             {...rest}
-            className={`h-44 w-80 min-h-44 select-none nowheel course-card ${warningClasses}`}
+            className={`h-44 w-80 min-h-44 select-none course-card ${warningClasses}`}
             radius="lg"
             shadow="sm"
             padding="lg"
