@@ -32,9 +32,14 @@ export async function getActiveUserProgram(userId: number): Promise<{
 
     const rows = queryResult.rows;
     if (rows.length != 1) {
-        throw new Error(
-            `Incorrect number of active entries returned for user ${userId}`
-        );
+        // user does not have an active program set, but this will be dealt with by the pages on load
+        return {
+            institutionId: 0,
+            institutionName: "",
+            institutionPhoto: "",
+            programName: "",
+            startingYear: 0,
+        };
     }
     const result = {
         institutionId: rows[0].institutionid,
@@ -91,10 +96,11 @@ export async function updateUserProgram(
         );
         const result = await client.query(
             `
-            UPDATE userprogram
-            SET active = TRUE
-            WHERE userId = $1 AND institutionid = $2 AND programname = $3 AND startingyear = $4
-            RETURNING *;
+            INSERT INTO userprogram (userId, institutionId, programName, startingYear, active)
+            VALUES ($1, $2, $3, $4, TRUE)
+            ON CONFLICT (userId, institutionId, programName)
+            DO UPDATE SET active = TRUE
+            RETURNING 1;
             `,
             [userId, institutionId, programName, startingYear]
         );
@@ -104,8 +110,9 @@ export async function updateUserProgram(
         } else {
             throw new Error("No userprograms were matched with given criteria");
         }
-    } catch {
+    } catch (e) {
         await client.query("ROLLBACK");
+        console.log(e);
         throw new Error("Error updating user program");
     } finally {
         client.release();
