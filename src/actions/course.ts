@@ -276,8 +276,7 @@ export async function searchCourses(
             ) AS subquery
             WHERE rank > 0.01
             GROUP BY courseid, rank
-            ORDER BY rank DESC
-            LIMIT 20;
+            ORDER BY rank DESC;
             `,
             [searchQuery, institutionId]
         );
@@ -290,7 +289,6 @@ export async function searchCourses(
                 courseattribute ON course.courseid = courseattribute.courseid
             WHERE ${joinedOptions} institutionid = $1
             GROUP BY course.courseid
-            LIMIT 20;
             `,
             [institutionId]
         );
@@ -327,7 +325,7 @@ export async function getCourseSemesters(
     userId: number,
     institutionId: number,
     programName: string,
-    startingyear: number
+    startingYear: number
 ): Promise<{ semesterId: number; course: CourseInformation }[]> {
     const coursesemesterQuery = await sql.query<{
         semesterid: number;
@@ -337,10 +335,14 @@ export async function getCourseSemesters(
         SELECT coursesemester.semesterid, coursesemester.courseid
         FROM coursesemester
         INNER JOIN semester ON coursesemester.semesterid = semester.semesterid
-        WHERE semester.userid = $1 AND semester.institutionid = $2
+        WHERE 
+            semester.userid = $1 AND 
+            semester.institutionid = $2 AND 
+            semester.programname = $3 
+            AND semester.startingyear = $4
         ORDER BY coursesemester.sortorder ASC;
         `,
-        [userId, institutionId]
+        [userId, institutionId, programName, startingYear]
     );
 
     const result: { semesterId: number; course: CourseInformation }[] = [];
@@ -351,7 +353,7 @@ export async function getCourseSemesters(
         await getCourseInformation(
             institutionId,
             programName,
-            startingyear,
+            startingYear,
             courseIds
         );
 

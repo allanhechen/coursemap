@@ -23,12 +23,13 @@ export async function GET() {
     if (!session) {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { userId, institutionId, programName } = session.user;
+    const { userId, institutionId, programName, startingYear } = session.user;
     try {
         const courseSemesters = await getSemesters(
             userId,
             institutionId,
-            programName
+            programName,
+            startingYear
         );
         return Response.json({ semesters: courseSemesters });
     } catch (e) {
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     if (!session) {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { userId, institutionId, programName } = session.user;
+    const { userId, institutionId, programName, startingYear } = session.user;
 
     const body = await request.json();
     try {
@@ -54,6 +55,7 @@ export async function POST(request: NextRequest) {
             userId,
             institutionId,
             programName,
+            startingYear,
             semester.semesterName,
             new Date(semester.semesterYear, 0, 1),
             semester.semesterTerm as SemesterTerm

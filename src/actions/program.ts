@@ -98,7 +98,7 @@ export async function updateUserProgram(
             `
             INSERT INTO userprogram (userId, institutionId, programName, startingYear, active)
             VALUES ($1, $2, $3, $4, TRUE)
-            ON CONFLICT (userId, institutionId, programName)
+            ON CONFLICT (userId, institutionId, programName, startingYear)
             DO UPDATE SET active = TRUE
             RETURNING 1;
             `,
@@ -154,41 +154,54 @@ export async function deleteUserProgram(
     );
 }
 
-export async function getUserPrograms(userId: number): Promise<
+export async function getPrograms(): Promise<
     {
         institutionId: number;
         institutionName: string;
         institutionPhoto: string;
         programName: string;
         startingYear: number;
-        active: boolean;
     }[]
 > {
-    const result = await sql.query<{
+    const queryResult = await sql.query<{
+        institutionid: number;
+        institutionname: string;
+        institutionphoto: string;
+        programname: string;
+        startingyear: number;
+    }>(
+        `
+        SELECT program.institutionId, program.programName, program.startingYear, institution.institutionName, institution.institutionPhoto
+        FROM program
+        INNER JOIN institution
+        ON institution.institutionid = program.institutionid;
+        `
+    );
+
+    const result: {
         institutionId: number;
         institutionName: string;
         institutionPhoto: string;
         programName: string;
         startingYear: number;
-        active: boolean;
-    }>(
-        `
-        SELECT 
-            institution.institutionid, 
-            institution.institutionname, 
-            institution.institutionphoto, 
-            userprogram.programname,
-            userprogram.startingyear,
-            userprogram.active
-        FROM userprogram
-        INNER JOIN institution ON userprogram.institutionid = institution.institutionid
-        WHERE userid = $1;
-        `,
-        [userId]
+    }[] = queryResult.rows.map(
+        ({
+            institutionid,
+            institutionname,
+            institutionphoto,
+            programname,
+            startingyear,
+        }) => {
+            return {
+                institutionId: institutionid,
+                institutionName: institutionname,
+                institutionPhoto: institutionphoto,
+                programName: programname,
+                startingYear: startingyear,
+            };
+        }
     );
-
-    const rows = result.rows;
-    return rows;
+    return result;
 }
 
 export async function getProgramRequirements(

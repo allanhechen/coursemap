@@ -50,10 +50,10 @@ CREATE TABLE IF NOT EXISTS userprogram (
     userId INT REFERENCES users(id),
     institutionid INT,
     programname VARCHAR(64),
-    startingyear INT NOT NULL,
+    startingyear INT,
     active BOOLEAN,
     FOREIGN KEY (institutionid, programname, startingyear) REFERENCES program(institutionid, programname, startingyear),
-    PRIMARY KEY (userId, institutionid, programname)
+    PRIMARY KEY (userId, institutionid, programname, startingyear)
 );
 CREATE TABLE IF NOT EXISTS course (
     courseid SERIAL PRIMARY KEY,
@@ -84,10 +84,11 @@ CREATE TABLE IF NOT EXISTS semester (
     userId INT,
     institutionid INT,
     programname VARCHAR(64),
+    startingyear INT,
     semestername VARCHAR(32) NOT NULL,
     semesteryear INT NOT NULL,
     semesterterm CHAR(2) NOT NULL,
-    FOREIGN KEY (userId, institutionid, programname) REFERENCES userprogram(userId, institutionid, programname),
+    FOREIGN KEY (userId, institutionid, programname, startingyear) REFERENCES userprogram(userId, institutionid, programname, startingyear),
     UNIQUE (userId, institutionid, programname, semesteryear, semesterterm)
 );
 CREATE TABLE IF NOT EXISTS coursesemester (
@@ -104,6 +105,6 @@ CREATE TABLE IF NOT EXISTS programrequirement (
     courseid INT,
     recommendedsemester INT NOT NULL,
     requirementyear INT,
-    PRIMARY KEY (institutionid, programname, courseid),
+    PRIMARY KEY (institutionid, programname, courseid, requirementyear),
     FOREIGN KEY (institutionid, programname, requirementyear) REFERENCES program(institutionid, programname, startingyear)
 );
