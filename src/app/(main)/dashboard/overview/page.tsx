@@ -10,7 +10,9 @@ export default async function Page() {
     const session = await auth();
 
     if (!session) {
-        redirect("/login");
+        redirect("/signin");
+    } else if (!session.user.institutionId) {
+        redirect("/help");
     }
 
     return (

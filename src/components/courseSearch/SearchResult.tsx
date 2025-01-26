@@ -1,5 +1,5 @@
 import { Stack } from "@mantine/core";
-import { useCallback, useContext } from "react";
+import { useContext } from "react";
 
 import { CourseCard } from "@/components/courseCard/CourseCard";
 import { CourseInformation } from "@/types/courseCard";
@@ -19,19 +19,18 @@ export default function SearchResult({
     }
     const [, setType] = contextItem;
 
-    const onDragStart = useCallback(
-        (
-            event: React.DragEvent<HTMLDivElement>,
-            nodeType: [string, CourseInformation]
-        ) => {
-            setType([nodeType[0], nodeType[1]]);
-            event.dataTransfer!.effectAllowed = "move";
-        },
-        [setType]
-    );
+    function onDragStart(
+        event: React.DragEvent<HTMLDivElement>,
+        nodeType: [string, CourseInformation]
+    ) {
+        setType([nodeType[0], nodeType[1]]);
+        event.dataTransfer!.effectAllowed = "move";
+    }
 
-    const renderedCards = cards.map((card) => {
-        return (
+    const renderedCards = [];
+    for (let i = 0; i < cards.length && i < 30; i++) {
+        const card = cards[i];
+        renderedCards.push(
             <CourseCard
                 draggable
                 onDragStart={(event) =>
@@ -48,7 +47,8 @@ export default function SearchResult({
                 courseId={card.courseId}
             />
         );
-    });
+    }
+
     return (
         <Stack
             style={{ borderRadius: "16px" }}

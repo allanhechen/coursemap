@@ -12,15 +12,18 @@ import { SemesterInformation } from "@/types/semester";
 export default async function Page() {
     const session = await auth();
     if (!session) {
-        redirect("/login");
+        redirect("/signin");
+    } else if (!session.user.institutionId) {
+        redirect("/help");
     }
-    const { userId, institutionId, programName } = session.user;
+    const { userId, institutionId, programName, startingYear } = session.user;
 
     const prerequisites = await getPrerequsuites(institutionId!);
     const semesterInformation = await getSemesters(
         userId,
         institutionId,
-        programName
+        programName,
+        startingYear
     );
     const semesterObject: {
         [semesterId: number]: SemesterInformation;

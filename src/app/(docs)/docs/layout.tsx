@@ -37,7 +37,6 @@ export default function Layout({ children }: { children: ReactNode }) {
                         sidebar={{
                             banner: (
                                 <Link href="/docs">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src="/logos/coursemap-banner-dark.svg"
                                         alt="Wide Coursemap Logo"
