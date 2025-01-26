@@ -1,0 +1,13 @@
+{
+    "name": "coursemap",
+    "icons": [
+        {
+            "src": "/logos/coursemap-icon-bg-light.png",
+            "type": "image/png",
+            "sizes": "120x120"
+        }
+    ],
+    "start_url": "/",
+    "display": "fullscreen",
+    "id": "coursemap"
+}

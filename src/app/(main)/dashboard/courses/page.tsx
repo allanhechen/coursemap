@@ -8,6 +8,13 @@ import { auth } from "@/lib/auth";
 import { getPrerequsuites } from "@/actions/course";
 import { getSemesters } from "@/actions/semester";
 import { SemesterInformation } from "@/types/semester";
+import { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+    return {
+        title: "courses",
+    };
+}
 
 export default async function Page() {
     const session = await auth();
