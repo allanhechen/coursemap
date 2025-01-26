@@ -43,7 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => {
             async session({ session, trigger, newSession }) {
                 if (trigger === "update") {
                     const { userId, institutionId, programName, startingYear } =
-                        newSession.user;
+                        newSession;
                     await updateUserProgram(
                         userId,
                         institutionId,
