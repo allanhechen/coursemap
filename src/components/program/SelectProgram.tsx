@@ -372,7 +372,7 @@ function getProgramOptions(
                 </InputBase>
             </Combobox.Target>
             <Combobox.Dropdown>
-                <Combobox.Options mah={200} style={{ overflowY: "auto" }}>
+                <Combobox.Options mah={150} style={{ overflowY: "auto" }}>
                     {programOptions}
                 </Combobox.Options>
             </Combobox.Dropdown>
@@ -435,7 +435,7 @@ function getYearOptions(
                 </InputBase>
             </Combobox.Target>
             <Combobox.Dropdown>
-                <Combobox.Options mah={200} style={{ overflowY: "auto" }}>
+                <Combobox.Options mah={100} style={{ overflowY: "auto" }}>
                     {programOptions}
                 </Combobox.Options>
             </Combobox.Dropdown>
