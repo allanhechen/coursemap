@@ -32,3 +32,7 @@
 [data-mantine-color-scheme="dark"] .mantine-Menu-dropdown {
     background-color: #22242e !important;
 }
+
+.mantine-InputBase-input {
+    background-color: hsl(0, 7%, 15%, 75%) !important;
+}

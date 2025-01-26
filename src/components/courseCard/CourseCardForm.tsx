@@ -68,12 +68,6 @@ export default function CourseCardForm({
                                 semesterId: semesterId,
                             }),
                         });
-                    } else {
-                        const params = new URLSearchParams("");
-                        params.append("courseId", courseId.toString());
-                        await fetch("/api/course/semesters?" + params, {
-                            method: "DELETE",
-                        });
                     }
                 } catch (e) {
                     console.log(e);
@@ -88,15 +82,28 @@ export default function CourseCardForm({
                     component="button"
                     type="button"
                     pointer
-                    onClick={() => combobox.toggleDropdown()}
+                    onClick={() => {
+                        combobox.toggleDropdown();
+                    }}
                     rightSection={
                         selection !== null ? (
                             <CloseButton
                                 size="sm"
                                 onMouseDown={(event) => event.preventDefault()}
-                                onClick={() =>
-                                    selectSemester(courseCode, undefined)
-                                }
+                                onClick={async () => {
+                                    selectSemester(courseCode, undefined);
+                                    const params = new URLSearchParams("");
+                                    params.append(
+                                        "courseId",
+                                        courseId.toString()
+                                    );
+                                    await fetch(
+                                        "/api/course/semesters?" + params,
+                                        {
+                                            method: "DELETE",
+                                        }
+                                    );
+                                }}
                                 aria-label="Clear value"
                             />
                         ) : (
