@@ -20,3 +20,16 @@ export function stringToDeg(string: string) {
     }
     return `${hash % 360}deg`;
 }
+
+export function getBackgroundColor() {
+    const time = new Date().toISOString();
+    return {
+        background: `linear-gradient(${stringToDeg(
+            time + "hi there"
+        )}, ${stringToColor(time + "these are some", 100, 30)}, ${stringToColor(
+            time + "random values!",
+            100,
+            30
+        )})`,
+    };
+}
