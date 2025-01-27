@@ -375,8 +375,14 @@ export const useUpdateNodes = () => {
         const { semesters }: { semesters: SemesterInformation[] } =
             await semesterResponse.json();
 
+        // the items received are not actually dates
         semesters.forEach((semester) => {
-            semester.semesterYear = new Date(semester.semesterYear);
+            const dateObject = new Date();
+            const yearString = (
+                semester.semesterYear as unknown as string
+            ).substring(0, 5);
+            dateObject.setFullYear(parseInt(yearString));
+            semester.semesterYear = dateObject;
         });
         const courseSemestersResponse = await fetch("/api/course/semesters");
         const courseSemesters: {

@@ -119,7 +119,6 @@ export async function updateUserProgram(
             `,
             [userId, institutionId, programName, startingYear]
         );
-        console.log(result.rows);
         if (result.rowCount === 1) {
             if (result.rows[0].operation === "inserted") {
                 const programRequirements = await client.query<{
@@ -138,7 +137,6 @@ export async function updateUserProgram(
                     await client.query("COMMIT");
                     return;
                 }
-                console.log(programRequirements.rows);
                 programRequirements.rows.forEach(({ recommendedsemester }) => {
                     if (!requiredSemesters.includes(recommendedsemester)) {
                         requiredSemesters.push(recommendedsemester);
@@ -170,7 +168,6 @@ export async function updateUserProgram(
                                                                   '${term}')`);
                     }
                 });
-                console.log(semesterQueryArray);
                 const queryResults = await client.query(
                     semesterQueryArray.join(
                         "RETURNING semesterid, semesteryear, semesterterm;"
@@ -197,7 +194,6 @@ export async function updateUserProgram(
                         const term = recommendedsemester % 2 == 0 ? "WI" : "FA";
                         const year = Math.floor(recommendedsemester / 2) + 1;
                         const key = startingYear + year - 1 + "-" + term;
-                        console.log(key, semesterToId[key]);
                         courseSemesters.push(`
                             INSERT INTO coursesemester(
                                 userId,

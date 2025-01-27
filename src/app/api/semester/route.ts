@@ -25,13 +25,13 @@ export async function GET() {
     }
     const { userId, institutionId, programName, startingYear } = session.user;
     try {
-        const courseSemesters = await getSemesters(
+        const semesters = await getSemesters(
             userId,
             institutionId,
             programName,
             startingYear
         );
-        return Response.json({ semesters: courseSemesters });
+        return Response.json({ semesters: semesters });
     } catch (e) {
         console.error("Unexpected error:", e);
         return Response.json(
