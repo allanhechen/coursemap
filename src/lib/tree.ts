@@ -94,7 +94,7 @@ export function parsePrerequisite(
 
 const CARD_HEIGHT = 256;
 const CARD_WIDTH = 352;
-const CARD_GAP = 50;
+const CARD_GAP = 75;
 export function placeNodes(nodes: (DropdownCardWrapper | WrapperWrapper)[]) {
     const nodeChildren: {
         [nodeId: string]:
@@ -357,7 +357,8 @@ function handleANDRequirement(
                 edgeOutput,
                 wrapperOutput,
                 courseIds,
-                key
+                key,
+                i.toString()
             );
 
             i = j;
@@ -412,7 +413,8 @@ function handleORRequirement(
     edgeOutput: Edge[],
     wrapperOutput: { [key: string]: Wrapper },
     courseIds: { [courseCode: string]: number },
-    key: string
+    key: string,
+    iteration?: string
 ): void {
     for (let i = 0; i < inputTokens.length; i++) {
         const current = inputTokens[i];
@@ -450,7 +452,7 @@ function handleORRequirement(
                 wrapperOutput,
                 courseIds,
                 key,
-                key + "-innerWrapper"
+                key + i.toString() + "-innerWrapper"
             );
 
             const outerNodeKey = key + "-outerWrapper";
@@ -471,7 +473,7 @@ function handleORRequirement(
         } else {
             const currentTransformed = current.replace("_", " ");
             const newKey = key + "-" + currentTransformed;
-            const outerNodeKey = key + "-outerWrapper";
+            const outerNodeKey = key + iteration + "-outerWrapper";
 
             nodeOutput.push({
                 courseName: currentTransformed,
