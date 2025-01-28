@@ -330,14 +330,28 @@ function handleANDRequirement(
                 "Malformed prerequisite, cannot have 'or' requirements in this level"
             );
         } else if (current === "(") {
-            let j = i + 1;
-            while (inputTokens[j] !== ")") {
+            const start = i + 1;
+            let j = start;
+            let level = 0;
+            while (j < inputTokens.length) {
+                if (inputTokens[j] == "(") {
+                    level += 1;
+                } else if (inputTokens[j] == ")") {
+                    if (level === 0) {
+                        break;
+                    }
+                    level -= 1;
+                }
                 j += 1;
             }
-
+            if (j > inputTokens.length) {
+                throw new Error(
+                    "Malformed prerequisite, mismatched parenthesis"
+                );
+            }
             handleORRequirement(
                 prerequisites,
-                inputTokens.slice(i + 1, j),
+                inputTokens.slice(start, j),
                 parentCourse,
                 nodeOutput,
                 edgeOutput,
@@ -407,14 +421,29 @@ function handleORRequirement(
                 "Malformed prerequisite, cannot have 'or' requirements in this level"
             );
         } else if (current === "(") {
-            let j = i + 1;
-            while (inputTokens[j] !== ")") {
+            const start = i + 1;
+            let j = start;
+            let level = 0;
+            while (j < inputTokens.length) {
+                if (inputTokens[j] == "(") {
+                    level += 1;
+                } else if (inputTokens[j] == ")") {
+                    if (level === 0) {
+                        break;
+                    }
+                    level -= 1;
+                }
                 j += 1;
+            }
+            if (j == inputTokens.length) {
+                throw new Error(
+                    "Malformed prerequisite, mismatched parenthesis"
+                );
             }
 
             handleANDRequirement(
                 prerequisites,
-                inputTokens.slice(i + 1, j),
+                inputTokens.slice(start, j),
                 parentCourse,
                 nodeOutput,
                 edgeOutput,
