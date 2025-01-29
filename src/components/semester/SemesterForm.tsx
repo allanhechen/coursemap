@@ -204,7 +204,7 @@ export default function SemesterForm({
                     </div>
                 </form>
             </Modal>
-            <div className="cursor-pointer" onClick={openedWrapper}>
+            <div className="cursor-pointer relative" onClick={openedWrapper}>
                 {semesterName ? (
                     <div
                         className="flex items-center relative mt-2 pr-2"
@@ -215,7 +215,8 @@ export default function SemesterForm({
                         <div
                             className="absolute edit-icon"
                             style={{
-                                transform: "translate(35px, 1px)",
+                                right: 0,
+                                transform: "translate(20px, -1px)",
                                 opacity: visible ? 1 : 0,
                             }}
                         >

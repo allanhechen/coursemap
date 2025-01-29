@@ -141,7 +141,6 @@ export async function updateUserProgram(
                     if (!requiredSemesters.includes(recommendedsemester)) {
                         requiredSemesters.push(recommendedsemester);
                         const term = recommendedsemester % 2 == 0 ? "WI" : "FA";
-                        const letter = recommendedsemester % 2 == 0 ? "b" : "a";
                         const year = Math.floor(recommendedsemester / 2) + 1;
                         semesterQueryArray.push(`INSERT INTO semester(
                                                                     userId, 
@@ -157,9 +156,10 @@ export async function updateUserProgram(
                                                                   '${programName}',
                                                                   ${startingYear},
                                                                   '${
-                                                                      year +
-                                                                      letter
-                                                                  }',
+                                                                      startingYear +
+                                                                      year -
+                                                                      1
+                                                                  }-${term}',
                                                                   ${
                                                                       startingYear +
                                                                       year -
