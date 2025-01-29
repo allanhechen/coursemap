@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 import DashboardWrapper from "@/app/(main)/dashboard/courses/DashboardWrapper";
 import { auth } from "@/lib/auth";
-import { getPrerequsuites } from "@/actions/course";
+import { getCourseIds, getPrerequsuites } from "@/actions/course";
 import { getSemesters } from "@/actions/semester";
 import { SemesterInformation } from "@/types/semester";
 import { Metadata } from "next";
@@ -32,6 +32,7 @@ export default async function Page() {
         programName,
         startingYear
     );
+    const courseIds = await getCourseIds(institutionId);
     const semesterObject: {
         [semesterId: number]: SemesterInformation;
     } = {};
@@ -45,6 +46,7 @@ export default async function Page() {
                 session={session}
                 prerequisites={prerequisites}
                 allSemesters={semesterObject}
+                courseIds={courseIds}
             />
         </ReactFlowProvider>
     );

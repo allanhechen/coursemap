@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useContext, useEffect } from "react";
 import { ReactFlow, Node, Edge, useReactFlow, MiniMap } from "@xyflow/react";
-import useSWR from "swr";
 
 import { CourseCardDropdownWrapper } from "@/components/courseCard/CourseCard";
 import NavBar from "@/components/header/NavBar";
@@ -26,7 +25,6 @@ import {
 import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/courseSemesterContext";
 import AndWrapper from "@/components/wrapper/AndWrapper";
 import OrWrapper from "@/components/wrapper/OrWrapper";
-import fetcher from "@/lib/fetcher";
 
 const nodeTypes = {
     courseDropdownNode: CourseCardDropdownWrapper,
@@ -36,23 +34,15 @@ const nodeTypes = {
 
 export default function DashboardComponent({
     prerequisites,
+    courseIds,
 }: {
     prerequisites: { [key: string]: string };
+    courseIds: { [courseCode: string]: number };
 }) {
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
     const [height, setHeight] = useState(1);
     const { fitView } = useReactFlow();
-
-    const courseIdsSWR = useSWR<{ [courseName: string]: number }, string>(
-        "/api/course/ids",
-        fetcher
-    );
-
-    if (courseIdsSWR.error) {
-        console.log(courseIdsSWR.error);
-    }
-    const courseIds: { [courseCode: string]: number } = courseIdsSWR.data!;
 
     const courseSemesterContextItem = useContext(CourseSemesterContext);
     if (!courseSemesterContextItem) {

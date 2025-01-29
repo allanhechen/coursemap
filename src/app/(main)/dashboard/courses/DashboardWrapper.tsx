@@ -20,10 +20,12 @@ export default function DashboardWrapper({
     session,
     prerequisites,
     allSemesters,
+    courseIds,
 }: {
     session: Session;
     prerequisites: { [key: string]: string };
     allSemesters: SemesterDict;
+    courseIds: { [courseCode: string]: number };
 }) {
     const [type, setType] = useState<[string, CourseInformation] | null>(null);
     const [relatedSemesterId, setRelatedSemesterId] =
@@ -49,7 +51,10 @@ export default function DashboardWrapper({
                 >
                     <SemesterFormProvider form={form}>
                         <DnDContext.Provider value={[type, setType]}>
-                            <DashboardComponent prerequisites={prerequisites} />
+                            <DashboardComponent
+                                prerequisites={prerequisites}
+                                courseIds={courseIds}
+                            />
                         </DnDContext.Provider>
                     </SemesterFormProvider>
                 </CourseSemesterContext.Provider>

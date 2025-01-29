@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import DashboardWrapper from "@/app/(main)/dashboard/overview/DashboardWrapper";
 import { auth } from "@/lib/auth";
 import { Metadata } from "next";
+import { getCourseNames } from "@/actions/course";
 
 export async function generateMetadata(): Promise<Metadata> {
     return {
@@ -22,9 +23,11 @@ export default async function Page() {
         redirect("/help");
     }
 
+    const courseNames = await getCourseNames(session.user.institutionId);
+
     return (
         <ReactFlowProvider>
-            <DashboardWrapper session={session} />
+            <DashboardWrapper session={session} courseNames={courseNames} />
         </ReactFlowProvider>
     );
 }

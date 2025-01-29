@@ -45,7 +45,13 @@ const nodeTypes = {
     searchNode: CourseSearch,
 };
 
-export default function DashboardComponent() {
+export default function DashboardComponent({
+    courseNames,
+}: {
+    courseNames: {
+        [courseId: number]: string;
+    };
+}) {
     const [lastX, setLastX] = useState(0);
     const [nodes, setNodes] = useState<Node[]>([]);
     const [nodesLength, setNodesLength] = useState(0);
@@ -53,7 +59,7 @@ export default function DashboardComponent() {
     const windowSize = useWindowSize();
     const { horizontalScrollHandler } = useScrollHandler();
     const { updateNodes } = useUpdateNodes();
-    const { groupCards } = useGroupCards();
+    const { groupCards } = useGroupCards(courseNames);
     const { dragStartHandler } = useDragStartHandler();
     const { onViewportMove } = useOnViewportMove();
     const { getViewport, setViewport, getNodes } = useReactFlow();

@@ -16,8 +16,6 @@ import {
 import { CardWrapper, CourseInformation } from "@/types/courseCard";
 import { SemesterPositionContext } from "@/app/(main)/dashboard/overview/semesterPositionContext";
 import { ChipVariant } from "@/types/chipVariant";
-import useSWR from "swr";
-import fetcher from "@/lib/fetcher";
 
 const termToChipVariant = {
     [SemesterTerm.FA]: ChipVariant.FALL,
@@ -550,7 +548,7 @@ async function sendDeleteFetch(courseId: number) {
 // if it overlaps with the destroy area it is deleted
 // finds the interval in semesterposition and then the related y position
 // updates the end of the card in semesterposition
-export const useGroupCards = () => {
+export const useGroupCards = (courseNames: { [courseId: number]: string }) => {
     const { getIntersectingNodes, getNodes, setNodes, updateNode, getNode } =
         useReactFlow();
     const contextItem = useContext(SemesterPositionContext);
@@ -563,17 +561,6 @@ export const useGroupCards = () => {
     const [oldPlacements, setPlacements] = contextItem;
     // create a copy of placements so we can just modify in place and not worry about it
     const placements = oldPlacements.slice();
-
-    const courseNamesSWR = useSWR<{ [courseId: number]: string }, string>(
-        "/api/course/ids",
-        fetcher
-    );
-
-    // TODO: add notification if swr fails
-    if (courseNamesSWR.error) {
-        console.log(courseNamesSWR.error);
-    }
-    const courseNames: { [courseId: number]: string } = courseNamesSWR.data!;
 
     const groupCards = useCallback(
         (notIsInsert: React.MouseEvent | null, droppedNode: Node) => {
