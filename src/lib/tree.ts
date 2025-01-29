@@ -66,30 +66,18 @@ export function parsePrerequisite(
         );
     }
 
-    if (orRequirement) {
-        handleORRequirement(
-            prerequisites,
-            tokens,
-            courseName,
-            nodeOutput,
-            edgeOutput,
-            wrapperOutput,
-            courseIds,
-            key
-        );
-    } else {
-        handleANDRequirement(
-            prerequisites,
-            tokens,
-            courseName,
-            nodeOutput,
-            edgeOutput,
-            wrapperOutput,
-            courseIds,
-
-            key
-        );
-    }
+    handleRequirements(
+        courseIds,
+        prerequisites,
+        tokens,
+        nodeOutput,
+        edgeOutput,
+        wrapperOutput,
+        courseName,
+        key,
+        orRequirement ? "OR" : "AND",
+        null
+    );
 }
 
 const CARD_HEIGHT = 256;
@@ -251,6 +239,13 @@ export function placeWrappers(
 
     for (let i = 0; i < wrappers.length; i++) {
         const wrapper = wrappers[i];
+
+        const innerNodeKeys = wrapper.innerNodeKeys;
+
+        if (innerNodeKeys.length === 1) {
+            continue;
+        }
+
         let upperBounds: number | undefined; // the bottom of the node, a larger number
         let lowerBounds: number | undefined;
         let leftBounds: number | undefined;
@@ -312,22 +307,31 @@ export function placeWrappers(
     }
 }
 
-function handleANDRequirement(
+function handleRequirements(
+    courseIds: { [courseCode: string]: number },
     prerequisites: { [key: string]: string },
     inputTokens: string[],
-    parentCourse: string,
     nodeOutput: PrerequisiteNodeType[],
     edgeOutput: Edge[],
     wrapperOutput: { [key: string]: Wrapper },
-    courseIds: { [courseCode: string]: number },
-    key: string,
-    outerNodeKey?: string
+    parentCourse: string,
+    parentKey: string,
+    requirementType: "AND" | "OR",
+    currentWrapperKey: string | null
 ): void {
+    if (!currentWrapperKey) {
+        currentWrapperKey = `${parentKey}-outerWrapper`;
+    }
+
     for (let i = 0; i < inputTokens.length; i++) {
         const current = inputTokens[i];
-        if (current === "||") {
+        if (requirementType === "AND" && current === "||") {
             throw Error(
                 "Malformed prerequisite, cannot have 'or' requirements in this level"
+            );
+        } else if (requirementType === "OR" && current === "&&") {
+            throw Error(
+                "Malformed prerequisite, cannot have 'and' requirements in this level"
             );
         } else if (current === "(") {
             const start = i + 1;
@@ -349,164 +353,87 @@ function handleANDRequirement(
                     "Malformed prerequisite, mismatched parenthesis"
                 );
             }
-            handleORRequirement(
+            const innerWrapperKey = `${currentWrapperKey}-${i}InnerWrapper`;
+            handleRequirements(
+                courseIds,
                 prerequisites,
                 inputTokens.slice(start, j),
+                nodeOutput,
+                edgeOutput,
+                wrapperOutput,
                 parentCourse,
-                nodeOutput,
-                edgeOutput,
-                wrapperOutput,
-                courseIds,
-                key,
-                i.toString()
+                parentKey,
+                requirementType === "AND" ? "OR" : "AND",
+                innerWrapperKey
             );
 
-            i = j;
-        } else if (current === "&&") {
-            // do nothing
-        } else {
-            const currentTransformed = current.replace("_", " ");
-            const newKey = key + "-" + currentTransformed;
-            nodeOutput.push({
-                courseName: currentTransformed,
-                key: newKey,
-                courseId: courseIds[currentTransformed],
-            });
-            edgeOutput.push({
-                selectable: false,
-                style: { strokeWidth: 3 },
-                source: newKey,
-                target: key,
-                id: `[${newKey}]-[${key}]`,
-            });
-
-            if (outerNodeKey) {
-                if (wrapperOutput[outerNodeKey]) {
-                    wrapperOutput[outerNodeKey].innerNodeKeys.push(newKey);
-                } else {
-                    wrapperOutput[outerNodeKey] = {
-                        id: outerNodeKey,
-                        wrapperType: "AND",
-                        innerNodeKeys: [newKey],
-                    };
-                }
-            }
-
-            parsePrerequisite(
-                prerequisites,
-                currentTransformed,
-                nodeOutput,
-                edgeOutput,
-                wrapperOutput,
-                courseIds,
-                newKey
-            );
-        }
-    }
-}
-
-function handleORRequirement(
-    prerequisites: { [key: string]: string },
-    inputTokens: string[],
-    parentCourse: string,
-    nodeOutput: PrerequisiteNodeType[],
-    edgeOutput: Edge[],
-    wrapperOutput: { [key: string]: Wrapper },
-    courseIds: { [courseCode: string]: number },
-    key: string,
-    iteration?: string
-): void {
-    for (let i = 0; i < inputTokens.length; i++) {
-        const current = inputTokens[i];
-        if (current === "&&") {
-            throw Error(
-                "Malformed prerequisite, cannot have 'or' requirements in this level"
-            );
-        } else if (current === "(") {
-            const start = i + 1;
-            let j = start;
-            let level = 0;
-            while (j < inputTokens.length) {
-                if (inputTokens[j] == "(") {
-                    level += 1;
-                } else if (inputTokens[j] == ")") {
-                    if (level === 0) {
-                        break;
-                    }
-                    level -= 1;
-                }
-                j += 1;
-            }
-            if (j == inputTokens.length) {
-                throw new Error(
-                    "Malformed prerequisite, mismatched parenthesis"
+            if (wrapperOutput[currentWrapperKey]) {
+                wrapperOutput[currentWrapperKey].innerNodeKeys.push(
+                    innerWrapperKey
                 );
-            }
-
-            handleANDRequirement(
-                prerequisites,
-                inputTokens.slice(start, j),
-                parentCourse,
-                nodeOutput,
-                edgeOutput,
-                wrapperOutput,
-                courseIds,
-                key,
-                key + i.toString() + "-innerWrapper"
-            );
-
-            const outerNodeKey = key + "-outerWrapper";
-            const innerNodeKey = key + "-innerWrapper";
-            if (wrapperOutput[outerNodeKey]) {
-                wrapperOutput[outerNodeKey].innerNodeKeys.push(innerNodeKey);
             } else {
-                wrapperOutput[outerNodeKey] = {
-                    id: outerNodeKey,
-                    wrapperType: "OR",
-                    innerNodeKeys: [innerNodeKey],
+                wrapperOutput[currentWrapperKey] = {
+                    id: currentWrapperKey,
+                    wrapperType: requirementType,
+                    innerNodeKeys: [innerWrapperKey],
                 };
             }
 
             i = j;
-        } else if (current === "||") {
+        } else if (current === "&&" && requirementType === "AND") {
+            // do nothing
+        } else if (current === "||" && requirementType === "OR") {
             // do nothing
         } else {
             const currentTransformed = current.replace("_", " ");
-            const newKey = key + "-" + currentTransformed;
-            const outerNodeKey = key + iteration + "-outerWrapper";
+            const newKey = parentKey + "-" + currentTransformed;
 
-            nodeOutput.push({
-                courseName: currentTransformed,
-                key: newKey,
-                courseId: courseIds[currentTransformed],
-            });
-            edgeOutput.push({
-                style: { strokeWidth: 3 },
-                selectable: false,
-                source: newKey,
-                target: key,
-                id: `[${newKey}]-[${key}]`,
-            });
+            // first ensure that new course has prerequisites and can be added
+            try {
+                nodeOutput.push({
+                    courseName: currentTransformed,
+                    key: newKey,
+                    courseId: courseIds[currentTransformed],
+                });
+                parsePrerequisite(
+                    prerequisites,
+                    currentTransformed,
+                    nodeOutput,
+                    edgeOutput,
+                    wrapperOutput,
+                    courseIds,
+                    newKey
+                );
+                edgeOutput.push({
+                    selectable: false,
+                    style: { strokeWidth: 3 },
+                    source: newKey,
+                    target: parentKey,
+                    id: `[${newKey}]-[${parentKey}]`,
+                });
 
-            if (wrapperOutput[outerNodeKey]) {
-                wrapperOutput[outerNodeKey].innerNodeKeys.push(newKey);
-            } else {
-                wrapperOutput[outerNodeKey] = {
-                    id: outerNodeKey,
-                    wrapperType: "OR",
-                    innerNodeKeys: [newKey],
-                };
+                if (
+                    !(currentWrapperKey === `${parentKey}-outerWrapper`) ||
+                    requirementType !== "AND"
+                )
+                    if (wrapperOutput[currentWrapperKey]) {
+                        wrapperOutput[currentWrapperKey].innerNodeKeys.push(
+                            newKey
+                        );
+                    } else {
+                        wrapperOutput[currentWrapperKey] = {
+                            id: currentWrapperKey,
+                            wrapperType: requirementType,
+                            innerNodeKeys: [newKey],
+                        };
+                    }
+            } catch {
+                // TODO: notify user that the last course could not be added
+                console.log(
+                    `Could not properly add the course ${currentTransformed}`
+                );
+                nodeOutput.pop();
             }
-
-            parsePrerequisite(
-                prerequisites,
-                currentTransformed,
-                nodeOutput,
-                edgeOutput,
-                wrapperOutput,
-                courseIds,
-                newKey
-            );
         }
     }
 }
