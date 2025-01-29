@@ -1,5 +1,5 @@
 import { Stack } from "@mantine/core";
-import { useContext } from "react";
+import { ReactNode, useContext } from "react";
 
 import { CourseCard } from "@/components/courseCard/CourseCard";
 import { CourseInformation } from "@/types/courseCard";
@@ -27,7 +27,7 @@ export default function SearchResult({
         event.dataTransfer!.effectAllowed = "move";
     }
 
-    const renderedCards = [];
+    const renderedCards: ReactNode[] = [];
     for (let i = 0; i < cards.length && i < 30; i++) {
         const card = cards[i];
         renderedCards.push(
@@ -45,6 +45,22 @@ export default function SearchResult({
                 postrequisites={card.postrequisites}
                 antirequisites={card.antirequisites}
                 courseId={card.courseId}
+            />
+        );
+    }
+    if (cards.length >= 30) {
+        renderedCards.push(
+            <CourseCard
+                draggable
+                key="additional-results"
+                courseCode="Refine your search term"
+                courseName="There are additional results hidden"
+                faculty="NA"
+                chips={[]}
+                prerequisites=""
+                postrequisites={[]}
+                antirequisites={[]}
+                courseId={0}
             />
         );
     }
