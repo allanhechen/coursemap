@@ -73,8 +73,8 @@ export function CourseCardDropdownWrapper({
                 selectSemester={selectSemester}
             />
             <CourseCard {...courseInformation} />
-            <Handle type="target" position={Position.Right} />
-            <Handle type="source" position={Position.Left} />
+            <Handle type="target" position={Position.Left} />
+            <Handle type="source" position={Position.Right} />
         </Card>
     );
 }

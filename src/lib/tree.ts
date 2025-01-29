@@ -102,9 +102,12 @@ export function placeNodes(nodes: (DropdownCardWrapper | WrapperWrapper)[]) {
 
         // if more tokens then we are child of the last node
         // we move right
+        const x = -(
+            (idTokenCount - 1) * CARD_WIDTH +
+            (idTokenCount - 2) * CARD_GAP
+        );
+
         if (idTokenCount > lastSeenTokenCount) {
-            const x =
-                (idTokenCount - 1) * CARD_WIDTH + (idTokenCount - 2) * CARD_GAP;
             const y = lastSeenY;
             node.position = {
                 x: x,
@@ -124,8 +127,6 @@ export function placeNodes(nodes: (DropdownCardWrapper | WrapperWrapper)[]) {
             // if same tokens then we are below the last node
             // we move down
         } else if (idTokenCount === lastSeenTokenCount) {
-            const x =
-                (idTokenCount - 1) * CARD_WIDTH + (idTokenCount - 2) * CARD_GAP;
             const y = lastSeenY + CARD_GAP + CARD_HEIGHT;
             node.position = {
                 x: x,
@@ -152,8 +153,6 @@ export function placeNodes(nodes: (DropdownCardWrapper | WrapperWrapper)[]) {
             // we are moving right + we need to calculate the x position
             // we are moving below the lowest we've seen for sure
         } else {
-            const x =
-                (idTokenCount - 1) * CARD_WIDTH + (idTokenCount - 2) * CARD_GAP;
             const y = highestSeenY + CARD_GAP + CARD_HEIGHT;
             node.position = {
                 x: x,
