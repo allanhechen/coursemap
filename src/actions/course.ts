@@ -264,19 +264,17 @@ export async function searchCourses(
             `
             SELECT courseid
             FROM (
-                SELECT 
-                    course.courseid, 
-                    TS_RANK(TO_TSVECTOR(coursecode || ' ' || coursetitle), WEBSEARCH_TO_TSQUERY($1)) AS rank
-                FROM 
-                    course
-                LEFT JOIN 
-                    courseattribute ON course.courseid = courseattribute.courseid
-                WHERE 
-                    ${joinedOptions} institutionid = $2
+                SELECT course.courseid
+                FROM course
+                LEFT JOIN courseattribute 
+                    ON course.courseid = courseattribute.courseid
+                WHERE ${joinedOptions} (
+                    (course.coursecode ILIKE '%' || $1::TEXT || '%' 
+                    OR course.coursetitle ILIKE '%' || $1::TEXT || '%') 
+                    AND course.institutionid = $2
+                )
             ) AS subquery
-            WHERE rank > 0.01
-            GROUP BY courseid, rank
-            ORDER BY rank DESC;
+            GROUP BY courseid;
             `,
             [searchQuery, institutionId]
         );
