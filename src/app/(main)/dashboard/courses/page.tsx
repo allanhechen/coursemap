@@ -5,7 +5,11 @@ import { redirect } from "next/navigation";
 
 import DashboardWrapper from "@/app/(main)/dashboard/courses/DashboardWrapper";
 import { auth } from "@/lib/auth";
-import { getCourseIds, getPrerequsuites } from "@/actions/course";
+import {
+    getCourseIds,
+    getPostrequisites,
+    getPrerequsuites,
+} from "@/actions/course";
 import { getSemesters } from "@/actions/semester";
 import { SemesterInformation } from "@/types/semester";
 import { Metadata } from "next";
@@ -25,7 +29,8 @@ export default async function Page() {
     }
     const { userId, institutionId, programName, startingYear } = session.user;
 
-    const prerequisites = await getPrerequsuites(institutionId!);
+    const prerequisites = await getPrerequsuites(institutionId);
+    const postrequisites = await getPostrequisites(institutionId);
     const semesterInformation = await getSemesters(
         userId,
         institutionId,
@@ -45,6 +50,7 @@ export default async function Page() {
             <DashboardWrapper
                 session={session}
                 prerequisites={prerequisites}
+                postrequisites={postrequisites}
                 allSemesters={semesterObject}
                 courseIds={courseIds}
             />

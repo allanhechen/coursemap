@@ -3,13 +3,17 @@
 import { useState, useCallback, useContext, useEffect } from "react";
 import { ReactFlow, Node, Edge, useReactFlow, MiniMap } from "@xyflow/react";
 
-import { CourseCardDropdownWrapper } from "@/components/courseCard/CourseCard";
+import {
+    CourseCardDropdownWrapper,
+    CourseCardPostrequisiteDropdownWrapper,
+} from "@/components/courseCard/CourseCard";
 import NavBar from "@/components/header/NavBar";
 
 import "@/app/(main)/dashboard/courses/DashboardComponent.css";
 import {
     parsePrerequisite,
     placeNodes,
+    getPostrequisitePlacements,
     placeWrappers,
     PrerequisiteNodeType,
     Wrapper,
@@ -27,6 +31,7 @@ import AndWrapper from "@/components/wrapper/AndWrapper";
 import OrWrapper from "@/components/wrapper/OrWrapper";
 
 const nodeTypes = {
+    prerequisiteDropdownNode: CourseCardPostrequisiteDropdownWrapper,
     courseDropdownNode: CourseCardDropdownWrapper,
     andWrapperNode: AndWrapper,
     orWrapperNode: OrWrapper,
@@ -34,11 +39,16 @@ const nodeTypes = {
 
 export default function DashboardComponent({
     prerequisites,
+    postrequisites,
     courseIds,
 }: {
     prerequisites: { [key: string]: string };
+    postrequisites: { [key: string]: number[] };
     courseIds: { [courseCode: string]: number };
 }) {
+    const [nextPostrequisites, setNextPostrequisites] = useState<
+        DropdownCardWrapper[]
+    >([]);
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
     const [height, setHeight] = useState(1);
@@ -84,12 +94,19 @@ export default function DashboardComponent({
                 if (!type) {
                     return;
                 }
+                setEdges([]);
+                setNodes([]);
 
                 const [, droppedNode] = type;
 
                 const nodeOutput: PrerequisiteNodeType[] = [];
                 const edgeOutput: Edge[] = [];
                 const wrapperOutput: { [key: string]: Wrapper } = {};
+                let postrequisiteOutput: number[] =
+                    postrequisites[droppedNode.courseId.toString()];
+                if (!postrequisiteOutput) {
+                    postrequisiteOutput = [];
+                }
 
                 parsePrerequisite(
                     prerequisites,
@@ -106,6 +123,12 @@ export default function DashboardComponent({
                     informationEndpoint.append(
                         "courseIds",
                         node.courseId.toString()
+                    );
+                });
+                postrequisiteOutput.forEach((postrequisiteId) => {
+                    informationEndpoint.append(
+                        "courseIds",
+                        postrequisiteId.toString()
                     );
                 });
                 const courseInformationResponse = await fetch(
@@ -155,6 +178,23 @@ export default function DashboardComponent({
                 placeNodes(dropdownCourses);
                 placeWrappers(dropdownCourses, wrapperOutput);
 
+                const postrequisiteDropdownCourses: DropdownCardWrapper[] =
+                    postrequisiteOutput.map((postrequisiteId) => {
+                        return {
+                            id: postrequisiteId.toString(),
+                            data: {
+                                courseInformation:
+                                    courseInformation[postrequisiteId],
+                                courseToSemesters: () => relatedSemesterId,
+                                selectSemester: selectSemester,
+                            },
+                            type: "prerequisiteDropdownNode",
+                            postition: { x: 0, y: 0 },
+                        };
+                    });
+
+                setNextPostrequisites(postrequisiteDropdownCourses);
+
                 setNodes(dropdownCourses as Node[]);
                 setEdges(edgeOutput);
             };
@@ -164,6 +204,7 @@ export default function DashboardComponent({
         [
             type,
             prerequisites,
+            postrequisites,
             selectSemester,
             relatedSemesterId,
             setRelatedSemesterId,
@@ -190,8 +231,37 @@ export default function DashboardComponent({
     }, []);
 
     useEffect(() => {
-        setTimeout(() => fitView(), 10);
-    }, [nodes, fitView]);
+        const fitAndPlaceEdges = async () => {
+            fitView({ padding: 0.1 });
+
+            // Small delay to allow layout adjustments if needed
+            await new Promise((resolve) => setTimeout(resolve, 500));
+
+            let newEdges: Edge[];
+            setNodes((currentNodes) => {
+                if (currentNodes.length > 0) {
+                    const updatedNodes = [...currentNodes];
+                    const temp = getPostrequisitePlacements(
+                        updatedNodes,
+                        nextPostrequisites
+                    );
+                    newEdges = temp["newEdges"];
+                    const newNodes = temp["newNodes"];
+
+                    return updatedNodes.concat(newNodes);
+                }
+                return currentNodes;
+            });
+            setEdges((currentEdges) => {
+                if (newEdges && newEdges.length > 0) {
+                    return currentEdges.concat(newEdges);
+                }
+                return currentEdges;
+            });
+        };
+
+        setTimeout(fitAndPlaceEdges, 10);
+    }, [fitView, nextPostrequisites]);
 
     return (
         <>

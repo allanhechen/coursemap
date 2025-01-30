@@ -7,7 +7,7 @@ import {
     CourseInformation,
 } from "@/types/courseCard";
 import { useScrollHandler } from "@/lib/placement";
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Handle, Node, Position, useNodeId, useReactFlow } from "@xyflow/react";
 
 import "@/components/courseCard/CourseCard.css";
@@ -76,6 +76,36 @@ export function CourseCardDropdownWrapper({
             <Handle type="target" position={Position.Left} />
             <Handle type="source" position={Position.Right} />
         </Card>
+    );
+}
+
+export function CourseCardPostrequisiteDropdownWrapper({
+    data,
+}: {
+    data: CourseDropdownInformation;
+}) {
+    const [focused, setFocused] = useState(false);
+    const [visible, setVisible] = useState(false);
+
+    const onMouseEnter = useCallback(() => setFocused(true), []);
+    const onMouseLeave = useCallback(() => setFocused(false), []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setVisible(true), 10);
+        return () => clearTimeout(timer);
+    }, []);
+
+    return (
+        <div
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            style={{
+                opacity: visible ? (focused ? 1 : 0.5) : 0,
+                transition: "opacity 0.5s ease-out",
+            }}
+        >
+            <CourseCardDropdownWrapper data={data} />
+        </div>
     );
 }
 

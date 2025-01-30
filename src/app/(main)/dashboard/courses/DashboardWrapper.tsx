@@ -19,11 +19,13 @@ import { SessionContext } from "@/components/sessionContext";
 export default function DashboardWrapper({
     session,
     prerequisites,
+    postrequisites,
     allSemesters,
     courseIds,
 }: {
     session: Session;
     prerequisites: { [key: string]: string };
+    postrequisites: { [key: string]: number[] };
     allSemesters: SemesterDict;
     courseIds: { [courseCode: string]: number };
 }) {
@@ -53,6 +55,7 @@ export default function DashboardWrapper({
                         <DnDContext.Provider value={[type, setType]}>
                             <DashboardComponent
                                 prerequisites={prerequisites}
+                                postrequisites={postrequisites}
                                 courseIds={courseIds}
                             />
                         </DnDContext.Provider>

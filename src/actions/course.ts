@@ -6,6 +6,33 @@ import { ChipVariant } from "@/types/chipVariant";
 import { CourseInformation } from "@/types/courseCard";
 import { getProgramRequirements } from "@/actions/program";
 
+export async function getPostrequisites(
+    institutionId: number
+): Promise<{ [courseId: number]: number[] }> {
+    const queryResult = await sql.query<{
+        courseid: number;
+        postrequisite: number;
+    }>(
+        `
+        SELECT coursepostrequisite.courseid, coursepostrequisite.postrequisite
+        FROM coursepostrequisite
+        INNER JOIN course ON course.courseid = coursepostrequisite.courseid
+        WHERE course.institutionid = $1;
+        `,
+        [institutionId]
+    );
+
+    const result: { [courseId: number]: number[] } = {};
+    queryResult.rows.forEach(({ courseid, postrequisite }) => {
+        if (result[postrequisite]) {
+            result[postrequisite].push(courseid);
+        } else {
+            result[postrequisite] = [courseid];
+        }
+    });
+    return result;
+}
+
 export async function getPrerequsuites(
     institutionId: number
 ): Promise<{ [courseId: number]: string }> {

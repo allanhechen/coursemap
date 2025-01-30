@@ -1,5 +1,5 @@
 import { DropdownCardWrapper, WrapperWrapper } from "@/types/courseCard";
-import { Edge } from "@xyflow/react";
+import { Edge, Node } from "@xyflow/react";
 
 export interface PrerequisiteNodeType {
     courseName: string;
@@ -76,6 +76,7 @@ export function parsePrerequisite(
         courseName,
         key,
         orRequirement ? "OR" : "AND",
+        null,
         null
     );
 }
@@ -306,6 +307,137 @@ export function placeWrappers(
     }
 }
 
+export function getPostrequisitePlacements(
+    originalNodes: Node[],
+    postrequisiteNodes: DropdownCardWrapper[]
+): { newEdges: Edge[]; newNodes: Node[] } {
+    if (postrequisiteNodes.length > 5) {
+        return placeManyPostrequisites(originalNodes, postrequisiteNodes);
+    } else {
+        return placeFewPostrequisites(originalNodes, postrequisiteNodes);
+    }
+}
+
+function placeManyPostrequisites(
+    originalNodes: Node[],
+    postrequisiteNodes: DropdownCardWrapper[]
+) {
+    const newEdges: Edge[] = [];
+    const newNodes: Node[] = [];
+    const firstNode = originalNodes.find(
+        (node) => node.id!.split("-").length === 1
+    );
+
+    if (!firstNode) {
+        return {
+            newEdges: newEdges,
+            newNodes: newNodes,
+        };
+    }
+
+    const firstNodeY = firstNode.position!.y;
+    let x = firstNode!.position!.x + CARD_GAP + CARD_WIDTH;
+    const topY = firstNodeY - 0.5 * CARD_WIDTH;
+    const bottomY = firstNodeY + 0.5 * CARD_WIDTH;
+
+    for (let i = 0; i < postrequisiteNodes.length; i++) {
+        const node = postrequisiteNodes[i];
+        const id = node.id!;
+        node.position = {
+            x: x,
+            y: i % 2 === 0 ? topY : bottomY,
+        };
+
+        if (i % 2 === 1) {
+            x += CARD_GAP + CARD_WIDTH;
+        }
+
+        newNodes.push(node as unknown as Node);
+        newEdges.push({
+            selectable: false,
+            style: {
+                strokeWidth: 3,
+                opacity: 0.25,
+                animation: "fadein 0.5s",
+                WebkitAnimation: "fadein 0.5s", // Safari, Chrome
+                MozAnimation: "fadein 0.5s", // Firefox
+                OAnimation: "fadein 0.5s", // Opera
+            },
+            source: firstNode.id,
+            target: id,
+            id: `[${id}]-[${firstNode.id}]`,
+        });
+    }
+
+    return {
+        newEdges: newEdges,
+        newNodes: newNodes,
+    };
+}
+
+function placeFewPostrequisites(
+    originalNodes: Node[],
+    postrequisiteNodes: DropdownCardWrapper[]
+) {
+    const newEdges: Edge[] = [];
+    const newNodes: Node[] = [];
+    const firstNode = originalNodes.find(
+        (node) => node.id!.split("-").length === 1
+    );
+
+    if (!firstNode) {
+        return {
+            newEdges: newEdges,
+            newNodes: newNodes,
+        };
+    }
+
+    const firstNodeY = firstNode.position!.y;
+    const x = firstNode!.position!.x + CARD_GAP + CARD_WIDTH;
+    let initialY: number;
+
+    if (postrequisiteNodes.length % 2 === 0) {
+        initialY =
+            firstNodeY -
+            ((postrequisiteNodes.length - 1) / 2) * (CARD_GAP + CARD_HEIGHT);
+    } else {
+        initialY =
+            firstNodeY -
+            Math.floor(postrequisiteNodes.length / 2) *
+                (CARD_GAP + CARD_HEIGHT);
+    }
+
+    let y = initialY;
+    postrequisiteNodes.forEach((node) => {
+        const id = node.id!;
+        node.position = {
+            x: x,
+            y: y,
+        };
+        newNodes.push(node as unknown as Node);
+        y += CARD_GAP + CARD_HEIGHT;
+        newEdges.push({
+            selectable: false,
+            style: {
+                strokeWidth: 3,
+                opacity: 0.25,
+                animation: "fadein 0.5s",
+                WebkitAnimation: "fadein 0.5s", // Safari, Chrome
+                MozAnimation: "fadein 0.5s", // Firefox
+                OAnimation: "fadein 0.5s", // Opera
+            },
+            source: firstNode.id,
+            target: id,
+            id: `[${id}]-[${firstNode.id}]`,
+        });
+    });
+
+    return {
+        newEdges: newEdges,
+        newNodes: newNodes,
+    };
+}
+
 function handleRequirements(
     courseIds: { [courseCode: string]: number },
     prerequisites: { [key: string]: string },
@@ -316,7 +448,8 @@ function handleRequirements(
     parentCourse: string,
     parentKey: string,
     requirementType: "AND" | "OR",
-    currentWrapperKey: string | null
+    currentWrapperKey: string | null,
+    differentiator: number | null
 ): void {
     if (!currentWrapperKey) {
         currentWrapperKey = `${parentKey}-outerWrapper`;
@@ -363,7 +496,8 @@ function handleRequirements(
                 parentCourse,
                 parentKey,
                 requirementType === "AND" ? "OR" : "AND",
-                innerWrapperKey
+                innerWrapperKey,
+                i
             );
 
             if (wrapperOutput[currentWrapperKey]) {
@@ -385,7 +519,9 @@ function handleRequirements(
             // do nothing
         } else {
             const currentTransformed = current.replace("_", " ");
-            const newKey = parentKey + "-" + currentTransformed;
+            const newKey = differentiator
+                ? parentKey + "-" + differentiator + currentTransformed + i
+                : parentKey + "-" + currentTransformed + i;
 
             // first ensure that new course has prerequisites and can be added
             try {
