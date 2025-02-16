@@ -32,6 +32,13 @@ export interface SemesterInformation {
     semesterTerm: SemesterTerm;
 }
 
+export const termOrder: Record<SemesterTerm, number> = {
+    [SemesterTerm.WI]: 1,
+    [SemesterTerm.SP]: 2,
+    [SemesterTerm.SU]: 3,
+    [SemesterTerm.FA]: 4,
+};
+
 export interface SemesterPlacement {
     semesterId: number;
     semesterTerm: SemesterTerm;

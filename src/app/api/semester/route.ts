@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     try {
         const semester = semesterSchema.parse(body);
-        const semesterId = createSemester(
+        const semesterId = await createSemester(
             userId,
             institutionId,
             programName,
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
             new Date(semester.semesterYear, 0, 1),
             semester.semesterTerm as SemesterTerm
         );
-        return Response.json({ semesterid: semesterId });
+        return Response.json({ semesterId: semesterId });
     } catch (e) {
         if (e instanceof ZodError) {
             return Response.json({ error: e.errors }, { status: 400 });

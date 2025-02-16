@@ -1,5 +1,6 @@
 import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/courseSemesterContext";
 import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
+import { SemesterInformation, termOrder } from "@/types/semester";
 import {
     CloseButton,
     Combobox,
@@ -7,7 +8,7 @@ import {
     InputBase,
     useCombobox,
 } from "@mantine/core";
-import { useContext } from "react";
+import { ReactNode, useContext } from "react";
 
 export default function CourseCardForm({
     courseId,
@@ -36,11 +37,24 @@ export default function CourseCardForm({
     const [relatedSemesterId] = courseSemesterContextItem;
 
     const combobox = useCombobox();
-    const options = [];
+    const options: ReactNode[] = [];
+    let orderedSemesters: SemesterInformation[] = [];
     const selection = relatedSemesterId[courseCode];
 
+    // the following is run per semester, but must be done because the semesters are put in a dict
     for (const key in semesterDict) {
         const semester = semesterDict[key];
+        orderedSemesters.push(semester);
+    }
+    orderedSemesters = orderedSemesters.sort((a, b) => {
+        if (a.semesterYear.getFullYear() != b.semesterYear.getFullYear()) {
+            return a.semesterYear.getFullYear() - b.semesterYear.getFullYear();
+        } else {
+            return termOrder[a.semesterTerm] - termOrder[b.semesterTerm];
+        }
+    });
+
+    orderedSemesters.forEach((semester) => {
         options.push(
             <Combobox.Option
                 value={semester.semesterId.toString()}
@@ -51,7 +65,7 @@ export default function CourseCardForm({
                 } - ${semester.semesterName}`}
             </Combobox.Option>
         );
-    }
+    });
 
     return (
         <Combobox
