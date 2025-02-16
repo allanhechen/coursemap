@@ -20,49 +20,55 @@ export default function Page() {
         router.push("/signin");
     }
 
-    return (
-        <>
-            <div className="fixed top-0 left-0 h-screen w-screen">
-                <SemesterDemo
-                    className="absolute h-screen w-screen top-0 demo-page"
-                    style={{
-                        left: `-${(activePage - 1) * 100}vw`,
-                    }}
-                />
-                <SearchDemo
-                    className="absolute h-screen w-screen top-0 demo-page"
-                    style={{
-                        left: `${(1 - (activePage - 1)) * 100}vw`,
-                    }}
-                />
-                <OverviewDemo
-                    className="absolute h-screen w-screen top-0 demo-page"
-                    style={{
-                        left: `${(2 - (activePage - 1)) * 100}vw`,
-                    }}
-                />
-                <CourseDemo
-                    className="absolute h-screen w-screen top-0 demo-page"
-                    style={{
-                        left: `${(3 - (activePage - 1)) * 100}vw`,
-                    }}
-                />
+    const elements = [
+        <SemesterDemo
+            key={0}
+            className="demo-page"
+            style={{
+                transform: `translateX(-${(activePage - 1) * 100}vw)`,
+            }}
+        />,
+        <SearchDemo
+            key={1}
+            className="demo-page"
+            style={{
+                transform: `translateX(${(1 - (activePage - 1)) * 100}vw)`,
+            }}
+        />,
+        <OverviewDemo
+            key={2}
+            className="demo-page"
+            style={{
+                transform: `translateX(${(2 - (activePage - 1)) * 100}vw)`,
+            }}
+        />,
+        <CourseDemo
+            key={3}
+            className="demo-page"
+            style={{
+                transform: `translateX(${(3 - (activePage - 1)) * 100}vw)`,
+            }}
+        />,
+        <SelectPage
+            key={4}
+            className="demo-page"
+            style={{
+                transform: `translateX(${(4 - (activePage - 1)) * 100}vw)`,
+            }}
+        />,
+    ];
 
-                <SelectPage
-                    className="absolute h-screen w-screen top-0 demo-page"
-                    style={{
-                        left: `${(4 - (activePage - 1)) * 100}vw`,
-                    }}
-                />
-            </div>
+    return (
+        <div className="flex flex-col items-center justify-center">
+            {elements[activePage - 1]}
             <Pagination
                 total={5}
                 value={activePage}
                 onChange={setPage}
                 radius="md"
                 size="lg"
-                className="absolute bottom-5 left-1/2 -translate-x-1/2"
+                className="mb-5"
             />
-        </>
+        </div>
     );
 }

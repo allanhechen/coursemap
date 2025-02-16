@@ -18,7 +18,7 @@ export default function OverviewDemo({
                         semesters. They are checked against the terms, and the
                         courses you have already finished. Yellow means the
                         course doesn&apos;t typically run in the given term, and
-                        red means the prerequisites haven&apost;t been met.
+                        red means the prerequisites haven&apos;t been met.
                     </Text>
                     <video
                         style={{ maxHeight: "50vh", width: "100%" }}

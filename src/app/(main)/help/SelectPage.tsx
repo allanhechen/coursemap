@@ -44,7 +44,7 @@ export default function SelectPage({
     return (
         <div {...props}>
             <Paper
-                className="p-5 relative top-1/2 left-1/2  -translate-x-1/2  -translate-y-1/2"
+                className="p-5 relative top-1/2 left-1/2  -translate-x-1/2  -translate-y-1/2 mb-96"
                 shadow="sm"
                 radius="lg"
                 w={400}
