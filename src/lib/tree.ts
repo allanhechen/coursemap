@@ -1,5 +1,16 @@
-import { DropdownCardWrapper, WrapperWrapper } from "@/types/courseCard";
+import { NodeContext } from "@/app/(main)/dashboard/courses/nodeContext";
+import {
+    CourseToSemesterIdDict,
+    DropdownCardWrapper,
+    WrapperWrapper,
+} from "@/types/courseCard";
+import {
+    SemesterDict,
+    SemesterInformation,
+    SemesterTerm,
+} from "@/types/semester";
 import { Edge, Node } from "@xyflow/react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 
 export interface PrerequisiteNodeType {
     courseName: string;
@@ -302,6 +313,9 @@ export function placeWrappers(
                 width: width,
                 height: height,
             },
+            data: {
+                prerequisiteMet: false,
+            },
         };
         nodes.push(wrapperNode);
     }
@@ -358,10 +372,6 @@ function placeManyPostrequisites(
             style: {
                 strokeWidth: 3,
                 opacity: 0.25,
-                animation: "fadein 0.5s",
-                WebkitAnimation: "fadein 0.5s", // Safari, Chrome
-                MozAnimation: "fadein 0.5s", // Firefox
-                OAnimation: "fadein 0.5s", // Opera
             },
             source: firstNode.id,
             target: id,
@@ -571,4 +581,146 @@ function handleRequirements(
             }
         }
     }
+}
+
+export function useCheckPrerequisites() {
+    const nodeContextItem = useContext(NodeContext);
+    if (!nodeContextItem) {
+        throw new Error("DashboardComponent must be used in a NodeContext");
+    }
+    const [nodes, setNodes] = nodeContextItem;
+    const nodesRef = useRef(nodes);
+
+    useEffect(() => {
+        nodesRef.current = nodes;
+    }, [nodes]);
+
+    const checkPrerequisites = useCallback(
+        (
+            courseCodeToSemester: CourseToSemesterIdDict,
+            allSemesters: SemesterDict
+        ) => {
+            let nodes = nodesRef.current;
+            nodes = nodes.sort(sortNodePrerequisites);
+
+            const seenCourses: { [courseCode: string]: Date } = {};
+
+            nodes.forEach((node) => {
+                node.data.prerequisiteMet = undefined;
+            });
+
+            nodes.forEach((node) => {
+                if (
+                    node.type === "andWrapperNode" ||
+                    node.type === "orWrapperNode"
+                ) {
+                } else {
+                    const cardNode = node as unknown as DropdownCardWrapper;
+                    const courseData = cardNode.data.courseInformation;
+                    const prerequisites = courseData.prerequisites;
+
+                    let relatedDate: Date;
+                    const relatedSemesterId =
+                        courseCodeToSemester[courseData.courseCode];
+                    if (relatedSemesterId === undefined) {
+                        relatedDate = new Date(2100, 0, 1);
+                    } else {
+                        const relatedSemester = allSemesters[relatedSemesterId];
+                        relatedDate = generateRelatedDate(relatedSemester);
+                    }
+
+                    if (prerequisites.length === 0 && relatedSemesterId) {
+                        cardNode.data.prerequisiteMet = true;
+                        seenCourses[courseData.courseCode] = relatedDate;
+                        return;
+                    } else if (prerequisites.length === 0) {
+                        cardNode.data.prerequisiteMet = "partially";
+                        return;
+                    }
+
+                    const prerequisite_eval = prerequisites.replace(
+                        /{([\w\s]+)}/g,
+                        (_, prerequisite) => {
+                            const prerequisiteCheck = courseTakenAlready(
+                                prerequisite,
+                                seenCourses,
+                                relatedDate
+                            );
+                            return prerequisiteCheck.toString();
+                        }
+                    );
+                    const prerequisiteMet = eval(prerequisite_eval);
+
+                    if (prerequisiteMet && relatedSemesterId) {
+                        seenCourses[courseData.courseCode] = relatedDate;
+                        cardNode.data.prerequisiteMet = prerequisiteMet;
+                    } else if (prerequisiteMet) {
+                        cardNode.data.prerequisiteMet = "partially";
+                    } else if (!prerequisiteMet && relatedSemesterId) {
+                        cardNode.data.prerequisiteMet = false;
+                    }
+                }
+            });
+            const newNodes = nodes.map((node) => {
+                return { ...node };
+            });
+
+            setNodes(newNodes);
+        },
+        [setNodes]
+    );
+
+    return { checkPrerequisites };
+}
+
+function sortNodePrerequisites(a: Node, b: Node): number {
+    const aFirst = checkOneIsWrapper(a, b);
+    if (aFirst) return aFirst;
+    const bFirst = checkOneIsWrapper(b, a);
+    if (bFirst) return -bFirst;
+
+    return a.position.x - b.position.x;
+}
+
+function checkOneIsWrapper(a: Node, b: Node): number | undefined {
+    if (a.type === "orWrapperNode" || a.type === "andWrapperNode") {
+        if (b.type !== "orWrapperNode" && b.type !== "andWrapperNode") {
+            return 1;
+        }
+        return b.id.split("-").length - a.id.split("-").length;
+    }
+}
+
+function generateRelatedDate(semester: SemesterInformation) {
+    let monthIndex: number;
+
+    switch (semester.semesterTerm) {
+        case SemesterTerm.WI:
+            monthIndex = 1;
+            break;
+        case SemesterTerm.SP:
+            monthIndex = 5;
+            break;
+        case SemesterTerm.SU:
+            monthIndex = 7;
+            break;
+        case SemesterTerm.FA:
+            monthIndex = 9;
+            break;
+    }
+    return new Date(semester.semesterYear.getFullYear(), monthIndex);
+}
+
+function courseTakenAlready(
+    courseToCheck: string,
+    seenCourses: { [courseCode: string]: Date },
+    deadlineDate: Date
+): boolean {
+    const originalCourseDate = seenCourses[courseToCheck];
+
+    if (!originalCourseDate) {
+        return false;
+    }
+
+    return originalCourseDate < deadlineDate;
 }

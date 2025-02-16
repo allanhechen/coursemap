@@ -1,4 +1,4 @@
-import { XYPosition } from "@xyflow/react";
+import { Node, XYPosition } from "@xyflow/react";
 import { ChipVariant } from "@/types/chipVariant";
 
 export interface CardWrapper {
@@ -18,6 +18,11 @@ export type CourseCodeToSemester = [
     React.Dispatch<React.SetStateAction<CourseToSemesterIdDict>>
 ];
 
+export type NodeContextType = [
+    Node[],
+    React.Dispatch<React.SetStateAction<Node[]>>
+];
+
 export interface DropdownCardWrapper {
     type?: string;
     id?: string;
@@ -34,6 +39,9 @@ export interface WrapperWrapper {
     position?: XYPosition;
     measured?: { width: number; height: number };
     style?: React.CSSProperties;
+    data: {
+        prerequisiteMet: boolean;
+    };
 }
 
 export interface CourseDropdownInformation {
@@ -42,6 +50,7 @@ export interface CourseDropdownInformation {
         courseCode: string,
         semesterId: number | undefined
     ) => void;
+    prerequisiteMet: false | true | "partially" | undefined;
 }
 
 export interface CourseInformation {

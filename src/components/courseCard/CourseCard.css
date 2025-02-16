@@ -1,3 +1,51 @@
 .course-card.mantine-Paper-root {
     background-color: #22242e !important;
 }
+
+.mantine-Paper-root.card-dropdown {
+    transition: background-color 400ms ease-in-out;
+}
+
+:root[data-mantine-color-scheme="dark"]
+    .course-error.mantine-Paper-root.card-dropdown {
+    background-color: #be6161 !important;
+}
+
+:root[data-mantine-color-scheme="light"]
+    .course-error.mantine-Paper-root.card-dropdown {
+    background-color: #ef8080 !important;
+}
+
+:root[data-mantine-color-scheme="dark"]
+    .course-included.mantine-Paper-root.card-dropdown {
+    background-color: #61be61 !important;
+}
+
+:root[data-mantine-color-scheme="light"]
+    .course-included.mantine-Paper-root.card-dropdown {
+    background-color: #80ef80 !important;
+}
+
+:root[data-mantine-color-scheme="dark"]
+    .course-prerequisite-met.mantine-Paper-root.card-dropdown {
+    background-color: #a2be61 !important;
+}
+
+:root[data-mantine-color-scheme="light"]
+    .course-prerequisite-met.mantine-Paper-root.card-dropdown {
+    background-color: #dbef80 !important;
+}
+
+:root[data-mantine-color-scheme="light"] .mantine-InputBase-input {
+    background-color: #7a7a7abf !important;
+    color: white;
+}
+
+:root[data-mantine-color-scheme="dark"] .mantine-InputBase-input {
+    background-color: #2c2a31bf !important;
+    color: white;
+}
+
+:root[data-mantine-color-scheme="light"] .mantine-InputPlaceholder-placeholder {
+    color: rgb(226, 226, 226);
+}

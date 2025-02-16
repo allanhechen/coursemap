@@ -17,6 +17,7 @@ import {
     placeWrappers,
     PrerequisiteNodeType,
     Wrapper,
+    useCheckPrerequisites,
 } from "@/lib/tree";
 import CourseSearch from "@/components/courseSearch/CourseSearch";
 import { DnDContext } from "@/components/dndContext";
@@ -30,6 +31,8 @@ import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/courseSeme
 import AndWrapper from "@/components/wrapper/AndWrapper";
 import OrWrapper from "@/components/wrapper/OrWrapper";
 import eventBus from "@/lib/eventBus";
+import { NodeContext } from "@/app/(main)/dashboard/courses/nodeContext";
+import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
 
 const nodeTypes = {
     prerequisiteDropdownNode: CourseCardPostrequisiteDropdownWrapper,
@@ -47,13 +50,16 @@ export default function DashboardComponent({
     postrequisites: { [key: string]: number[] };
     courseIds: { [courseCode: string]: number };
 }) {
-    const [nextPostrequisites, setNextPostrequisites] = useState<
-        DropdownCardWrapper[]
-    >([]);
-    const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
     const [height, setHeight] = useState(1);
     const { fitView } = useReactFlow();
+    const { checkPrerequisites } = useCheckPrerequisites();
+
+    const nodeContextItem = useContext(NodeContext);
+    if (!nodeContextItem) {
+        throw new Error("DashboardComponent must be used in a NodeContext");
+    }
+    const [nodes, setNodes] = nodeContextItem;
 
     const courseSemesterContextItem = useContext(CourseSemesterContext);
     if (!courseSemesterContextItem) {
@@ -62,6 +68,12 @@ export default function DashboardComponent({
         );
     }
     const [relatedSemesterId, setRelatedSemesterId] = courseSemesterContextItem;
+
+    const semesterDictContextItem = useContext(SemesterContext);
+    if (!semesterDictContextItem) {
+        throw new Error("CourseCardForm must be used in a SemesterContext");
+    }
+    const [semesterDict] = semesterDictContextItem;
 
     const dndContextItem = useContext(DnDContext);
     if (!dndContextItem) {
@@ -170,6 +182,7 @@ export default function DashboardComponent({
                             courseInformation: course.data,
                             courseToSemesters: () => relatedSemesterId,
                             selectSemester: selectSemester,
+                            prerequisiteMet: undefined,
                         },
                         type: "courseDropdownNode",
                         position: { x: 0, y: 0 },
@@ -188,18 +201,54 @@ export default function DashboardComponent({
                                     courseInformation[postrequisiteId],
                                 courseToSemesters: () => relatedSemesterId,
                                 selectSemester: selectSemester,
+                                prerequisiteMet: false,
                             },
                             type: "prerequisiteDropdownNode",
                             postition: { x: 0, y: 0 },
                         };
                     });
 
-                setNextPostrequisites(postrequisiteDropdownCourses);
-
                 setNodes(dropdownCourses as Node[]);
                 setEdges(edgeOutput);
-            };
 
+                const fitAndPlaceEdges = async () => {
+                    fitView({ padding: 0.1 });
+
+                    // Small delay to allow layout adjustments if needed
+                    await new Promise((resolve) => setTimeout(resolve, 500));
+
+                    let newEdges: Edge[];
+                    setNodes((currentNodes) => {
+                        if (currentNodes.length > 0) {
+                            const updatedNodes = [...currentNodes];
+                            const temp = getPostrequisitePlacements(
+                                updatedNodes,
+                                postrequisiteDropdownCourses
+                            );
+                            newEdges = temp["newEdges"];
+                            const newNodes = temp["newNodes"];
+
+                            return updatedNodes.concat(newNodes);
+                        }
+                        return currentNodes;
+                    });
+                    setEdges((currentEdges) => {
+                        if (newEdges && newEdges.length > 0) {
+                            return currentEdges.concat(newEdges);
+                        }
+                        return currentEdges;
+                    });
+
+                    setTimeout(
+                        () =>
+                            checkPrerequisites(relatedSemesterId, semesterDict),
+                        100
+                    );
+                };
+
+                // let React update the nodes before centering page
+                setTimeout(fitAndPlaceEdges, 100);
+            };
             handler();
         },
         [
@@ -210,6 +259,10 @@ export default function DashboardComponent({
             relatedSemesterId,
             setRelatedSemesterId,
             courseIds,
+            setNodes,
+            checkPrerequisites,
+            fitView,
+            semesterDict,
         ]
     );
 
@@ -231,38 +284,16 @@ export default function DashboardComponent({
         }
     }, []);
 
-    useEffect(() => {
-        const fitAndPlaceEdges = async () => {
-            fitView({ padding: 0.1 });
+    // useEffect(() => {
 
-            // Small delay to allow layout adjustments if needed
-            await new Promise((resolve) => setTimeout(resolve, 500));
-
-            let newEdges: Edge[];
-            setNodes((currentNodes) => {
-                if (currentNodes.length > 0) {
-                    const updatedNodes = [...currentNodes];
-                    const temp = getPostrequisitePlacements(
-                        updatedNodes,
-                        nextPostrequisites
-                    );
-                    newEdges = temp["newEdges"];
-                    const newNodes = temp["newNodes"];
-
-                    return updatedNodes.concat(newNodes);
-                }
-                return currentNodes;
-            });
-            setEdges((currentEdges) => {
-                if (newEdges && newEdges.length > 0) {
-                    return currentEdges.concat(newEdges);
-                }
-                return currentEdges;
-            });
-        };
-
-        setTimeout(fitAndPlaceEdges, 10);
-    }, [fitView, nextPostrequisites]);
+    // }, [
+    //     fitView,
+    //     nextPostrequisites,
+    //     checkPrerequisites,
+    //     relatedSemesterId,
+    //     semesterDict,
+    //     setNodes,
+    // ]);
 
     const closeDropdowns = useCallback(() => {
         eventBus.dispatchEvent(new CustomEvent("closeDropdowns", {}));
