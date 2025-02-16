@@ -1,5 +1,6 @@
 import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/courseSemesterContext";
 import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
+import eventBus from "@/lib/eventBus";
 import { SemesterInformation, termOrder } from "@/types/semester";
 import {
     CloseButton,
@@ -8,7 +9,7 @@ import {
     InputBase,
     useCombobox,
 } from "@mantine/core";
-import { ReactNode, useContext } from "react";
+import { ReactNode, useContext, useEffect, useRef } from "react";
 
 export default function CourseCardForm({
     courseId,
@@ -37,6 +38,7 @@ export default function CourseCardForm({
     const [relatedSemesterId] = courseSemesterContextItem;
 
     const combobox = useCombobox();
+    const comboboxRef = useRef(combobox);
     const options: ReactNode[] = [];
     let orderedSemesters: SemesterInformation[] = [];
     const selection = relatedSemesterId[courseCode];
@@ -66,6 +68,25 @@ export default function CourseCardForm({
             </Combobox.Option>
         );
     });
+
+    // https://stackoverflow.com/questions/71277021/react-redux-useeffect-useselector-stale-closures-and-event-listeners
+    // In short, the event listener points to a stale reference
+    // We get around this with useRef but we also need to update the ref when combobox changes
+    useEffect(() => {
+        comboboxRef.current = combobox;
+    }, [combobox]);
+
+    useEffect(() => {
+        const closeHandler = () => {
+            comboboxRef.current?.closeDropdown();
+        };
+
+        eventBus.addEventListener("closeDropdowns", closeHandler);
+
+        return () => {
+            eventBus.removeEventListener("closeDropdowns", closeHandler);
+        };
+    }, []);
 
     return (
         <Combobox
@@ -97,7 +118,7 @@ export default function CourseCardForm({
                     type="button"
                     pointer
                     onClick={() => {
-                        combobox.toggleDropdown();
+                        combobox.openDropdown();
                     }}
                     rightSection={
                         selection !== null ? (

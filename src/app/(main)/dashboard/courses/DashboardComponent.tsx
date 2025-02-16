@@ -29,6 +29,7 @@ import {
 import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/courseSemesterContext";
 import AndWrapper from "@/components/wrapper/AndWrapper";
 import OrWrapper from "@/components/wrapper/OrWrapper";
+import eventBus from "@/lib/eventBus";
 
 const nodeTypes = {
     prerequisiteDropdownNode: CourseCardPostrequisiteDropdownWrapper,
@@ -263,6 +264,10 @@ export default function DashboardComponent({
         setTimeout(fitAndPlaceEdges, 10);
     }, [fitView, nextPostrequisites]);
 
+    const closeDropdowns = useCallback(() => {
+        eventBus.dispatchEvent(new CustomEvent("closeDropdowns", {}));
+    }, []);
+
     return (
         <>
             <div className="dashboard-component">
@@ -277,6 +282,9 @@ export default function DashboardComponent({
                 >
                     <CourseSearch />
                     <ReactFlow
+                        onNodeClick={closeDropdowns}
+                        onPaneClick={closeDropdowns}
+                        onMove={closeDropdowns}
                         minZoom={0.1}
                         maxZoom={1}
                         edges={edges}
