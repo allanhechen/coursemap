@@ -1,6 +1,7 @@
 import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/courseSemesterContext";
 import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
 import eventBus from "@/lib/eventBus";
+import { useCheckPrerequisites } from "@/lib/tree";
 import { SemesterInformation, termOrder } from "@/types/semester";
 import {
     CloseButton,
@@ -39,6 +40,7 @@ export default function CourseCardForm({
 
     const combobox = useCombobox();
     const comboboxRef = useRef(combobox);
+    const { checkPrerequisites } = useCheckPrerequisites();
     const options: ReactNode[] = [];
     let orderedSemesters: SemesterInformation[] = [];
     const selection = relatedSemesterId[courseCode];
@@ -110,6 +112,12 @@ export default function CourseCardForm({
 
                 selectSemester(courseCode, semesterId);
                 combobox.closeDropdown();
+                if (semesterId) {
+                    relatedSemesterId[courseCode] = semesterId;
+                } else {
+                    delete relatedSemesterId[courseCode];
+                }
+                checkPrerequisites(relatedSemesterId, semesterDict);
             }}
         >
             <Combobox.Target>
@@ -138,6 +146,12 @@ export default function CourseCardForm({
                                             method: "DELETE",
                                         }
                                     );
+                                    delete relatedSemesterId[courseCode];
+
+                                    checkPrerequisites(
+                                        relatedSemesterId,
+                                        semesterDict
+                                    );
                                 }}
                                 aria-label="Clear value"
                             />
@@ -145,6 +159,7 @@ export default function CourseCardForm({
                             <Combobox.Chevron />
                         )
                     }
+                    c="white"
                 >
                     {selection ? (
                         `${semesterDict[selection].semesterYear.getFullYear()}${

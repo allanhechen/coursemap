@@ -15,6 +15,8 @@ import { SemesterDict, SemesterTerm } from "@/types/semester";
 import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
 import { Session } from "next-auth";
 import { SessionContext } from "@/components/sessionContext";
+import { NodeContext } from "./nodeContext";
+import { Node } from "@xyflow/react";
 
 export default function DashboardWrapper({
     session,
@@ -29,6 +31,7 @@ export default function DashboardWrapper({
     allSemesters: SemesterDict;
     courseIds: { [courseCode: string]: number };
 }) {
+    const [nodes, setNodes] = useState<Node[]>([]);
     const [type, setType] = useState<[string, CourseInformation] | null>(null);
     const [relatedSemesterId, setRelatedSemesterId] =
         useState<CourseToSemesterIdDict>({});
@@ -53,11 +56,13 @@ export default function DashboardWrapper({
                 >
                     <SemesterFormProvider form={form}>
                         <DnDContext.Provider value={[type, setType]}>
-                            <DashboardComponent
-                                prerequisites={prerequisites}
-                                postrequisites={postrequisites}
-                                courseIds={courseIds}
-                            />
+                            <NodeContext.Provider value={[nodes, setNodes]}>
+                                <DashboardComponent
+                                    prerequisites={prerequisites}
+                                    postrequisites={postrequisites}
+                                    courseIds={courseIds}
+                                />
+                            </NodeContext.Provider>
                         </DnDContext.Provider>
                     </SemesterFormProvider>
                 </CourseSemesterContext.Provider>

@@ -59,11 +59,15 @@ export function CourseCardDropdownWrapper({
 }: {
     data: CourseDropdownInformation;
 }) {
-    const { courseInformation, selectSemester } = data;
-
+    const { courseInformation, selectSemester, prerequisiteMet } = data;
+    const addedClass = prerequisiteMet
+        ? prerequisiteMet === true
+            ? "course-included"
+            : "course-prerequisite-met"
+        : "";
     return (
         <Card
-            className="h-64 flex content-between justify-between"
+            className={`h-64 flex content-between justify-between card-dropdown ${addedClass}`}
             radius="lg"
             shadow="sm"
         >
