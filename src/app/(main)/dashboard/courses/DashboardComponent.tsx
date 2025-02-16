@@ -167,10 +167,7 @@ export default function DashboardComponent({
                         courseSemester.semesterId;
                 });
 
-                setRelatedSemesterId((prevRelatedSemesterId) => ({
-                    ...prevRelatedSemesterId,
-                    ...courseStates,
-                }));
+                setRelatedSemesterId(courseStates);
 
                 const dropdownCourses: (
                     | DropdownCardWrapper
@@ -201,7 +198,7 @@ export default function DashboardComponent({
                                     courseInformation[postrequisiteId],
                                 courseToSemesters: () => relatedSemesterId,
                                 selectSemester: selectSemester,
-                                prerequisiteMet: false,
+                                prerequisiteMet: undefined,
                             },
                             type: "prerequisiteDropdownNode",
                             postition: { x: 0, y: 0 },
@@ -240,8 +237,7 @@ export default function DashboardComponent({
                     });
 
                     setTimeout(
-                        () =>
-                            checkPrerequisites(relatedSemesterId, semesterDict),
+                        () => checkPrerequisites(courseStates, semesterDict),
                         100
                     );
                 };
@@ -283,17 +279,6 @@ export default function DashboardComponent({
             };
         }
     }, []);
-
-    // useEffect(() => {
-
-    // }, [
-    //     fitView,
-    //     nextPostrequisites,
-    //     checkPrerequisites,
-    //     relatedSemesterId,
-    //     semesterDict,
-    //     setNodes,
-    // ]);
 
     const closeDropdowns = useCallback(() => {
         eventBus.dispatchEvent(new CustomEvent("closeDropdowns", {}));
