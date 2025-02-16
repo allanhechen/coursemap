@@ -611,10 +611,10 @@ export function useCheckPrerequisites() {
 
             nodes.forEach((node) => {
                 if (
-                    node.type === "andWrapperNode" ||
-                    node.type === "orWrapperNode"
+                    node.type !== "andWrapperNode" &&
+                    node.type !== "orWrapperNode" &&
+                    node.type !== "prerequisiteDropdownNode"
                 ) {
-                } else {
                     const cardNode = node as unknown as DropdownCardWrapper;
                     const courseData = cardNode.data.courseInformation;
                     const prerequisites = courseData.prerequisites;
