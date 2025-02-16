@@ -182,7 +182,7 @@ export default function DashboardComponent({
                             courseInformation: course.data,
                             courseToSemesters: () => relatedSemesterId,
                             selectSemester: selectSemester,
-                            prerequisiteMet: false,
+                            prerequisiteMet: undefined,
                         },
                         type: "courseDropdownNode",
                         position: { x: 0, y: 0 },

@@ -50,7 +50,7 @@ export interface CourseDropdownInformation {
         courseCode: string,
         semesterId: number | undefined
     ) => void;
-    prerequisiteMet: false | true | "partially";
+    prerequisiteMet: false | true | "partially" | undefined;
 }
 
 export interface CourseInformation {

@@ -7,6 +7,16 @@
 }
 
 :root[data-mantine-color-scheme="dark"]
+    .course-error.mantine-Paper-root.card-dropdown {
+    background-color: #be6161 !important;
+}
+
+:root[data-mantine-color-scheme="light"]
+    .course-error.mantine-Paper-root.card-dropdown {
+    background-color: #ef8080 !important;
+}
+
+:root[data-mantine-color-scheme="dark"]
     .course-included.mantine-Paper-root.card-dropdown {
     background-color: #61be61 !important;
 }

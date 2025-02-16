@@ -606,7 +606,7 @@ export function useCheckPrerequisites() {
             const seenCourses: { [courseCode: string]: Date } = {};
 
             nodes.forEach((node) => {
-                node.data.prerequisiteMet = false;
+                node.data.prerequisiteMet = undefined;
             });
 
             nodes.forEach((node) => {
@@ -656,6 +656,8 @@ export function useCheckPrerequisites() {
                         cardNode.data.prerequisiteMet = prerequisiteMet;
                     } else if (prerequisiteMet) {
                         cardNode.data.prerequisiteMet = "partially";
+                    } else if (!prerequisiteMet && relatedSemesterId) {
+                        cardNode.data.prerequisiteMet = false;
                     }
                 }
             });

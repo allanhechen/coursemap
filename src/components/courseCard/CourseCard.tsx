@@ -64,6 +64,8 @@ export function CourseCardDropdownWrapper({
         ? prerequisiteMet === true
             ? "course-included"
             : "course-prerequisite-met"
+        : prerequisiteMet === false
+        ? "course-error"
         : "";
     return (
         <Card
