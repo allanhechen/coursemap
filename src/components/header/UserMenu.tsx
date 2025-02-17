@@ -72,15 +72,17 @@ export default function UserMenu() {
                         </Menu.Item>
                     </Link>
                     <Menu.Divider />
-                    <Menu.Item
-                        leftSection={
-                            <IconSettings
-                                style={{ width: rem(14), height: rem(14) }}
-                            />
-                        }
-                    >
-                        Settings
-                    </Menu.Item>
+                    <Link href="/settings">
+                        <Menu.Item
+                            leftSection={
+                                <IconSettings
+                                    style={{ width: rem(14), height: rem(14) }}
+                                />
+                            }
+                        >
+                            Settings
+                        </Menu.Item>
+                    </Link>
                     <Menu.Item
                         color="red"
                         leftSection={

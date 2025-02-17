@@ -4,4 +4,5 @@ export type ProgramInformation = {
     institutionPhoto: string;
     programName: string;
     startingYear: number;
+    active?: boolean;
 };

@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS program (
     PRIMARY KEY (institutionid, programname, startingyear)
 );
 CREATE TABLE IF NOT EXISTS userprogram (
-    userId INT REFERENCES users(id),
+    userId INT REFERENCES users(id) ON DELETE CASCADE,
     institutionid INT,
     programname VARCHAR(64),
     startingyear INT,
@@ -88,12 +88,12 @@ CREATE TABLE IF NOT EXISTS semester (
     semestername VARCHAR(32) NOT NULL,
     semesteryear INT NOT NULL,
     semesterterm CHAR(2) NOT NULL,
-    FOREIGN KEY (userId, institutionid, programname, startingyear) REFERENCES userprogram(userId, institutionid, programname, startingyear),
+    FOREIGN KEY (userId, institutionid, programname, startingyear) REFERENCES userprogram(userId, institutionid, programname, startingyear) ON DELETE CASCADE,
     UNIQUE (userId, institutionid, programname, semesteryear, semesterterm)
 );
 CREATE TABLE IF NOT EXISTS coursesemester (
-    userId INT REFERENCES users(id),
-    semesterid INT REFERENCES semester(semesterid),
+    userId INT REFERENCES users(id) ON DELETE CASCADE,
+    semesterid INT REFERENCES semester(semesterid) ON DELETE CASCADE,
     courseid INT REFERENCES course(courseid),
     sortorder INT,
     PRIMARY KEY (semesterid, courseid),
