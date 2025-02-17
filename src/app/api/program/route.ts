@@ -3,7 +3,9 @@
 import {
     createUserProgram,
     deleteUserProgram,
+    getUserPrograms,
     getPrograms,
+    updateUserProgram,
 } from "@/actions/program";
 import { auth } from "@/lib/auth";
 import { NextRequest } from "next/server";
@@ -27,6 +29,38 @@ export async function GET() {
             { error: "An unexpected error occurred." },
             { status: 500 }
         );
+    }
+}
+
+export async function PATCH(request: NextRequest) {
+    const session = await auth();
+    if (!session) {
+        return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const { userId } = session.user;
+
+    const body = await request.json();
+    try {
+        const institutionId = number.parse(body["institutionId"]);
+        const programName = string.parse(body["programName"]);
+        const startingYear = year.parse(body["startingYear"]);
+        await updateUserProgram(
+            userId,
+            institutionId,
+            programName,
+            startingYear
+        );
+        return new Response(null, { status: 200 });
+    } catch (e) {
+        if (e instanceof ZodError) {
+            return Response.json({ error: e.errors }, { status: 400 });
+        } else {
+            console.error("Unexpected error:", e);
+            return Response.json(
+                { error: "An unexpected error occurred." },
+                { status: 500 }
+            );
+        }
     }
 }
 
@@ -75,7 +109,7 @@ export async function DELETE(request: NextRequest) {
 
     try {
         const startingYear = year.parse(startingYearRaw);
-        const institutionId = year.parse(institutionIdRaw);
+        const institutionId = number.parse(institutionIdRaw);
         const programName = string.parse(programNameRaw);
         await deleteUserProgram(
             userId,
