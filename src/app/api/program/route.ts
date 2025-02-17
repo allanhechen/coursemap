@@ -3,7 +3,6 @@
 import {
     createUserProgram,
     deleteUserProgram,
-    getUserPrograms,
     getPrograms,
     updateUserProgram,
 } from "@/actions/program";

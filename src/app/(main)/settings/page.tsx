@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import PageComponent from "@/app/(main)/settings/PageComponent";
+import { getUserPrograms } from "@/actions/program";
 
 export default async function Page() {
     const session = await auth();
@@ -11,9 +12,11 @@ export default async function Page() {
         redirect("/help");
     }
 
+    const userPrograms = await getUserPrograms(parseInt(session.user.id!));
+
     return (
         <>
-            <PageComponent session={session} />
+            <PageComponent session={session} userPrograms={userPrograms} />
         </>
     );
 }
