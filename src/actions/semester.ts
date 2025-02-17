@@ -38,7 +38,7 @@ export async function getSemesters(
                 semesterId: semesterid,
                 semesterName: semestername,
                 semesterTerm: semesterterm,
-                semesterYear: new Date(semesteryear, 0, 1),
+                semesterYear: new Date(semesteryear, 1, 1),
             });
         }
     );
