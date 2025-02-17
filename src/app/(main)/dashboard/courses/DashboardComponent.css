@@ -18,10 +18,6 @@ html {
     flex: 1 1 auto;
 }
 
-[class*="react-flow"] {
-    transition: transform 0s ease;
-}
-
 .react-flow__handle {
     opacity: 0;
 }

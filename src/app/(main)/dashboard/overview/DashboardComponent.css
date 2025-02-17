@@ -5,13 +5,3 @@ html {
     width: 100vw;
     overscroll-behavior: none; /* block navigation gestures because we need it to pan the viewport */
 }
-
-[class*="react-flow"] {
-    transition: transform 0.1s ease;
-}
-
-@media (pointer: coarse) {
-    [class*="react-flow"] {
-        transition: none;
-    }
-}
