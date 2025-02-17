@@ -1,14 +1,11 @@
 "use server";
 
-import { QueryResult, sql } from "@/lib/db";
+import { QueryResult, sql, VercelPoolClient } from "@/lib/db";
+import { ProgramInformation } from "@/types/program";
 
-export async function getActiveUserProgram(userId: number): Promise<{
-    institutionId: number;
-    institutionName: string;
-    institutionPhoto: string;
-    programName: string;
-    startingYear: number;
-}> {
+export async function getActiveUserProgram(
+    userId: number
+): Promise<ProgramInformation> {
     const queryResult = await sql.query<{
         institutionid: number;
         institutionname: string;
@@ -51,30 +48,94 @@ export async function getActiveUserProgram(userId: number): Promise<{
     return result;
 }
 
+export async function getUserPrograms(
+    userId: number
+): Promise<ProgramInformation[]> {
+    const queryResult = await sql.query<{
+        institutionid: number;
+        institutionname: string;
+        institutionphoto: string;
+        programname: string;
+        startingyear: number;
+        active: boolean;
+    }>(
+        `
+        SELECT 
+            institution.institutionid, 
+            institution.institutionname, 
+            institution.institutionphoto, 
+            userprogram.programname,
+            userprogram.startingyear,
+            userprogram.active
+        FROM userprogram
+        INNER JOIN institution ON userprogram.institutionid = institution.institutionid
+        WHERE userid = $1
+        ORDER BY 
+            userprogram.active DESC, 
+            institution.institutionname ASC, 
+            userprogram.programname ASC, 
+            userprogram.startingyear ASC;
+        `,
+        [userId]
+    );
+
+    const result: ProgramInformation[] = [];
+
+    queryResult.rows.forEach((row) => {
+        result.push({
+            institutionId: row.institutionid,
+            institutionName: row.institutionname,
+            institutionPhoto: row.institutionphoto,
+            programName: row.programname,
+            startingYear: row.startingyear,
+            active: row.active,
+        });
+    });
+
+    return result;
+}
+
 export async function createUserProgram(
     userId: number,
     institutionId: number,
     programName: string,
-    startingyear: number
+    startingYear: number
 ): Promise<void> {
-    await sql.query(
-        `
-        INSERT INTO userprogram(
+    const client = await sql.connect();
+    await client.query("BEGIN");
+    try {
+        await client.query(
+            `
+            INSERT INTO userprogram(
+                userId,
+                institutionid,
+                programname,
+                startingyear,
+                active
+            )
+            VALUES(
+                $1,
+                $2,
+                $3,
+                $4,
+                FALSE
+            );`,
+            [userId, institutionId, programName, startingYear]
+        );
+
+        await createProgramRequirements(
+            client,
             userId,
-            institutionid,
-            programname,
-            startingyear,
-            active
-        )
-        VALUES(
-            $1,
-            $2,
-            $3,
-            $4,
-            FALSE
-        );`,
-        [userId, institutionId, programName, startingyear]
-    );
+            programName,
+            startingYear,
+            institutionId
+        );
+        await client.query("COMMIT");
+    } catch {
+        client.query("ROLLBACK");
+    } finally {
+        client.release();
+    }
 }
 
 export async function updateUserProgram(
@@ -121,97 +182,13 @@ export async function updateUserProgram(
         );
         if (result.rowCount === 1) {
             if (result.rows[0].operation === "inserted") {
-                const programRequirements = await client.query<{
-                    courseid: number;
-                    recommendedsemester: number;
-                }>(
-                    `
-                    SELECT courseid, recommendedsemester
-                    FROM programrequirement
-                    WHERE institutionid = $1 AND programname = $2 AND requirementyear = $3`,
-                    [institutionId, programName, startingYear]
+                await createProgramRequirements(
+                    client,
+                    userId,
+                    programName,
+                    startingYear,
+                    institutionId
                 );
-                const requiredSemesters: number[] = [];
-                const semesterQueryArray: string[] = [];
-                if (programRequirements.rows.length === 0) {
-                    await client.query("COMMIT");
-                    return;
-                }
-                programRequirements.rows.forEach(({ recommendedsemester }) => {
-                    if (!requiredSemesters.includes(recommendedsemester)) {
-                        requiredSemesters.push(recommendedsemester);
-                        const term = recommendedsemester % 2 == 0 ? "WI" : "FA";
-                        const year = Math.floor(recommendedsemester / 2) + 1;
-                        semesterQueryArray.push(`INSERT INTO semester(
-                                                                    userId, 
-                                                                    institutionid, 
-                                                                    programname, 
-                                                                    startingyear, 
-                                                                    semestername, 
-                                                                    semesteryear, 
-                                                                    semesterterm
-                                                                 ) VALUES(
-                                                                  ${userId},
-                                                                  ${institutionId},
-                                                                  '${programName}',
-                                                                  ${startingYear},
-                                                                  '${
-                                                                      startingYear +
-                                                                      year -
-                                                                      1
-                                                                  }-${term}',
-                                                                  ${
-                                                                      startingYear +
-                                                                      year -
-                                                                      1
-                                                                  },
-                                                                  '${term}')`);
-                    }
-                });
-                const queryResults = await client.query(
-                    semesterQueryArray.join(
-                        "RETURNING semesterid, semesteryear, semesterterm;"
-                    ) + "RETURNING semesterid, semesteryear, semesterterm;"
-                );
-                const queryResultsArray =
-                    queryResults as unknown as QueryResult<{
-                        semesterid: number;
-                        semesteryear: number;
-                        semesterterm: string;
-                    }>[];
-
-                const semesterToId: { [key: string]: number } = {};
-                queryResultsArray.forEach((queryResult) => {
-                    const { semesterid, semesteryear, semesterterm } =
-                        queryResult.rows[0];
-                    const key = semesteryear + "-" + semesterterm;
-                    semesterToId[key] = semesterid;
-                });
-
-                const courseSemesters: string[] = [];
-                programRequirements.rows.forEach(
-                    ({ courseid, recommendedsemester }) => {
-                        const term = recommendedsemester % 2 == 0 ? "WI" : "FA";
-                        const year = Math.floor(recommendedsemester / 2) + 1;
-                        const key = startingYear + year - 1 + "-" + term;
-                        courseSemesters.push(`
-                            INSERT INTO coursesemester(
-                                userId,
-                                semesterid,
-                                courseid,
-                                sortorder
-                            )
-                            VALUES (
-                                ${userId},
-                                ${semesterToId[key]},
-                                ${courseid},
-                                0
-                            );
-                            `);
-                    }
-                );
-
-                client.query(courseSemesters.join(";") + ";");
             }
             await client.query("COMMIT");
         } else {
@@ -330,4 +307,99 @@ export async function getProgramRequirements(
     });
 
     return result;
+}
+
+async function createProgramRequirements(
+    client: VercelPoolClient,
+    userId: number,
+    programName: string,
+    startingYear: number,
+    institutionId: number
+) {
+    const programRequirements = await client.query<{
+        courseid: number;
+        recommendedsemester: number;
+    }>(
+        `
+        SELECT courseid, recommendedsemester
+        FROM programrequirement
+        WHERE institutionid = $1 AND programname = $2 AND requirementyear = $3`,
+        [institutionId, programName, startingYear]
+    );
+    const requiredSemesters: number[] = [];
+    const semesterQueryArray: string[] = [];
+    if (programRequirements.rows.length === 0) {
+        return;
+    }
+    programRequirements.rows.forEach(({ recommendedsemester }) => {
+        if (!requiredSemesters.includes(recommendedsemester)) {
+            requiredSemesters.push(recommendedsemester);
+            const term = recommendedsemester % 2 == 0 ? "WI" : "FA";
+            const year = Math.floor(recommendedsemester / 2) + 1;
+            semesterQueryArray.push(`INSERT INTO semester(
+                                                        userId, 
+                                                        institutionid, 
+                                                        programname, 
+                                                        startingyear, 
+                                                        semestername, 
+                                                        semesteryear, 
+                                                        semesterterm
+                                                     ) VALUES(
+                                                      ${userId},
+                                                      ${institutionId},
+                                                      '${programName}',
+                                                      ${startingYear},
+                                                      '${
+                                                          startingYear +
+                                                          year -
+                                                          1
+                                                      }-${term}',
+                                                      ${
+                                                          startingYear +
+                                                          year -
+                                                          1
+                                                      },
+                                                      '${term}')`);
+        }
+    });
+    const queryResults = await client.query(
+        semesterQueryArray.join(
+            "RETURNING semesterid, semesteryear, semesterterm;"
+        ) + "RETURNING semesterid, semesteryear, semesterterm;"
+    );
+    const queryResultsArray = queryResults as unknown as QueryResult<{
+        semesterid: number;
+        semesteryear: number;
+        semesterterm: string;
+    }>[];
+
+    const semesterToId: { [key: string]: number } = {};
+    queryResultsArray.forEach((queryResult) => {
+        const { semesterid, semesteryear, semesterterm } = queryResult.rows[0];
+        const key = semesteryear + "-" + semesterterm;
+        semesterToId[key] = semesterid;
+    });
+
+    const courseSemesters: string[] = [];
+    programRequirements.rows.forEach(({ courseid, recommendedsemester }) => {
+        const term = recommendedsemester % 2 == 0 ? "WI" : "FA";
+        const year = Math.floor(recommendedsemester / 2) + 1;
+        const key = startingYear + year - 1 + "-" + term;
+        courseSemesters.push(`
+                INSERT INTO coursesemester(
+                    userId,
+                    semesterid,
+                    courseid,
+                    sortorder
+                )
+                VALUES (
+                    ${userId},
+                    ${semesterToId[key]},
+                    ${courseid},
+                    0
+                );
+                `);
+    });
+
+    client.query(courseSemesters.join(";") + ";");
 }
