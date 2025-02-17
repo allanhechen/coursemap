@@ -431,10 +431,10 @@ function placeFewPostrequisites(
             style: {
                 strokeWidth: 3,
                 opacity: 0.25,
-                animation: "fadein 0.5s",
-                WebkitAnimation: "fadein 0.5s", // Safari, Chrome
-                MozAnimation: "fadein 0.5s", // Firefox
-                OAnimation: "fadein 0.5s", // Opera
+                // animation: "fadein 0.5s",
+                // WebkitAnimation: "fadein 0.5s", // Safari, Chrome
+                // MozAnimation: "fadein 0.5s", // Firefox
+                // OAnimation: "fadein 0.5s", // Opera
             },
             source: firstNode.id,
             target: id,
