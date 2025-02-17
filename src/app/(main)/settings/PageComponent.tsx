@@ -8,6 +8,7 @@ import { Session } from "next-auth";
 import React from "react";
 import UserPrograms from "@/app/(main)/settings/UserPrograms";
 import AddProgramButton from "@/app/(main)/settings/AddProgramButton";
+import DeleteModal from "@/app/(main)/settings/DeleteModal";
 
 export default function PageComponent({
     session,
@@ -21,7 +22,7 @@ export default function PageComponent({
             <SessionContext.Provider value={session}>
                 <Flex direction="column" className="h-screen overflow-y-auto">
                     <NavBar hideForm={true} />
-                    <div className="flex-auto max-w-7xl w-screen mx-auto px-5">
+                    <div className="flex-auto max-w-7xl w-screen mx-auto px-10">
                         <Title order={1}>Settings</Title>
                         <Divider my="md" />
                         <Title className="mt-10" order={2}>
@@ -35,6 +36,7 @@ export default function PageComponent({
                             Account
                         </Title>
                         <Divider my="md" />
+                        <DeleteModal />
                     </div>
                 </Flex>
             </SessionContext.Provider>
