@@ -5,11 +5,9 @@ import { SessionContext } from "@/components/sessionContext";
 import { ProgramInformation } from "@/types/program";
 import { Divider, Flex, Title } from "@mantine/core";
 import { Session } from "next-auth";
-import React, { useEffect } from "react";
 import UserPrograms from "@/app/(main)/settings/UserPrograms";
 import AddProgramButton from "@/app/(main)/settings/AddProgramButton";
 import DeleteModal from "@/app/(main)/settings/DeleteModal";
-import { notifications } from "@mantine/notifications";
 
 export default function PageComponent({
     session,
@@ -18,11 +16,11 @@ export default function PageComponent({
     session: Session;
     userPrograms: ProgramInformation[];
 }) {
-    useEffect(() => {
-        return () => {
-            notifications.clean();
-        };
-    });
+    // useEffect(() => {
+    //     return () => {
+    //         notifications.clean();
+    //     };
+    // });
 
     return (
         <>
