@@ -2,6 +2,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { Modal, Button, Text } from "@mantine/core";
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { notifications } from "@mantine/notifications";
 
 export default function DeleteModal() {
     const router = useRouter();
@@ -14,7 +15,14 @@ export default function DeleteModal() {
             });
             router.push("/");
         } catch {
-            // TODO: DISPLAY ERROR
+            notifications.show({
+                withCloseButton: true,
+                autoClose: false,
+                title: "Account deletion failed",
+                message: "Could not delete account, please try again",
+                color: "red",
+                className: "mt-2 transition-transform",
+            });
         }
     }, [router]);
 
