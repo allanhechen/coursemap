@@ -16,6 +16,7 @@
         "@mantine/dates": "^7.15.1",
         "@mantine/form": "^7.15.1",
         "@mantine/hooks": "^7.15.1",
+        "@mantine/notifications": "^7.17.0",
         "@tabler/icons-react": "^3.26.0",
         "@types/mdx": "^2.0.13",
         "@uidotdev/usehooks": "^2.4.1",

@@ -25,6 +25,14 @@
     background-color: #22242e !important;
 }
 
+[data-mantine-color-scheme="light"] .mantine-Notification-root {
+    background-color: white !important;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Notification-root {
+    background-color: #22242e !important;
+}
+
 [data-mantine-color-scheme="light"] .mantine-Menu-dropdown {
     background-color: white !important;
 }
@@ -35,6 +43,11 @@
 
 .mantine-InputBase-input {
     background-color: hsl(0, 7%, 15%, 75%) !important;
+}
+
+[data-position="bottom-right"] {
+    bottom: 1.25rem;
+    right: 1.25rem;
 }
 
 /* https://stackoverflow.com/questions/11679567/using-css-for-a-fade-in-effect-on-page-load */

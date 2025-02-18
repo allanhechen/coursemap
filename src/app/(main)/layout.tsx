@@ -3,9 +3,11 @@ import type { Metadata } from "next";
 import "@xyflow/react/dist/style.css";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
+import "@mantine/notifications/styles.css";
 import "@/app/(main)/globals.css";
 
 import { ColorSchemeScript, createTheme, MantineProvider } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 
 const theme = createTheme({
     primaryShade: { light: 6, dark: 4 },
@@ -57,6 +59,7 @@ export default function RootLayout({
             </head>
             <body>
                 <MantineProvider theme={theme} defaultColorScheme="dark">
+                    <Notifications />
                     {children}
                 </MantineProvider>
             </body>
