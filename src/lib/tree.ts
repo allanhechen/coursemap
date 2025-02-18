@@ -9,6 +9,7 @@ import {
     SemesterInformation,
     SemesterTerm,
 } from "@/types/semester";
+import { notifications } from "@mantine/notifications";
 import { Edge, Node } from "@xyflow/react";
 import { useCallback, useContext, useEffect, useRef } from "react";
 
@@ -574,10 +575,16 @@ function handleRequirements(
                     }
             } catch {
                 // TODO: notify user that the last course could not be added
-                console.log(
-                    `Could not properly add the course ${currentTransformed}`
-                );
-                nodeOutput.pop();
+                const rejectedNode = nodeOutput.pop()!;
+                notifications.show({
+                    id: rejectedNode.courseName,
+                    autoClose: false,
+                    withCloseButton: true,
+                    title: "Could not add course",
+                    message: `Course ${rejectedNode.courseName} has malformed prerequisites`,
+                    color: "red",
+                    className: "mt-2 transition-transform",
+                });
             }
         }
     }
