@@ -10,6 +10,7 @@ import {
     InputBase,
     useCombobox,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { ReactNode, useContext, useEffect, useRef } from "react";
 
 export default function CourseCardForm({
@@ -98,16 +99,27 @@ export default function CourseCardForm({
                 try {
                     if (semesterIdString) {
                         semesterId = parseInt(semesterIdString);
-                        await fetch("/api/course/semesters", {
+                        const response = await fetch("/api/course/semesters", {
                             method: "PUT",
                             body: JSON.stringify({
                                 courseIds: [courseId],
                                 semesterId: semesterId,
                             }),
                         });
+                        if (!response.ok) {
+                            throw new Error("Coursesemester API called failed");
+                        }
                     }
-                } catch (e) {
-                    console.log(e);
+                } catch {
+                    notifications.show({
+                        withCloseButton: false,
+                        autoClose: false,
+                        title: "Error updating course semester",
+                        message:
+                            "API call to update course semester failed, please reload the page",
+                        color: "red",
+                        className: "mt-2 transition-transform",
+                    });
                 }
 
                 selectSemester(courseCode, semesterId);
@@ -140,12 +152,27 @@ export default function CourseCardForm({
                                         "courseId",
                                         courseId.toString()
                                     );
-                                    await fetch(
-                                        "/api/course/semesters?" + params,
-                                        {
-                                            method: "DELETE",
+                                    try {
+                                        const response = await fetch(
+                                            "/api/course/semesters?" + params,
+                                            {
+                                                method: "DELETE",
+                                            }
+                                        );
+                                        if (!response.ok) {
                                         }
-                                    );
+                                    } catch {
+                                        notifications.show({
+                                            withCloseButton: false,
+                                            autoClose: false,
+                                            title: "Error updating course semester",
+                                            message:
+                                                "API call to update course semester failed, please reload the page",
+                                            color: "red",
+                                            className:
+                                                "mt-2 transition-transform",
+                                        });
+                                    }
                                     delete relatedSemesterId[courseCode];
 
                                     checkPrerequisites(

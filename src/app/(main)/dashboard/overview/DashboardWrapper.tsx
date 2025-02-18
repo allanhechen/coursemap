@@ -36,6 +36,20 @@ export default function DashboardWrapper({
             semesterYear: new Date(2024, 0, 1),
             semesterTerm: SemesterTerm.SU,
         },
+        validate: {
+            semesterName: (value) =>
+                value.length === 0 ? "Invalid semester name" : null,
+            semesterYear: (value) => {
+                console.log(
+                    value,
+                    1000 < value.getFullYear(),
+                    value.getFullYear() < 9999
+                );
+                return 1000 < value.getFullYear() && value.getFullYear() < 9999
+                    ? null
+                    : "Invalid semester year";
+            },
+        },
     });
 
     return (

@@ -8,6 +8,7 @@ import {
     IconBrandDiscordFilled,
     IconBrandGithubFilled,
 } from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
 
 const providerImages: { [providerName: string]: ReactNode } = {
     GitHub: <IconBrandGithubFilled />,
@@ -66,10 +67,19 @@ export default async function Page() {
                                             redirectTo: "/dashboard/overview",
                                         });
                                     } catch (error) {
-                                        // TODO: add notification with message in case of error
                                         if (error instanceof AuthError) {
                                             console.log(error);
                                         }
+                                        notifications.show({
+                                            withCloseButton: true,
+                                            autoClose: false,
+                                            title: "Error signing in",
+                                            message:
+                                                "Sign in with provider failed, please try again",
+                                            color: "red",
+                                            className:
+                                                "mt-2 transition-transform",
+                                        });
                                         throw error;
                                     }
                                 }}

@@ -3,6 +3,7 @@ import { Button, Modal, Paper, Stack, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
+import { notifications } from "@mantine/notifications";
 
 export default function UserPrograms({
     userPrograms,
@@ -33,9 +34,22 @@ export default function UserPrograms({
                     }),
                 });
                 router.refresh();
-                // TODO: send positive message
+                notifications.show({
+                    withCloseButton: true,
+                    title: "Program updated",
+                    message: `Successfully set active program to ${userProgram.programName}`,
+                    color: "blue",
+                    className: "mt-2 transition-transform",
+                });
             } catch {
-                // TODO: send failure message
+                notifications.show({
+                    withCloseButton: true,
+                    autoClose: false,
+                    title: "Program update failed",
+                    message: "Could not activate new program, please try again",
+                    color: "red",
+                    className: "mt-2 transition-transform",
+                });
             }
         },
         [router]
@@ -56,10 +70,22 @@ export default function UserPrograms({
                 });
                 close();
                 router.refresh();
-                // TODO: send positive message
-            } catch (e) {
-                // TODO: send failure message
-                console.log(e);
+                notifications.show({
+                    withCloseButton: true,
+                    title: "Program deleted",
+                    message: `Successfully deleted program ${userProgram.programName}`,
+                    color: "blue",
+                    className: "mt-2 transition-transform",
+                });
+            } catch {
+                notifications.show({
+                    withCloseButton: true,
+                    autoClose: false,
+                    title: "Program deletion failed",
+                    message: "Could not delete program, please try again",
+                    color: "red",
+                    className: "mt-2 transition-transform",
+                });
             }
         },
         [router, close]

@@ -11,6 +11,7 @@ import {
     Stack,
     useCombobox,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import {
     Dispatch,
     ReactNode,
@@ -101,9 +102,16 @@ export default function SelectProgram({
 
                 setInstitutionIdDict(tempIdDict);
                 setPrograms(programObject);
-            } catch (e) {
-                // TODO: display a toast when this goes wrong
-                console.log(e);
+            } catch {
+                notifications.show({
+                    withCloseButton: true,
+                    autoClose: false,
+                    title: "Error retrieving program data",
+                    message:
+                        "API call to retrieve program data failed, please try again later",
+                    color: "red",
+                    className: "mt-2 transition-transform",
+                });
             }
         }
         getData();

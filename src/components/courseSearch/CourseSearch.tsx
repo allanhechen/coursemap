@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Paper, TextInput } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import useSWR from "swr";
 
 import Chip from "@/components/chip/Chip";
@@ -37,7 +38,14 @@ export default function CourseSearch() {
     );
 
     if (courseSWR.error) {
-        console.log(courseSWR.error);
+        notifications.show({
+            id: "search-courses-error",
+            withCloseButton: true,
+            title: "Could not search for courses",
+            message: "API call to search for courses failed, please try again",
+            color: "red",
+            className: "mt-2 transition-transform",
+        });
     }
     useEffect(() => {
         if (courseSWR.data) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useContext, useEffect } from "react";
-import { ReactFlow, Node, Edge, useReactFlow, MiniMap } from "@xyflow/react";
+import { ReactFlow, Node, Edge, useReactFlow } from "@xyflow/react";
 
 import {
     CourseCardDropdownWrapper,
@@ -33,6 +33,7 @@ import OrWrapper from "@/components/wrapper/OrWrapper";
 import eventBus from "@/lib/eventBus";
 import { NodeContext } from "@/app/(main)/dashboard/courses/nodeContext";
 import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
+import { notifications } from "@mantine/notifications";
 
 const nodeTypes = {
     prerequisiteDropdownNode: CourseCardPostrequisiteDropdownWrapper,
@@ -107,8 +108,7 @@ export default function DashboardComponent({
                 if (!type) {
                     return;
                 }
-                setEdges([]);
-                setNodes([]);
+                notifications.clean();
 
                 const [, droppedNode] = type;
 
@@ -144,24 +144,56 @@ export default function DashboardComponent({
                         postrequisiteId.toString()
                     );
                 });
-                const courseInformationResponse = await fetch(
-                    "/api/course/information?" + informationEndpoint
-                );
-                const courseInformation: {
+
+                let courseInformation: {
                     [courseId: number]: CourseInformation;
-                } = await courseInformationResponse.json();
+                };
+                try {
+                    const courseInformationResponse = await fetch(
+                        "/api/course/information?" + informationEndpoint
+                    );
+                    courseInformation = await courseInformationResponse.json();
+                } catch {
+                    notifications.show({
+                        withCloseButton: true,
+                        autoClose: false,
+                        title: "Error retrieving course information ",
+                        message:
+                            "API call to retrieve course information failed, please try again",
+                        color: "red",
+                        className: "mt-2 transition-transform",
+                    });
+                    return 0;
+                }
+
                 const filledCourses = nodeOutput.map((node) => {
                     const course = courseInformation[node.courseId];
                     return { id: node.key, data: course };
                 });
 
-                const courseSemesterResponse = await fetch(
-                    "/api/course/semesters"
-                );
-                const courseSemesters: {
+                let courseSemesters: {
                     semesterId: number;
                     course: CourseInformation;
-                }[] = await courseSemesterResponse.json();
+                }[];
+
+                try {
+                    const courseSemesterResponse = await fetch(
+                        "/api/course/semesters"
+                    );
+                    courseSemesters = await courseSemesterResponse.json();
+                } catch {
+                    notifications.show({
+                        withCloseButton: true,
+                        autoClose: false,
+                        title: "Error retrieving course semesters",
+                        message:
+                            "API call to retrieve course semesters failed, please try again",
+                        color: "red",
+                        className: "mt-2 transition-transform",
+                    });
+                    return 0;
+                }
+
                 courseSemesters.forEach((courseSemester) => {
                     courseStates[courseSemester.course.courseCode] =
                         courseSemester.semesterId;
@@ -204,6 +236,9 @@ export default function DashboardComponent({
                             postition: { x: 0, y: 0 },
                         };
                     });
+
+                setEdges([]);
+                setNodes([]);
 
                 setNodes(dropdownCourses as Node[]);
                 setEdges(edgeOutput);
@@ -278,7 +313,26 @@ export default function DashboardComponent({
                 window.removeEventListener("resize", updateHeight);
             };
         }
+
+        return () => {
+            notifications.clean();
+        };
     }, []);
+
+    useEffect(() => {
+        if (nodes.length === 0) {
+            notifications.show({
+                id: "no-course-selected",
+                withCloseButton: false,
+                autoClose: false,
+                title: "No course selected!",
+                message: "Drag a course from the search results to the side",
+                className: "mt-2 transition-transform",
+            });
+        } else {
+            notifications.hide("no-course-selected");
+        }
+    }, [nodes]);
 
     const closeDropdowns = useCallback(() => {
         eventBus.dispatchEvent(new CustomEvent("closeDropdowns", {}));
@@ -311,9 +365,7 @@ export default function DashboardComponent({
                         onDrop={onDrop}
                         nodesDraggable={false}
                         nodesConnectable={false}
-                    >
-                        <MiniMap />
-                    </ReactFlow>
+                    />
                 </div>
             </div>
         </>
