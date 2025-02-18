@@ -1,7 +1,7 @@
 import { ProgramInformation } from "@/types/program";
 import { Button, Modal, Paper, Stack, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function UserPrograms({
@@ -11,6 +11,15 @@ export default function UserPrograms({
 }) {
     const router = useRouter();
     const [opened, { open, close }] = useDisclosure(false);
+    const [currentProgram, setCurrentProgram] = useState(userPrograms[0]);
+
+    const handleOpen = useCallback(
+        (userProgram: ProgramInformation) => {
+            setCurrentProgram(userProgram);
+            open();
+        },
+        [open]
+    );
 
     const handleActivation = useCallback(
         async (userProgram: ProgramInformation) => {
@@ -59,34 +68,6 @@ export default function UserPrograms({
     const programs = userPrograms.map((userProgram) => {
         return (
             <div key={userProgram.programName}>
-                <Modal opened={opened} onClose={close} title="Delete Program">
-                    <div className="flex flex-col">
-                        <Text className="mt-3">
-                            Are you sure you want to delete{" "}
-                            {
-                                <Text c="blue" className="inline">
-                                    {userProgram.programName}{" "}
-                                </Text>
-                            }{" "}
-                            from{" "}
-                            {
-                                <Text c="blue" className="inline">
-                                    {userProgram.institutionName}
-                                </Text>
-                            }
-                            ?
-                        </Text>
-                        <Button
-                            disabled={userProgram.active ? true : undefined}
-                            className="col-span-1 mt-3"
-                            variant="filled"
-                            color="red"
-                            onClick={() => handleDeletion(userProgram)}
-                        >
-                            I am sure
-                        </Button>
-                    </div>
-                </Modal>
                 <Paper
                     className="p-5 grid grid-cols-10 items-center gap-2"
                     key={userProgram.programName}
@@ -124,7 +105,7 @@ export default function UserPrograms({
                                 className="col-span-1"
                                 variant="filled"
                                 color="red"
-                                onClick={open}
+                                onClick={() => handleOpen(userProgram)}
                             >
                                 Delete
                             </Button>
@@ -135,16 +116,48 @@ export default function UserPrograms({
         );
     });
     return (
-        <div className="w-full overflow-x-auto pb-5">
-            <div className="min-w-[65rem]">
-                <div className="grid grid-cols-10 p-5 gap-2">
-                    <div className="text-left col-span-3">Institution</div>
-                    <div className="text-left col-span-3">Program</div>
-                    <div className="text-left col-span-2">Starting Year</div>
-                    <div className="text-left col-span-2">Actions</div>
+        <>
+            <Modal opened={opened} onClose={close} title="Delete Program">
+                <div className="flex flex-col">
+                    <Text className="mt-3">
+                        Are you sure you want to delete{" "}
+                        {
+                            <span className="text-sky-500/100">
+                                {currentProgram.programName}{" "}
+                            </span>
+                        }{" "}
+                        from{" "}
+                        {
+                            <span className="text-sky-500/100">
+                                {currentProgram.institutionName}
+                            </span>
+                        }
+                        ?
+                    </Text>
+                    <Button
+                        disabled={currentProgram.active ? true : undefined}
+                        className="col-span-1 mt-3"
+                        variant="filled"
+                        color="red"
+                        onClick={() => handleDeletion(currentProgram)}
+                    >
+                        I am sure
+                    </Button>
                 </div>
-                <Stack>{programs}</Stack>
+            </Modal>
+            <div className="w-full overflow-x-auto pb-5">
+                <div className="min-w-[65rem]">
+                    <div className="grid grid-cols-10 p-5 gap-2">
+                        <div className="text-left col-span-3">Institution</div>
+                        <div className="text-left col-span-3">Program</div>
+                        <div className="text-left col-span-2">
+                            Starting Year
+                        </div>
+                        <div className="text-left col-span-2">Actions</div>
+                    </div>
+                    <Stack>{programs}</Stack>
+                </div>
             </div>
-        </div>
+        </>
     );
 }
