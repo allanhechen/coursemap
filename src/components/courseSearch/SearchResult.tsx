@@ -63,6 +63,21 @@ export default function SearchResult({
                 courseId={0}
             />
         );
+    } else if (cards.length == 0) {
+        renderedCards.push(
+            <CourseCard
+                draggable
+                key="no-results-found"
+                courseCode="No results found"
+                courseName="Please try another search query"
+                faculty="NA"
+                chips={[]}
+                prerequisites=""
+                postrequisites={[]}
+                antirequisites={[]}
+                courseId={0}
+            />
+        );
     }
 
     return (
