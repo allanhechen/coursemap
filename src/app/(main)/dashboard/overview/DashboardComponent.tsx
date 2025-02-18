@@ -29,6 +29,7 @@ import CourseSearch from "@/components/courseSearch/CourseSearch";
 import { DnDContext } from "@/components/dndContext";
 import { CardWrapper } from "@/types/courseCard";
 import { SessionContext } from "@/components/sessionContext";
+import { notifications } from "@mantine/notifications";
 
 // ipmlementation notes:
 // 1. pan on drag false -> can't move the viewport with mouse
@@ -128,6 +129,12 @@ export default function DashboardComponent({
         event.dataTransfer.dropEffect = "move";
     }, []);
 
+    useEffect(() => {
+        return () => {
+            notifications.clean();
+        };
+    }, []);
+
     const onDrop = useCallback(
         (event: React.DragEvent) => {
             event.preventDefault();
@@ -147,6 +154,13 @@ export default function DashboardComponent({
             }
             for (let i = 0; i < nodes.length; i++) {
                 if (nodes[i].id === id) {
+                    notifications.show({
+                        withCloseButton: true,
+                        title: "Error adding new course",
+                        message: "Course already exists in a semester",
+                        color: "red",
+                        className: "mt-2 transition-transform",
+                    });
                     return;
                 }
             }

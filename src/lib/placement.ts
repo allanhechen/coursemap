@@ -16,6 +16,7 @@ import {
 import { CardWrapper, CourseInformation } from "@/types/courseCard";
 import { SemesterPositionContext } from "@/app/(main)/dashboard/overview/semesterPositionContext";
 import { ChipVariant } from "@/types/chipVariant";
+import { notifications } from "@mantine/notifications";
 
 const termToChipVariant = {
     [SemesterTerm.FA]: ChipVariant.FALL,
@@ -187,7 +188,7 @@ const termOrder: { [key in SemesterTerm]: number } = {
     [SemesterTerm.FA]: 4,
 };
 
-// a helper funciton that calculates where the nodes should go
+// a helper function that calculates where the nodes should go
 // initializes semesterpositions for intervals
 // also adds the delete bar (and the search bar in the future)
 function placeNodes(
@@ -369,9 +370,42 @@ export const useUpdateNodes = () => {
 
     const updateNodes = useCallback(async () => {
         // these are already sorted so we don't need to sort them again
-        const semesterResponse = await fetch("/api/semester");
-        const { semesters }: { semesters: SemesterInformation[] } =
-            await semesterResponse.json();
+        let semesters;
+        try {
+            const semesterResponse = await fetch("/api/semester");
+            if (!semesterResponse.ok) {
+                throw new Error(
+                    `${semesterResponse.status} ${semesterResponse.statusText}`
+                );
+            }
+            const temp: { semesters: SemesterInformation[] } =
+                await semesterResponse.json();
+            semesters = temp.semesters;
+        } catch {
+            notifications.show({
+                withCloseButton: true,
+                autoClose: false,
+                title: "Error placing courses",
+                message:
+                    "Could not load existing semesters, please reload the page",
+                color: "red",
+                className: "mt-2 transition-transform",
+            });
+            return 0;
+        }
+
+        if (semesters.length === 0) {
+            notifications.show({
+                id: "no-semesters",
+                withCloseButton: false,
+                autoClose: false,
+                title: "No semesters found!",
+                message: "Add a semester from the navigation bar above",
+                className: "mt-2 transition-transform",
+            });
+        } else {
+            notifications.hide("no-semesters");
+        }
 
         // the items received are not actually dates
         semesters.forEach((semester) => {
@@ -382,11 +416,33 @@ export const useUpdateNodes = () => {
             dateObject.setFullYear(parseInt(yearString));
             semester.semesterYear = dateObject;
         });
-        const courseSemestersResponse = await fetch("/api/course/semesters");
-        const courseSemesters: {
+
+        let courseSemesters: {
             semesterId: number;
             course: CourseInformation;
-        }[] = await courseSemestersResponse.json();
+        }[];
+        try {
+            const courseSemestersResponse = await fetch(
+                "/api/course/semesters"
+            );
+            if (!courseSemestersResponse.ok) {
+                throw new Error(
+                    `${courseSemestersResponse.status} ${courseSemestersResponse.statusText}`
+                );
+            }
+            courseSemesters = await courseSemestersResponse.json();
+        } catch {
+            notifications.show({
+                withCloseButton: true,
+                autoClose: false,
+                title: "Error placing courses",
+                message:
+                    "Could not load courseSemesters, please reload the page",
+                color: "red",
+                className: "mt-2 transition-transform",
+            });
+            return 0;
+        }
 
         // we need to group all the courseSemesters by semesters and convert them into nodes
         const semesterGroupDict: Dictionary<SemesterGroup> = {};
@@ -508,7 +564,22 @@ function checkRequisites(
                     return seenCourses.has(prerequisite).toString();
                 }
             );
-            courseData.requisiteWarning = !eval(prerequisite_eval);
+            const passedPrerequisiteCheck = eval(prerequisite_eval);
+            courseData.requisiteWarning = !passedPrerequisiteCheck;
+
+            if (
+                droppedNode &&
+                node.id === droppedNode.id &&
+                !passedPrerequisiteCheck
+            ) {
+                notifications.show({
+                    withCloseButton: true,
+                    title: "Prerequisites not met",
+                    message: `Prerequisites not met for dropped course ${droppedNode.data.courseCode}`,
+                    color: "red",
+                    className: "mt-2 transition-transform",
+                });
+            }
         });
 
         // only add courses after the semester is done
@@ -532,16 +603,27 @@ function checkRequisites(
 }
 
 async function sendDeleteFetch(courseId: number) {
-    try {
-        const params = new URLSearchParams("");
-        params.append("courseId", courseId.toString());
-        fetch("/api/course/semesters?" + params, {
-            method: "DELETE",
+    const params = new URLSearchParams("");
+    params.append("courseId", courseId.toString());
+    fetch("/api/course/semesters?" + params, {
+        method: "DELETE",
+    })
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error(`${res.status} ${res.statusText}`);
+            }
+        })
+        .catch(() => {
+            notifications.show({
+                withCloseButton: true,
+                autoClose: false,
+                title: "Error deleting course",
+                message:
+                    "API call to delete course from semester failed, please reload the page",
+                color: "red",
+                className: "mt-2 transition-transform",
+            });
         });
-    } catch (e) {
-        // TODO: send notification if deletefetch is rejected
-        console.log(e);
-    }
 }
 
 // arranges dropped nodes depending on where it's placed
@@ -771,17 +853,29 @@ export const useGroupCards = (courseNames: { [courseId: number]: string }) => {
                 return courseId;
             });
 
-            const updateReponse = fetch("/api/course/semesters", {
+            fetch("/api/course/semesters", {
                 method: "PUT",
                 body: JSON.stringify({
                     courseIds: courseIds,
                     semesterId: relatedSemester.semesterId,
                 }),
-            });
-            // TODO: add message if the coursesemester update is rejected
-            updateReponse.catch((e) => {
-                console.log(e);
-            });
+            })
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error(`${res.status} ${res.statusText}`);
+                    }
+                })
+                .catch(() => {
+                    notifications.show({
+                        withCloseButton: true,
+                        autoClose: false,
+                        title: "Error placing card",
+                        message:
+                            "API call to add course to semester failed, please reload the page",
+                        color: "red",
+                        className: "mt-2 transition-transform",
+                    });
+                });
 
             setNodes(newNodes);
             setPlacements(placements);
