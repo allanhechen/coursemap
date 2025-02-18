@@ -574,7 +574,6 @@ function handleRequirements(
                         };
                     }
             } catch {
-                // TODO: notify user that the last course could not be added
                 const rejectedNode = nodeOutput.pop()!;
                 notifications.show({
                     id: rejectedNode.courseName,

@@ -124,7 +124,6 @@ export default function SemesterForm({
             >
                 <form
                     onSubmit={form.onSubmit(async (values) => {
-                        // TODO: Add some client side validation to make sure name and year are filled
                         if (semesterId) {
                             try {
                                 const res = await fetch("/api/semester", {

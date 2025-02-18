@@ -3,6 +3,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { Button, Paper, Title } from "@mantine/core";
 import SelectProgram from "@/components/program/SelectProgram";
 import { useRouter } from "next/navigation";
+import { notifications } from "@mantine/notifications";
 
 export default function AddProgramButton() {
     const router = useRouter();
@@ -38,18 +39,38 @@ export default function AddProgramButton() {
                                     programName: string,
                                     startingYear: number
                                 ) => {
-                                    await fetch("/api/program", {
-                                        method: "POST",
-                                        body: JSON.stringify({
-                                            institutionId: institutionId,
-                                            programName: programName,
-                                            startingYear: startingYear,
-                                        }),
-                                    });
+                                    try {
+                                        const res = await fetch(
+                                            "/api/program",
+                                            {
+                                                method: "POST",
+                                                body: JSON.stringify({
+                                                    institutionId:
+                                                        institutionId,
+                                                    programName: programName,
+                                                    startingYear: startingYear,
+                                                }),
+                                            }
+                                        );
+                                        if (!res.ok) {
+                                            throw new Error(res.statusText);
+                                        }
+                                    } catch {
+                                        notifications.show({
+                                            withCloseButton: true,
+                                            autoClose: false,
+                                            title: "Error adding new program",
+                                            message:
+                                                "API call to add program failed, please try again later",
+                                            color: "red",
+                                            className:
+                                                "mt-2 transition-transform",
+                                        });
+                                        return;
+                                    }
+
                                     close();
                                     router.refresh();
-
-                                    // TODO: HANDLE ERROR
                                 }}
                             />
                         </Paper>

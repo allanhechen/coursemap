@@ -149,7 +149,6 @@ export default function DashboardComponent({
             const nodes = getNodes();
             if (nodes.length === 2) {
                 // this means we have no semesters, there are no valid semesters for this course to be dropped on
-                // TODO: add toast to notify the user to add a semester
                 return;
             }
             for (let i = 0; i < nodes.length; i++) {

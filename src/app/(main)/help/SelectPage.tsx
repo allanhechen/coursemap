@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import SelectProgram from "@/components/program/SelectProgram";
 import { Paper, Title, Text } from "@mantine/core";
 import { getBackgroundColor } from "@/lib/color";
+import { notifications } from "@mantine/notifications";
 
 export default function SelectPage({
     ...props
@@ -29,14 +30,25 @@ export default function SelectPage({
             programName: string,
             startingYear: number
         ) => {
-            // TODO: add notifications on failure
-            await update({
-                ...session,
-                institutionId,
-                programName,
-                startingYear,
-            });
-            router.push("/dashboard/overview");
+            try {
+                await update({
+                    ...session,
+                    institutionId,
+                    programName,
+                    startingYear,
+                });
+                router.push("/dashboard/overview");
+            } catch {
+                notifications.show({
+                    withCloseButton: true,
+                    autoClose: false,
+                    title: "Error adding new program",
+                    message:
+                        "API call to add program failed, please try again later",
+                    color: "red",
+                    className: "mt-2 transition-transform",
+                });
+            }
         },
         [update, router, session]
     );
