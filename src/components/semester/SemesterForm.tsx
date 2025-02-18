@@ -21,6 +21,7 @@ import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext"
 import "@/components/semester/SemesterForm.css";
 import { Session } from "next-auth";
 import { SessionContext } from "@/components/sessionContext";
+import { notifications } from "@mantine/notifications";
 
 // semseterForm will be called in two places
 // the first is the create page on a semester, where all fields will initially be fileld in
@@ -84,16 +85,26 @@ export default function SemesterForm({
         try {
             const params = new URLSearchParams("");
             params.append("semesterId", semesterId!.toString());
-            await fetch("/api/semester?" + params, {
+            const res = await fetch("/api/semester?" + params, {
                 method: "DELETE",
             });
+            if (!res.ok) {
+                throw new Error(res.statusText);
+            }
             if (updateNodes) {
                 updateNodes(session);
             }
             close();
-        } catch (e) {
-            console.log(e);
-            // TODO: handle this error
+        } catch {
+            notifications.show({
+                id: "delete-semester",
+                withCloseButton: true,
+                autoClose: false,
+                title: "Error deleting semester",
+                message: "API call to delete semester failed, please try again",
+                color: "red",
+                className: "mt-2 transition-transform",
+            });
         }
     }, [close, semesterId, session, updateNodes]);
 
@@ -114,9 +125,9 @@ export default function SemesterForm({
                 <form
                     onSubmit={form.onSubmit(async (values) => {
                         // TODO: Add some client side validation to make sure name and year are filled
-                        try {
-                            if (semesterId) {
-                                await fetch("/api/semester", {
+                        if (semesterId) {
+                            try {
+                                const res = await fetch("/api/semester", {
                                     method: "PUT",
                                     body: JSON.stringify({
                                         semesterId: semesterId,
@@ -126,7 +137,24 @@ export default function SemesterForm({
                                         semesterTerm: values.semesterTerm,
                                     }),
                                 });
-                            } else {
+                                if (!res.ok) {
+                                    throw new Error(res.statusText);
+                                }
+                            } catch {
+                                notifications.show({
+                                    id: "update-semester",
+                                    withCloseButton: true,
+                                    autoClose: false,
+                                    title: "Error updating semester",
+                                    message:
+                                        "API call to update semester failed, please try again",
+                                    color: "red",
+                                    className: "mt-2 transition-transform",
+                                });
+                                return;
+                            }
+                        } else {
+                            try {
                                 const semesterResponse = await fetch(
                                     "/api/semester",
                                     {
@@ -139,6 +167,11 @@ export default function SemesterForm({
                                         }),
                                     }
                                 );
+                                if (!semesterResponse.ok) {
+                                    throw new Error(
+                                        semesterResponse.statusText
+                                    );
+                                }
                                 const { semesterId } =
                                     await semesterResponse.json();
                                 if (semesterDict && setSemesterDict) {
@@ -153,10 +186,19 @@ export default function SemesterForm({
                                     };
                                     setSemesterDict(newSemesterDict);
                                 }
+                            } catch {
+                                notifications.show({
+                                    id: "create-semester",
+                                    withCloseButton: true,
+                                    autoClose: false,
+                                    title: "Error creating semester",
+                                    message:
+                                        "API call to create semester failed, please try again",
+                                    color: "red",
+                                    className: "mt-2 transition-transform",
+                                });
+                                return;
                             }
-                        } catch (e) {
-                            // TODO: add notification when this goes wrong
-                            console.log(e);
                         }
 
                         if (updateNodes) {
@@ -194,10 +236,16 @@ export default function SemesterForm({
                         </div>
                     </div>
 
-                    <div className="mt-5 mb-3 flex justify-between">
-                        <Button type="submit">Submit</Button>
+                    <div className="mt-5 w-full flex gap-3">
+                        <Button className="flex-auto" type="submit">
+                            Submit
+                        </Button>
                         {semesterId && (
-                            <Button color="red" onClick={handleDelete}>
+                            <Button
+                                className="flex-auto"
+                                color="red"
+                                onClick={handleDelete}
+                            >
                                 Delete
                             </Button>
                         )}
