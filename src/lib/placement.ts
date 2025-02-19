@@ -42,12 +42,17 @@ if (typeof window !== "undefined") {
     // eslint-disable-next-line
     var SEMESTER_STARTING_POSITION_Y = SEARCHAREA_POSITION_Y;
 
+    // eslint-disable-next-line
+    var SEMESTER_BOTTOM_DISTANCE = window.innerHeight - 300;
+
     window.addEventListener("resize", () => {
         DELETEAREA_DEFAULT_POSITION = window.innerHeight;
         DELETEAREA_ACTIVE_POSITION = window.innerHeight * 0.9;
 
         SEARCHAREA_POSITION_Y = window.innerWidth >= 768 ? 106 : 114;
         SEMESTER_STARTING_POSITION_Y = SEARCHAREA_POSITION_Y;
+
+        SEMESTER_BOTTOM_DISTANCE = window.innerHeight - 300;
     });
 }
 
@@ -105,7 +110,8 @@ export const useScrollHandler = () => {
             if (distance < 0) {
                 // - distance remaining
                 const potentialDistanceScrolled =
-                    SEMESTER_STARTING_POSITION_Y -
+                    SEMESTER_STARTING_POSITION_Y +
+                    SEMESTER_BOTTOM_DISTANCE -
                     targetSemesterPosition.bottom;
                 // find maximum of scroll desired and - distance remaining
                 // this will be the smaller number
@@ -193,7 +199,8 @@ const termOrder: { [key in SemesterTerm]: number } = {
 // also adds the delete bar (and the search bar in the future)
 function placeNodes(
     semesterGroupDict: Dictionary<SemesterGroup>,
-    setPlacements: Dispatch<SetStateAction<SemesterPlacement[]>>
+    setPlacements: Dispatch<SetStateAction<SemesterPlacement[]>>,
+    viewportXOffset: number
 ): Node[] {
     const finalNodes: Node[] = [];
     const newPlacements: SemesterPlacement[] = [];
@@ -328,7 +335,7 @@ function placeNodes(
         data: {},
         type: "searchNode" as const,
         position: {
-            x: 0,
+            x: -viewportXOffset,
             y: SEARCHAREA_POSITION_Y, //for testing
         },
         className: "nopan nodrag",
@@ -343,7 +350,7 @@ function placeNodes(
         data: {},
         type: "deleteNode" as const,
         position: {
-            x: 0.1 * window.innerWidth,
+            x: 0.1 * window.innerWidth - viewportXOffset,
             y: DELETEAREA_DEFAULT_POSITION,
         },
         style: {
@@ -358,7 +365,7 @@ function placeNodes(
 // function calls the server for semesters and coursesemesters and properly orders all of them
 // initializes semesterpositions as well using placenodes
 export const useUpdateNodes = () => {
-    const { setNodes } = useReactFlow();
+    const { setNodes, getViewport } = useReactFlow();
     const contextItem = useContext(SemesterPositionContext);
 
     if (!contextItem) {
@@ -461,10 +468,11 @@ export const useUpdateNodes = () => {
             courses.push({ data: course });
         });
 
-        const nodes = placeNodes(semesterGroupDict, setPlacements);
+        const { x } = getViewport();
+        const nodes = placeNodes(semesterGroupDict, setPlacements, x);
         setNodes(nodes);
         return nodes.length;
-    }, [setNodes, setPlacements]);
+    }, [setNodes, setPlacements, getViewport]);
 
     return { updateNodes };
 };
