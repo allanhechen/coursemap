@@ -96,8 +96,7 @@ CREATE TABLE IF NOT EXISTS coursesemester (
     semesterid INT REFERENCES semester(semesterid) ON DELETE CASCADE,
     courseid INT REFERENCES course(courseid),
     sortorder INT,
-    PRIMARY KEY (semesterid, courseid),
-    UNIQUE (userId, courseid)
+    PRIMARY KEY (semesterid, courseid)
 );
 CREATE TABLE IF NOT EXISTS programrequirement (
     institutionid INT,
