@@ -395,7 +395,10 @@ export async function getCourseSemesters(
 export async function updateCourseSemester(
     userId: number,
     semesterId: number,
-    courseIds: number[]
+    courseIds: number[],
+    institutionId: number,
+    programName: string,
+    courseIdToDelete?: number
 ): Promise<void> {
     if (courseIds.length === 0) {
         return;
@@ -405,8 +408,8 @@ export async function updateCourseSemester(
         `
         SELECT 1
         FROM semester
-        WHERE userId = $1`,
-        [userId]
+        WHERE userId = $1 AND semesterid = $2`,
+        [userId, semesterId]
     );
 
     if (queryResult.rowCount === 0) {
@@ -415,21 +418,20 @@ export async function updateCourseSemester(
     const client = await sql.connect();
     client.query("BEGIN");
     try {
-        const input = [];
-        for (let i = 1; i <= courseIds.length; i++) {
-            input.push(`$${i}`);
+        if (courseIdToDelete) {
+            await sql.query(
+                `
+                DELETE FROM coursesemester
+                USING semester
+                WHERE 
+                    semester.userId = $1 AND 
+                    coursesemester.courseid = $2 AND 
+                    semester.institutionid = $3 AND
+                    semester.programname = $4;
+                `,
+                [userId, courseIdToDelete, institutionId, programName]
+            );
         }
-        const set = input.join(",");
-        courseIds.push(userId);
-
-        await client.query(
-            `
-            DELETE FROM coursesemester
-            WHERE courseId IN (${set}) AND userId = $${courseIds.length};
-            `,
-            courseIds
-        );
-        courseIds.pop();
 
         for (let i = 0; i < courseIds.length; i++) {
             const courseId = courseIds[i];
@@ -464,24 +466,20 @@ export async function updateCourseSemester(
 
 export async function deleteCourseSemester(
     userId: number,
+    institutionId: number,
+    programName: string,
     courseId: number
 ): Promise<void> {
-    const queryResult = await sql.query(
-        `
-        SELECT 1
-        FROM semester
-        WHERE userId = $1`,
-        [userId]
-    );
-
-    if (queryResult.rowCount === 0) {
-        throw new Error("Provided semesterId does not belong to given user");
-    }
     await sql.query(
         `
         DELETE FROM coursesemester
-        WHERE userId = $1 AND courseid = $2;
+        USING semester
+        WHERE 
+            semester.userId = $1 AND 
+            coursesemester.courseid = $2 AND 
+            semester.institutionid = $3 AND
+            semester.programname = $4;
         `,
-        [userId, courseId]
+        [userId, courseId, institutionId, programName]
     );
 }
