@@ -858,6 +858,7 @@ export const useGroupCards = (courseNames: { [courseId: number]: string }) => {
                 body: JSON.stringify({
                     courseIds: courseIds,
                     semesterId: relatedSemester.semesterId,
+                    courseIdToDelete: droppedNode.data.courseId as number,
                 }),
             })
                 .then((res) => {

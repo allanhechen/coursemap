@@ -104,6 +104,7 @@ export default function CourseCardForm({
                             body: JSON.stringify({
                                 courseIds: [courseId],
                                 semesterId: semesterId,
+                                courseIdToDelete: courseId,
                             }),
                         });
                         if (!response.ok) {

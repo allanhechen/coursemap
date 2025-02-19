@@ -11,6 +11,7 @@ import { z, ZodError } from "zod";
 
 const numberArray = z.coerce.number().array().nonempty();
 const number = z.coerce.number();
+const optionalNumber = z.coerce.number().optional();
 
 export async function GET() {
     const session = await auth();
@@ -40,13 +41,22 @@ export async function PUT(request: NextRequest) {
     if (!session) {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { userId } = session.user;
+    const { userId, institutionId, programName } = session.user;
 
     const body = await request.json();
     try {
         const courseIds = numberArray.parse(body["courseIds"]);
         const semesterId = number.parse(body["semesterId"]);
-        await updateCourseSemester(userId, semesterId, courseIds);
+        const courseIdToDelete = optionalNumber.parse(body["courseIdToDelete"]);
+
+        await updateCourseSemester(
+            userId,
+            semesterId,
+            courseIds,
+            institutionId,
+            programName,
+            courseIdToDelete
+        );
         return new Response(null, { status: 200 });
     } catch (e) {
         if (e instanceof ZodError) {
@@ -66,13 +76,18 @@ export async function DELETE(request: NextRequest) {
     if (!session) {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { userId } = session.user;
+    const { userId, institutionId, programName } = session.user;
     const searchParams = request.nextUrl.searchParams;
     const courseIdRaw = searchParams.get("courseId");
 
     try {
         const courseId = number.parse(courseIdRaw);
-        await deleteCourseSemester(userId, courseId);
+        await deleteCourseSemester(
+            userId,
+            institutionId,
+            programName,
+            courseId
+        );
         return new Response(null, { status: 200 });
     } catch (e) {
         if (e instanceof ZodError) {
