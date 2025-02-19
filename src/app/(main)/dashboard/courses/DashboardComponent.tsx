@@ -311,12 +311,9 @@ export default function DashboardComponent({
             window.addEventListener("resize", updateHeight);
             return () => {
                 window.removeEventListener("resize", updateHeight);
+                notifications.clean();
             };
         }
-
-        return () => {
-            notifications.clean();
-        };
     }, []);
 
     useEffect(() => {
