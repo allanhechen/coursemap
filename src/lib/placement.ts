@@ -25,38 +25,27 @@ const termToChipVariant = {
     [SemesterTerm.SU]: ChipVariant.SUMMER,
 };
 
-// always fix to the bottom of the screen
-if (typeof window !== "undefined") {
-    // eslint-disable-next-line
-    var DELETEAREA_DEFAULT_POSITION = window.innerHeight;
-    // eslint-disable-next-line
-    var DELETEAREA_ACTIVE_POSITION = window.innerHeight * 0.9;
+let DELETEAREA_DEFAULT_POSITION = window.innerHeight;
+let DELETEAREA_ACTIVE_POSITION = window.innerHeight * 0.9;
 
-    // eslint-disable-next-line
-    var SEARCHAREA_POSITION_X = 20;
-    // eslint-disable-next-line
-    var SEARCHAREA_POSITION_Y = window.innerWidth >= 768 ? 106 : 114;
+// let SEARCHAREA_POSITION_X = 20;
+let SEARCHAREA_POSITION_Y = window.innerWidth >= 768 ? 106 : 114;
 
-    // eslint-disable-next-line
-    var SEMESTER_STARTING_POSITION_X = 420;
-    // eslint-disable-next-line
-    var SEMESTER_STARTING_POSITION_Y = SEARCHAREA_POSITION_Y;
+const SEMESTER_STARTING_POSITION_X = 420;
+let SEMESTER_STARTING_POSITION_Y = SEARCHAREA_POSITION_Y;
 
-    // eslint-disable-next-line
-    var SEMESTER_BOTTOM_DISTANCE = window.innerHeight - 300;
+let SEMESTER_BOTTOM_DISTANCE = window.innerHeight - 300;
 
-    window.addEventListener("resize", () => {
-        DELETEAREA_DEFAULT_POSITION = window.innerHeight;
-        DELETEAREA_ACTIVE_POSITION = window.innerHeight * 0.9;
+// TODO: remove all that require event listeners when changing searchArea to be a regular page component
+window.addEventListener("resize", () => {
+    DELETEAREA_DEFAULT_POSITION = window.innerHeight;
+    DELETEAREA_ACTIVE_POSITION = window.innerHeight * 0.9;
 
-        SEARCHAREA_POSITION_Y = window.innerWidth >= 768 ? 106 : 114;
-        SEMESTER_STARTING_POSITION_Y = SEARCHAREA_POSITION_Y;
+    SEARCHAREA_POSITION_Y = window.innerWidth >= 768 ? 106 : 114;
+    SEMESTER_STARTING_POSITION_Y = SEARCHAREA_POSITION_Y;
 
-        SEMESTER_BOTTOM_DISTANCE = window.innerHeight - 300;
-    });
-}
-
-// TODO: do this with states and useeffect instead instead of lying to eslint
+    SEMESTER_BOTTOM_DISTANCE = window.innerHeight - 300;
+});
 
 const SEMESTER_WIDTH = 360;
 const SEMESTER_GAP = 10;

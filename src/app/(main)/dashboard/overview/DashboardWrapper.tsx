@@ -15,6 +15,7 @@ import { SemesterPlacement } from "@/types/semester";
 import { SemesterTerm } from "@/types/semester";
 import { Session } from "next-auth";
 import { SessionContext } from "@/components/sessionContext";
+import NoSSR from "@/components/NoSSR";
 
 export default function DashboardWrapper({
     session,
@@ -53,16 +54,18 @@ export default function DashboardWrapper({
     });
 
     return (
-        <SessionContext.Provider value={session}>
-            <SemesterPositionContext.Provider
-                value={[placements, setPlacements]}
-            >
-                <SemesterFormProvider form={form}>
-                    <DnDContext.Provider value={[type, setType]}>
-                        <DashboardComponent courseNames={courseNames} />
-                    </DnDContext.Provider>
-                </SemesterFormProvider>
-            </SemesterPositionContext.Provider>
-        </SessionContext.Provider>
+        <NoSSR>
+            <SessionContext.Provider value={session}>
+                <SemesterPositionContext.Provider
+                    value={[placements, setPlacements]}
+                >
+                    <SemesterFormProvider form={form}>
+                        <DnDContext.Provider value={[type, setType]}>
+                            <DashboardComponent courseNames={courseNames} />
+                        </DnDContext.Provider>
+                    </SemesterFormProvider>
+                </SemesterPositionContext.Provider>
+            </SessionContext.Provider>
+        </NoSSR>
     );
 }

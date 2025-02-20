@@ -17,6 +17,7 @@ import { Session } from "next-auth";
 import { SessionContext } from "@/components/sessionContext";
 import { NodeContext } from "./nodeContext";
 import { Node } from "@xyflow/react";
+import NoSSR from "@/components/NoSSR";
 
 export default function DashboardWrapper({
     session,
@@ -49,24 +50,28 @@ export default function DashboardWrapper({
     });
 
     return (
-        <SessionContext.Provider value={session}>
-            <SemesterContext.Provider value={[semesterDict, setSemesterDict]}>
-                <CourseSemesterContext.Provider
-                    value={[relatedSemesterId, setRelatedSemesterId]}
+        <NoSSR>
+            <SessionContext.Provider value={session}>
+                <SemesterContext.Provider
+                    value={[semesterDict, setSemesterDict]}
                 >
-                    <SemesterFormProvider form={form}>
-                        <DnDContext.Provider value={[type, setType]}>
-                            <NodeContext.Provider value={[nodes, setNodes]}>
-                                <DashboardComponent
-                                    prerequisites={prerequisites}
-                                    postrequisites={postrequisites}
-                                    courseIds={courseIds}
-                                />
-                            </NodeContext.Provider>
-                        </DnDContext.Provider>
-                    </SemesterFormProvider>
-                </CourseSemesterContext.Provider>
-            </SemesterContext.Provider>
-        </SessionContext.Provider>
+                    <CourseSemesterContext.Provider
+                        value={[relatedSemesterId, setRelatedSemesterId]}
+                    >
+                        <SemesterFormProvider form={form}>
+                            <DnDContext.Provider value={[type, setType]}>
+                                <NodeContext.Provider value={[nodes, setNodes]}>
+                                    <DashboardComponent
+                                        prerequisites={prerequisites}
+                                        postrequisites={postrequisites}
+                                        courseIds={courseIds}
+                                    />
+                                </NodeContext.Provider>
+                            </DnDContext.Provider>
+                        </SemesterFormProvider>
+                    </CourseSemesterContext.Provider>
+                </SemesterContext.Provider>
+            </SessionContext.Provider>
+        </NoSSR>
     );
 }

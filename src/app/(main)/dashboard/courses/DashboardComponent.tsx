@@ -52,7 +52,6 @@ export default function DashboardComponent({
     courseIds: { [courseCode: string]: number };
 }) {
     const [edges, setEdges] = useState<Edge[]>([]);
-    const [height, setHeight] = useState(1);
     const { fitView } = useReactFlow();
     const { checkPrerequisites } = useCheckPrerequisites();
 
@@ -298,22 +297,25 @@ export default function DashboardComponent({
     );
 
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            const updateHeight = () => {
-                setHeight(
-                    window.innerWidth >= 768
-                        ? window.innerHeight - 126
-                        : window.innerHeight - 134
-                );
-            };
+        // if (typeof window !== "undefined") {
+        //     const updateHeight = () => {
+        //         setHeight(
+        //             window.innerWidth >= 768
+        //                 ? window.innerHeight - 126
+        //                 : window.innerHeight - 134
+        //         );
+        //     };
 
-            updateHeight();
-            window.addEventListener("resize", updateHeight);
-            return () => {
-                window.removeEventListener("resize", updateHeight);
-                notifications.clean();
-            };
-        }
+        //     updateHeight();
+        //     window.addEventListener("resize", updateHeight);
+        //     return () => {
+        //         window.removeEventListener("resize", updateHeight);
+        //     };
+        // }
+
+        return () => {
+            notifications.clean();
+        };
     }, []);
 
     useEffect(() => {
@@ -341,13 +343,8 @@ export default function DashboardComponent({
                 <div className="row header">
                     <NavBar />
                 </div>
-                <div
-                    className="row content flex"
-                    style={{
-                        height: height,
-                    }}
-                >
-                    <CourseSearch />
+                <div className="row content flex">
+                    <CourseSearch className="ml-5 mb-5" />
                     <ReactFlow
                         onNodeClick={closeDropdowns}
                         onPaneClick={closeDropdowns}
