@@ -27,7 +27,7 @@ export default function PageComponent({
             <SessionContext.Provider value={session}>
                 <Flex direction="column" className="h-screen overflow-y-auto">
                     <NavBar hideForm={true} />
-                    <div className="flex-auto max-w-7xl w-screen mx-auto px-10">
+                    <div className="flex-auto max-w-7xl w-screen mx-auto px-10 mt-5">
                         <Title order={1}>Settings</Title>
                         <Divider my="md" />
                         <Title className="mt-10" order={2}>

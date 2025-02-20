@@ -4,20 +4,6 @@ html {
     width: 100vw;
 }
 
-.dashboard-component {
-    display: flex;
-    flex-flow: column;
-    height: 100%;
-}
-
-.dashboard-component .row.header {
-    flex: 0 1 auto;
-}
-
-.dashboard-component .row {
-    flex: 1 1 auto;
-}
-
 .react-flow__handle {
     opacity: 0;
 }

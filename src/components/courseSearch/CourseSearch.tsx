@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { HTMLAttributes, useCallback, useEffect, useState } from "react";
 import { Paper, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import useSWR from "swr";
@@ -12,7 +12,7 @@ import SearchResult from "@/components/courseSearch/SearchResult";
 import { CourseInformation } from "@/types/courseCard";
 import fetcher from "@/lib/fetcher";
 
-export default function CourseSearch() {
+export default function CourseSearch(props: HTMLAttributes<HTMLDivElement>) {
     const [searchQuery, setSearchQuery] = useState("");
     const [courses, setCourses] = useState<CourseInformation[]>([]);
 
@@ -77,72 +77,68 @@ export default function CourseSearch() {
     }, [includeElective]);
 
     return (
-        <Paper
-            className="p-5 w-96 flex flex-col items-center justify-center ml-5"
-            h={
-                typeof window !== "undefined"
-                    ? window.innerWidth >= 768
-                        ? window.innerHeight - 126
-                        : window.innerHeight - 134
-                    : "100%"
-            }
-            style={{
-                width: "23rem",
-            }}
-            shadow="sm"
-            radius="lg"
-        >
-            <TextInput
-                placeholder="Search for courses"
-                variant="filled"
-                w="20rem"
-                onChange={onChange}
-            />
-            <div className="flex flex-wrap justify-center">
-                <div className="mt-4 mx-1">
-                    <Chip
-                        onClick={onClickFall}
-                        variant={ChipVariant.FALL}
-                        filled={includeFall}
-                    />
+        <div {...props}>
+            <Paper
+                className="p-5 w-96 flex flex-col items-center justify-start"
+                style={{
+                    width: "23rem",
+                    height: "100%",
+                }}
+                shadow="sm"
+                radius="lg"
+            >
+                <TextInput
+                    placeholder="Search for courses"
+                    variant="filled"
+                    w="20rem"
+                    onChange={onChange}
+                />
+                <div className="flex flex-wrap justify-center flex-none">
+                    <div className="mt-4 mx-1">
+                        <Chip
+                            onClick={onClickFall}
+                            variant={ChipVariant.FALL}
+                            filled={includeFall}
+                        />
+                    </div>
+                    <div className="mt-4 mx-1">
+                        <Chip
+                            onClick={onClickWinter}
+                            variant={ChipVariant.WINTER}
+                            filled={includeWinter}
+                        />
+                    </div>
+                    <div className="mt-4 mx-1">
+                        <Chip
+                            onClick={onClickSpring}
+                            variant={ChipVariant.SPRING}
+                            filled={includeSpring}
+                        />
+                    </div>
+                    <div className="mt-4 mx-1">
+                        <Chip
+                            onClick={onClickSummer}
+                            variant={ChipVariant.SUMMER}
+                            filled={includeSummer}
+                        />
+                    </div>
+                    <div className="mt-2 mx-1">
+                        <Chip
+                            onClick={onClickRequired}
+                            variant={ChipVariant.REQUIRED}
+                            filled={includeRequired}
+                        />
+                    </div>
+                    <div className="mt-2 mx-1">
+                        <Chip
+                            onClick={onClickElective}
+                            variant={ChipVariant.ELECTIVE}
+                            filled={includeElective}
+                        />
+                    </div>
                 </div>
-                <div className="mt-4 mx-1">
-                    <Chip
-                        onClick={onClickWinter}
-                        variant={ChipVariant.WINTER}
-                        filled={includeWinter}
-                    />
-                </div>
-                <div className="mt-4 mx-1">
-                    <Chip
-                        onClick={onClickSpring}
-                        variant={ChipVariant.SPRING}
-                        filled={includeSpring}
-                    />
-                </div>
-                <div className="mt-4 mx-1">
-                    <Chip
-                        onClick={onClickSummer}
-                        variant={ChipVariant.SUMMER}
-                        filled={includeSummer}
-                    />
-                </div>
-                <div className="mt-2 mx-1">
-                    <Chip
-                        onClick={onClickRequired}
-                        variant={ChipVariant.REQUIRED}
-                        filled={includeRequired}
-                    />
-                </div>
-                <div className="mt-2 mx-1">
-                    <Chip
-                        onClick={onClickElective}
-                        variant={ChipVariant.ELECTIVE}
-                        filled={includeElective}
-                    />
-                </div>
-            </div>
-            <SearchResult cards={courses} />
-        </Paper>
+                <SearchResult cards={courses} />
+            </Paper>
+        </div>
     );
 }

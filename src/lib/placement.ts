@@ -18,6 +18,14 @@ import { SemesterPositionContext } from "@/app/(main)/dashboard/overview/semeste
 import { ChipVariant } from "@/types/chipVariant";
 import { notifications } from "@mantine/notifications";
 
+interface SemesterGroup {
+    semester: SemesterWrapper;
+    courses: CardWrapper[];
+}
+interface Dictionary<T> {
+    [Key: string]: T;
+}
+
 const termToChipVariant = {
     [SemesterTerm.FA]: ChipVariant.FALL,
     [SemesterTerm.WI]: ChipVariant.WINTER,
@@ -25,27 +33,8 @@ const termToChipVariant = {
     [SemesterTerm.SU]: ChipVariant.SUMMER,
 };
 
-let DELETEAREA_DEFAULT_POSITION = window.innerHeight;
-let DELETEAREA_ACTIVE_POSITION = window.innerHeight * 0.9;
-
-// let SEARCHAREA_POSITION_X = 20;
-let SEARCHAREA_POSITION_Y = window.innerWidth >= 768 ? 106 : 114;
-
-const SEMESTER_STARTING_POSITION_X = 420;
-let SEMESTER_STARTING_POSITION_Y = SEARCHAREA_POSITION_Y;
-
-let SEMESTER_BOTTOM_DISTANCE = window.innerHeight - 300;
-
-// TODO: remove all that require event listeners when changing searchArea to be a regular page component
-window.addEventListener("resize", () => {
-    DELETEAREA_DEFAULT_POSITION = window.innerHeight;
-    DELETEAREA_ACTIVE_POSITION = window.innerHeight * 0.9;
-
-    SEARCHAREA_POSITION_Y = window.innerWidth >= 768 ? 106 : 114;
-    SEMESTER_STARTING_POSITION_Y = SEARCHAREA_POSITION_Y;
-
-    SEMESTER_BOTTOM_DISTANCE = window.innerHeight - 300;
-});
+const SEMESTER_STARTING_POSITION_X = 35;
+const SEMESTER_STARTING_POSITION_Y = 20;
 
 const SEMESTER_WIDTH = 360;
 const SEMESTER_GAP = 10;
@@ -58,13 +47,16 @@ const INTERVAL_OFFSET = -(SEMESTER_WIDTH + SEMESTER_GAP) / 2;
 const CARD_GAP = 10;
 const CARD_HEIGHT = 175;
 
-interface SemesterGroup {
-    semester: SemesterWrapper;
-    courses: CardWrapper[];
-}
-interface Dictionary<T> {
-    [Key: string]: T;
-}
+let SEMESTER_BOTTOM_DISTANCE = window.innerHeight - 300;
+let DELETEAREA_DEFAULT_POSITION = window.innerHeight;
+let DELETEAREA_ACTIVE_POSITION = window.innerHeight - 175;
+
+window.addEventListener("resize", () => {
+    DELETEAREA_DEFAULT_POSITION = window.innerHeight;
+    DELETEAREA_ACTIVE_POSITION = window.innerHeight - 175;
+
+    SEMESTER_BOTTOM_DISTANCE = window.innerHeight - 300;
+});
 
 // function takes in a node and moves all nodes connected to it
 // currently assumes that the item to be moved is a smester
@@ -317,22 +309,6 @@ function placeNodes(
             });
         }
     });
-
-    // push this near the end so it appears on top of semesters
-    const courseSearch: Node = {
-        id: "courseSearch",
-        data: {},
-        type: "searchNode" as const,
-        position: {
-            x: -viewportXOffset,
-            y: SEARCHAREA_POSITION_Y, //for testing
-        },
-        className: "nopan nodrag",
-        style: {
-            cursor: "default",
-        },
-    };
-    finalNodes.push(courseSearch);
 
     const deleteArea: Node = {
         id: "deleteArea",
@@ -985,13 +961,6 @@ export const useOnViewportMove = () => {
                 position: {
                     x: x + 0.1 * windowWidth,
                     y: DELETEAREA_DEFAULT_POSITION,
-                },
-            });
-
-            updateNode("courseSearch", {
-                position: {
-                    x: x,
-                    y: SEARCHAREA_POSITION_Y,
                 },
             });
         },

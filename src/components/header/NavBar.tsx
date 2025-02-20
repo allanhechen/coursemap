@@ -10,7 +10,7 @@ export default function NavBar({ hideForm }: { hideForm?: boolean }) {
     return (
         <Paper
             shadow="sm"
-            className="flex justify-between items-center py-3 px-6 m-5 relative flex-initial"
+            className="flex justify-between items-center py-3 px-6 mx-5 mt-5 relative flex-initial"
             radius="lg"
         >
             <div className="hidden md:block">

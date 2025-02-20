@@ -25,6 +25,7 @@ import {
     useScrollHandler,
 } from "@/lib/placement";
 import "@/app/(main)/dashboard/overview/DashboardComponent.css";
+import "@/app/(main)/dashboard/Dashboard.css";
 import CourseSearch from "@/components/courseSearch/CourseSearch";
 import { DnDContext } from "@/components/dndContext";
 import { CardWrapper } from "@/types/courseCard";
@@ -43,7 +44,6 @@ const nodeTypes = {
     courseNode: CourseCardWrapper,
     semesterNode: Semester,
     deleteNode: DeleteArea,
-    searchNode: CourseSearch,
 };
 
 export default function DashboardComponent({
@@ -130,10 +130,13 @@ export default function DashboardComponent({
     }, []);
 
     useEffect(() => {
+        const handleResize = () => horizontalScrollHandler(0);
+        window.addEventListener("resize", handleResize);
         return () => {
             notifications.clean();
+            window.removeEventListener("resize", handleResize);
         };
-    }, []);
+    }, [horizontalScrollHandler]);
 
     const onDrop = useCallback(
         (event: React.DragEvent) => {
@@ -165,9 +168,8 @@ export default function DashboardComponent({
             }
 
             const viewport = getViewport();
-            console.log(viewport);
             const position = {
-                x: event.clientX - 100 - viewport.x, // offset to account for semester intervals, not precise but it should work
+                x: event.clientX - 600 - viewport.x, // account for the offset of the page vs. the viewport
                 y: event.clientY,
             };
 
@@ -207,18 +209,12 @@ export default function DashboardComponent({
     }, [nodes, nodesLength, groupCards]);
 
     return (
-        <>
-            <NavBar />
-            <div
-                style={{
-                    height: "100vh",
-                    width: "100vw",
-                    top: 0,
-                    left: 0,
-                    position: "absolute",
-                    zIndex: -1,
-                }}
-            >
+        <div className="dashboard-component">
+            <div className="row header">
+                <NavBar />
+            </div>
+            <div className="row content flex">
+                <CourseSearch className="ml-5 my-5" />
                 <ReactFlow
                     nodes={nodes}
                     onNodesChange={onNodesChange}
@@ -248,6 +244,6 @@ export default function DashboardComponent({
                     proOptions={{ hideAttribution: true }}
                 />
             </div>
-        </>
+        </div>
     );
 }

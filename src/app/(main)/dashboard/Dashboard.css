@@ -1,0 +1,15 @@
+.dashboard-component {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+}
+
+.dashboard-component .row.header {
+    flex: none;
+    height: initial;
+}
+
+.dashboard-component .row {
+    flex: 1 1 auto;
+    height: 0px;
+}

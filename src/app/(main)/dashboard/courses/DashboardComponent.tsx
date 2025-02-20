@@ -10,6 +10,7 @@ import {
 import NavBar from "@/components/header/NavBar";
 
 import "@/app/(main)/dashboard/courses/DashboardComponent.css";
+import "@/app/(main)/dashboard/Dashboard.css";
 import {
     parsePrerequisite,
     placeNodes,
@@ -338,30 +339,28 @@ export default function DashboardComponent({
     }, []);
 
     return (
-        <>
-            <div className="dashboard-component">
-                <div className="row header">
-                    <NavBar />
-                </div>
-                <div className="row content flex">
-                    <CourseSearch className="ml-5 mb-5" />
-                    <ReactFlow
-                        onNodeClick={closeDropdowns}
-                        onPaneClick={closeDropdowns}
-                        onMove={closeDropdowns}
-                        minZoom={0.1}
-                        maxZoom={1}
-                        edges={edges}
-                        nodes={nodes}
-                        nodeTypes={nodeTypes}
-                        proOptions={{ hideAttribution: true }}
-                        onDragOver={onDragOver}
-                        onDrop={onDrop}
-                        nodesDraggable={false}
-                        nodesConnectable={false}
-                    />
-                </div>
+        <div className="dashboard-component">
+            <div className="row header">
+                <NavBar />
             </div>
-        </>
+            <div className="row content flex">
+                <CourseSearch className="ml-5 my-5" />
+                <ReactFlow
+                    onNodeClick={closeDropdowns}
+                    onPaneClick={closeDropdowns}
+                    onMove={closeDropdowns}
+                    minZoom={0.1}
+                    maxZoom={1}
+                    edges={edges}
+                    nodes={nodes}
+                    nodeTypes={nodeTypes}
+                    proOptions={{ hideAttribution: true }}
+                    onDragOver={onDragOver}
+                    onDrop={onDrop}
+                    nodesDraggable={false}
+                    nodesConnectable={false}
+                />
+            </div>
+        </div>
     );
 }

@@ -6,7 +6,7 @@ export default function DeleteArea() {
             className="nodrag flex justify-center pt-5"
             shadow="sm"
             style={{
-                width: "80vw",
+                width: "calc(80vw - 25rem)",
                 height: "20vh",
             }}
         >

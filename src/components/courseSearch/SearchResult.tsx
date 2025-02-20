@@ -83,7 +83,7 @@ export default function SearchResult({
     return (
         <Stack
             style={{ borderRadius: "16px" }}
-            className="mt-4 flex-1 hidden-scrollbar"
+            className="mt-4 hidden-scrollbar"
         >
             {renderedCards}
         </Stack>
