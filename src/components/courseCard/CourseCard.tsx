@@ -122,6 +122,7 @@ export function CourseCard({
     chips,
     termWarning,
     requisiteWarning,
+    courseId,
     ...rest
 }: CourseInformation & React.HTMLAttributes<HTMLDivElement>) {
     const warningClasses = requisiteWarning
@@ -138,6 +139,7 @@ export function CourseCard({
             shadow="sm"
             padding="lg"
             data-faculty={faculty}
+            data-courseid={courseId}
             style={{
                 background: `linear-gradient(${stringToDeg(
                     courseCode + courseName
