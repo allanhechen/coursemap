@@ -6,9 +6,9 @@ import {
     applyNodeChanges,
     PanOnScrollMode,
     Node,
-    useOnViewportChange,
     NodeChange,
     useReactFlow,
+    useOnViewportChange,
 } from "@xyflow/react";
 import { useWindowSize } from "@uidotdev/usehooks";
 
@@ -55,7 +55,6 @@ export default function DashboardComponent({
 }) {
     const [lastX, setLastX] = useState(0);
     const [nodes, setNodes] = useState<Node[]>([]);
-    const [nodesLength, setNodesLength] = useState(0);
 
     const windowSize = useWindowSize();
     const { horizontalScrollHandler } = useScrollHandler();
@@ -81,8 +80,7 @@ export default function DashboardComponent({
     // get initial node state
     useEffect(() => {
         const loadData = async () => {
-            const countNodes = await updateNodes();
-            setNodesLength(countNodes);
+            await updateNodes();
         };
         loadData();
         // I am unsure why my viewport is being set to something else, hacky way to fix this
@@ -150,7 +148,7 @@ export default function DashboardComponent({
             const id = `course-${data.courseCode}`;
 
             const nodes = getNodes();
-            if (nodes.length === 2) {
+            if (nodes.length === 1) {
                 // this means we have no semesters, there are no valid semesters for this course to be dropped on
                 return;
             }
@@ -173,40 +171,26 @@ export default function DashboardComponent({
                 y: event.clientY,
             };
 
-            data.fresh = true;
-
             const newNode: CardWrapper = {
                 data: data,
                 type: nodeType,
                 position: position,
                 id: id,
+                measured: { width: 320, height: 176 },
             };
 
-            setNodes((nds) => {
-                const newNodes = [...nds];
-                const insertIndex = newNodes.length - 2;
-                newNodes.splice(insertIndex, 0, newNode as unknown as Node);
-                return newNodes;
-            });
+            const nextNodes = [...nodes];
+            const insertIndex = nextNodes.length - 1;
+            nextNodes.splice(insertIndex, 0, newNode as unknown as Node);
+            console.log(nextNodes);
+
+            groupCards(null, newNode as unknown as Node, nextNodes);
         },
-        [getViewport, type, getNodes]
+        [groupCards, getViewport, type, getNodes]
     );
 
-    useEffect(() => {
-        if (nodes.length > 3 && nodes.length > nodesLength) {
-            const lastAddedNode = nodes[nodes.length - 3];
-
-            // measured isn't added until after calculation
-            // the newly added node won't have it
-            if (!lastAddedNode.data.fresh) {
-                return;
-            }
-
-            lastAddedNode.measured = { width: 320, height: 176 };
-            groupCards(null, lastAddedNode);
-        }
-        setNodesLength(nodes.length);
-    }, [nodes, nodesLength, groupCards]);
+    const groupCardsWrapper = (e: React.MouseEvent, droppedNode: Node) =>
+        groupCards(e, droppedNode);
 
     return (
         <div className="dashboard-component">
@@ -224,7 +208,7 @@ export default function DashboardComponent({
                     zoomOnDoubleClick={false}
                     preventScrolling={false}
                     nodeTypes={nodeTypes}
-                    onNodeDragStop={groupCards}
+                    onNodeDragStop={groupCardsWrapper}
                     onNodeDragStart={dragStartHandler}
                     translateExtent={[
                         [0, 0],

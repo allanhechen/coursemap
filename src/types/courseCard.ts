@@ -7,6 +7,7 @@ export interface CardWrapper {
     data: CourseInformation;
     isConnectable?: boolean;
     position?: XYPosition;
+    measured?: { width: number; height: number };
 }
 
 export type CourseToSemesterIdDict = {

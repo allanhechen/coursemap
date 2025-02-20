@@ -47,16 +47,17 @@ const INTERVAL_OFFSET = -(SEMESTER_WIDTH + SEMESTER_GAP) / 2;
 const CARD_GAP = 10;
 const CARD_HEIGHT = 175;
 
-let SEMESTER_BOTTOM_DISTANCE = window.innerHeight - 300;
-let DELETEAREA_DEFAULT_POSITION = window.innerHeight;
-let DELETEAREA_ACTIVE_POSITION = window.innerHeight - 175;
-
-window.addEventListener("resize", () => {
-    DELETEAREA_DEFAULT_POSITION = window.innerHeight;
-    DELETEAREA_ACTIVE_POSITION = window.innerHeight - 175;
-
-    SEMESTER_BOTTOM_DISTANCE = window.innerHeight - 300;
-});
+const placement = {
+    get SEMESTER_BOTTOM_DISTANCE() {
+        return typeof window !== "undefined" ? window.innerHeight - 300 : 0;
+    },
+    get DELETEAREA_DEFAULT_POSITION() {
+        return typeof window !== "undefined" ? window.innerHeight : 0;
+    },
+    get DELETEAREA_ACTIVE_POSITION() {
+        return typeof window !== "undefined" ? window.innerHeight - 175 : 0;
+    },
+};
 
 // function takes in a node and moves all nodes connected to it
 // currently assumes that the item to be moved is a smester
@@ -92,7 +93,7 @@ export const useScrollHandler = () => {
                 // - distance remaining
                 const potentialDistanceScrolled =
                     SEMESTER_STARTING_POSITION_Y +
-                    SEMESTER_BOTTOM_DISTANCE -
+                    placement.SEMESTER_BOTTOM_DISTANCE -
                     targetSemesterPosition.bottom;
                 // find maximum of scroll desired and - distance remaining
                 // this will be the smaller number
@@ -316,7 +317,7 @@ function placeNodes(
         type: "deleteNode" as const,
         position: {
             x: 0.1 * window.innerWidth - viewportXOffset,
-            y: DELETEAREA_DEFAULT_POSITION,
+            y: placement.DELETEAREA_DEFAULT_POSITION,
         },
         style: {
             cursor: "default",
@@ -618,8 +619,18 @@ export const useGroupCards = (courseNames: { [courseId: number]: string }) => {
     const placements = oldPlacements.slice();
 
     const groupCards = useCallback(
-        (notIsInsert: React.MouseEvent | null, droppedNode: Node) => {
-            const nodes = getNodes();
+        (
+            notIsInsert: React.MouseEvent | null,
+            droppedNode: Node,
+            inputNodes?: Node[]
+        ) => {
+            console.log(inputNodes);
+
+            if (!inputNodes) {
+                inputNodes = getNodes();
+            }
+            console.log(inputNodes);
+
             const intersectingNodes = getIntersectingNodes(droppedNode);
 
             // see if it's intersecting with deletearea
@@ -627,18 +638,18 @@ export const useGroupCards = (courseNames: { [courseId: number]: string }) => {
             for (let i = 0; i < intersectingNodes.length; i++) {
                 const node = intersectingNodes[i];
                 if (node.id === "deleteArea") {
-                    const newNodes = removeNode(droppedNode.id, nodes);
+                    const newNodes = removeNode(droppedNode.id, inputNodes);
                     setNodes(newNodes);
                     const deleteArea = getNode("deleteArea")!;
                     updateNode("deleteArea", {
                         position: {
                             x: deleteArea.position.x,
-                            y: DELETEAREA_DEFAULT_POSITION,
+                            y: placement.DELETEAREA_DEFAULT_POSITION,
                         },
                     });
 
                     checkRequisites(
-                        nodes,
+                        inputNodes,
                         getIntersectingNodes,
                         courseNames,
                         undefined,
@@ -656,18 +667,18 @@ export const useGroupCards = (courseNames: { [courseId: number]: string }) => {
 
             // node was not found in any interval
             if (!foundInterval) {
-                const newNodes = removeNode(droppedNode.id, nodes);
+                const newNodes = removeNode(droppedNode.id, inputNodes);
                 setNodes(newNodes);
                 const deleteArea = getNode("deleteArea")!;
                 updateNode("deleteArea", {
                     position: {
                         x: deleteArea.position.x,
-                        y: DELETEAREA_DEFAULT_POSITION,
+                        y: placement.DELETEAREA_DEFAULT_POSITION,
                     },
                 });
 
                 checkRequisites(
-                    nodes,
+                    inputNodes,
                     getIntersectingNodes,
                     courseNames,
                     undefined,
@@ -700,7 +711,7 @@ export const useGroupCards = (courseNames: { [courseId: number]: string }) => {
             }
 
             checkRequisites(
-                nodes,
+                inputNodes,
                 getIntersectingNodes,
                 courseNames,
                 relatedSemester.semesterId,
@@ -787,14 +798,14 @@ export const useGroupCards = (courseNames: { [courseId: number]: string }) => {
             placements[relatedSemesterIndex].bottom += semesterBottomAdjustment;
 
             // could use updatenodes but I wish to not call setnodes again
-            nodes.forEach((node) => {
+            inputNodes.forEach((node) => {
                 if (node.id === "deleteArea") {
                     newNodes.push({
                         id: node.id,
                         data: node.data,
                         position: {
                             x: node.position.x,
-                            y: DELETEAREA_DEFAULT_POSITION,
+                            y: placement.DELETEAREA_DEFAULT_POSITION,
                         },
                         type: node.type,
                     });
@@ -889,7 +900,7 @@ export const useDragStartHandler = () => {
                 updateNode("deleteArea", {
                     position: {
                         x: deleteArea.position.x,
-                        y: DELETEAREA_ACTIVE_POSITION,
+                        y: placement.DELETEAREA_ACTIVE_POSITION,
                     },
                 });
 
@@ -960,7 +971,7 @@ export const useOnViewportMove = () => {
             updateNode("deleteArea", {
                 position: {
                     x: x + 0.1 * windowWidth,
-                    y: DELETEAREA_DEFAULT_POSITION,
+                    y: placement.DELETEAREA_DEFAULT_POSITION,
                 },
             });
         },
