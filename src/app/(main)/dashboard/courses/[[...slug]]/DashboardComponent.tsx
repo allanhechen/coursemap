@@ -196,55 +196,29 @@ export default function DashboardComponent({
                     };
                 });
 
-            // setEdges([]);
-            // setNodes([]);
+            const nextCourses = dropdownCourses as Node[];
 
-            setNodes(dropdownCourses as Node[]);
-            setEdges(edgeOutput);
+            const {
+                newEdges: additionalEdges,
+                newNodes: additionalPostrequisites,
+            } = getPostrequisitePlacements(
+                nextCourses,
+                postrequisiteDropdownCourses
+            );
 
-            const fitAndPlaceEdges = async () => {
-                fitView({ padding: 0.1 });
+            setNodes(nextCourses.concat(additionalPostrequisites));
+            setEdges(edgeOutput.concat(additionalEdges));
 
-                // Small delay to allow layout adjustments if needed
-                await new Promise((resolve) => setTimeout(resolve, 500));
-
-                let newEdges: Edge[];
-                setNodes((currentNodes) => {
-                    if (currentNodes.length > 0) {
-                        const updatedNodes = [...currentNodes];
-                        const temp = getPostrequisitePlacements(
-                            updatedNodes,
-                            postrequisiteDropdownCourses
-                        );
-                        newEdges = temp["newEdges"];
-                        const newNodes = temp["newNodes"];
-
-                        return updatedNodes.concat(newNodes);
-                    }
-                    return currentNodes;
-                });
-                setEdges((currentEdges) => {
-                    if (newEdges && newEdges.length > 0) {
-                        return currentEdges.concat(newEdges);
-                    }
-                    return currentEdges;
-                });
-
-                setTimeout(
-                    () => checkPrerequisites(relatedSemesterId, semesterDict),
-                    100
-                );
-            };
-
-            // let React update the nodes before centering page
-            setTimeout(fitAndPlaceEdges, 100);
+            setTimeout(() => {
+                checkPrerequisites(relatedSemesterId, semesterDict);
+                fitView({ padding: 0.1, nodes: nextCourses });
+            }, 100);
         },
         [
             prerequisites,
             postrequisites,
             selectSemester,
             relatedSemesterId,
-            setRelatedSemesterId,
             courseIds,
             setNodes,
             checkPrerequisites,
