@@ -7,7 +7,6 @@ import {
     CourseCardDropdownWrapper,
     CourseCardPostrequisiteDropdownWrapper,
 } from "@/components/courseCard/CourseCard";
-import NavBar from "@/components/header/NavBar";
 
 import "@/app/(main)/dashboard/courses/[[...slug]]//DashboardComponent.css";
 import "@/app/(main)/dashboard/Dashboard.css";
@@ -20,7 +19,6 @@ import {
     Wrapper,
     useCheckPrerequisites,
 } from "@/lib/tree";
-import CourseSearch from "@/components/courseSearch/CourseSearch";
 import { DnDContext } from "@/components/dndContext";
 import {
     CourseInformation,
@@ -308,28 +306,20 @@ export default function DashboardComponent({
     }, []);
 
     return (
-        <div className="dashboard-component">
-            <div className="row header">
-                <NavBar />
-            </div>
-            <div className="row content flex">
-                <CourseSearch className="ml-5 my-5" />
-                <ReactFlow
-                    onNodeClick={closeDropdowns}
-                    onPaneClick={closeDropdowns}
-                    onMove={closeDropdowns}
-                    minZoom={0.1}
-                    maxZoom={1}
-                    edges={edges}
-                    nodes={nodes}
-                    nodeTypes={nodeTypes}
-                    proOptions={{ hideAttribution: true }}
-                    onDragOver={onDragOver}
-                    onDrop={onDrop}
-                    nodesDraggable={false}
-                    nodesConnectable={false}
-                />
-            </div>
-        </div>
+        <ReactFlow
+            onNodeClick={closeDropdowns}
+            onPaneClick={closeDropdowns}
+            onMove={closeDropdowns}
+            minZoom={0.1}
+            maxZoom={1}
+            edges={edges}
+            nodes={nodes}
+            nodeTypes={nodeTypes}
+            proOptions={{ hideAttribution: true }}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            nodesDraggable={false}
+            nodesConnectable={false}
+        />
     );
 }

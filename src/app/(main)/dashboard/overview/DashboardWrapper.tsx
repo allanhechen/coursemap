@@ -16,6 +16,8 @@ import { SemesterTerm } from "@/types/semester";
 import { Session } from "next-auth";
 import { SessionContext } from "@/components/sessionContext";
 import NoSSR from "@/components/NoSSR";
+import NavBar from "@/components/header/NavBar";
+import CourseSearch from "@/components/courseSearch/CourseSearch";
 
 export default function DashboardWrapper({
     session,
@@ -68,11 +70,19 @@ export default function DashboardWrapper({
                 >
                     <SemesterFormProvider form={form}>
                         <DnDContext.Provider value={[type, setType]}>
-                            <DashboardComponent
-                                courseNames={courseNames}
-                                semesters={semesters}
-                                courseSemesters={courseSemesters}
-                            />
+                            <div className="dashboard-component">
+                                <div className="row header">
+                                    <NavBar />
+                                </div>
+                                <div className="row content flex">
+                                    <CourseSearch className="ml-5 my-5" />
+                                    <DashboardComponent
+                                        courseNames={courseNames}
+                                        semesters={semesters}
+                                        courseSemesters={courseSemesters}
+                                    />
+                                </div>
+                            </div>
                         </DnDContext.Provider>
                     </SemesterFormProvider>
                 </SemesterPositionContext.Provider>

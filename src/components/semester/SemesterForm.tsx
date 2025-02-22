@@ -10,7 +10,7 @@ import {
     Title,
 } from "@mantine/core";
 import { YearPickerInput } from "@mantine/dates";
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
 
 import { useSemesterFormContext } from "@/components/semester/semesterFormContext";
@@ -23,7 +23,6 @@ import {
 } from "@/types/semester";
 import { SemesterContext } from "@/app/(main)/dashboard/courses/[[...slug]]//semesterContext";
 import "@/components/semester/SemesterForm.css";
-import { SessionContext } from "@/components/sessionContext";
 import { notifications } from "@mantine/notifications";
 import { CourseInformation } from "@/types/courseCard";
 
@@ -49,7 +48,6 @@ export default function SemesterForm({
     const [opened, { open, close }] = useDisclosure(false);
     const [visible, setVisible] = useState(false);
 
-    const session = useContext(SessionContext)!;
     let updateNodes:
         | ((
               semesters: SemesterInformation[],
@@ -120,10 +118,10 @@ export default function SemesterForm({
                 className: "mt-2 transition-transform",
             });
         }
-    }, [close, semesterId, session, updateNodes]);
+    }, [close, semesterId, updateNodes]);
 
-    return (
-        <>
+    const modalMemo = useMemo(
+        () => (
             <Modal
                 // lockScroll introduces a bar onto position absolute elements
                 lockScroll={false}
@@ -267,6 +265,15 @@ export default function SemesterForm({
                     </div>
                 </form>
             </Modal>
+        ),
+        // intentionally skip render when the element is not visible
+        // eslint-disable-next-line
+        [form.values, opened]
+    );
+
+    return (
+        <>
+            {modalMemo}
             <div className="cursor-pointer relative" onClick={openedWrapper}>
                 {semesterName ? (
                     <div

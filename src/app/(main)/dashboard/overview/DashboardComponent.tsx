@@ -15,7 +15,6 @@ import { useWindowSize } from "@uidotdev/usehooks";
 import CourseCardWrapper from "@/components/courseCard/CourseCard";
 import DeleteArea from "@/components/DeleteArea";
 import Semester from "@/components/semester/Semester";
-import NavBar from "@/components/header/NavBar";
 
 import {
     useGroupCards,
@@ -26,7 +25,6 @@ import {
 } from "@/lib/placement";
 import "@/app/(main)/dashboard/overview/DashboardComponent.css";
 import "@/app/(main)/dashboard/Dashboard.css";
-import CourseSearch from "@/components/courseSearch/CourseSearch";
 import { DnDContext } from "@/components/dndContext";
 import { CardWrapper, CourseInformation } from "@/types/courseCard";
 import { SessionContext } from "@/components/sessionContext";
@@ -90,7 +88,7 @@ export default function DashboardComponent({
         updateNodes(semesters, courseSemesters);
         // I am unsure why my viewport is being set to something else, hacky way to fix this
         setViewport({ x: 0, y: 0, zoom: 1 });
-    }, [updateNodes, setViewport, session]);
+    }, [updateNodes, setViewport, session, courseSemesters, semesters]);
 
     const onNodesChange = useCallback((changes: NodeChange[]) => {
         setNodes((nds) => applyNodeChanges(changes, nds));
@@ -198,41 +196,33 @@ export default function DashboardComponent({
         groupCards(e, droppedNode);
 
     return (
-        <div className="dashboard-component">
-            <div className="row header">
-                <NavBar />
-            </div>
-            <div className="row content flex">
-                <CourseSearch className="ml-5 my-5" />
-                <ReactFlow
-                    nodes={nodes}
-                    onNodesChange={onNodesChange}
-                    panOnDrag={false}
-                    panOnScroll={true}
-                    zoomOnScroll={false}
-                    zoomOnDoubleClick={false}
-                    preventScrolling={false}
-                    nodeTypes={nodeTypes}
-                    onNodeDragStop={groupCardsWrapper}
-                    onNodeDragStart={dragStartHandler}
-                    translateExtent={[
-                        [0, 0],
-                        [5000, 1000],
-                    ]}
-                    panOnScrollMode={PanOnScrollMode.Horizontal}
-                    autoPanOnConnect={false}
-                    autoPanOnNodeDrag={false}
-                    minZoom={1}
-                    maxZoom={1}
-                    className="nodrag nowheel"
-                    onWheel={onWheel}
-                    onTouchMove={onTouchMove}
-                    onTouchStart={onTouchStart}
-                    onDragOver={onDragOver}
-                    onDrop={onDrop}
-                    proOptions={{ hideAttribution: true }}
-                />
-            </div>
-        </div>
+        <ReactFlow
+            nodes={nodes}
+            onNodesChange={onNodesChange}
+            panOnDrag={false}
+            panOnScroll={true}
+            zoomOnScroll={false}
+            zoomOnDoubleClick={false}
+            preventScrolling={false}
+            nodeTypes={nodeTypes}
+            onNodeDragStop={groupCardsWrapper}
+            onNodeDragStart={dragStartHandler}
+            translateExtent={[
+                [0, 0],
+                [5000, 1000],
+            ]}
+            panOnScrollMode={PanOnScrollMode.Horizontal}
+            autoPanOnConnect={false}
+            autoPanOnNodeDrag={false}
+            minZoom={1}
+            maxZoom={1}
+            className="nodrag nowheel"
+            onWheel={onWheel}
+            onTouchMove={onTouchMove}
+            onTouchStart={onTouchStart}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            proOptions={{ hideAttribution: true }}
+        />
     );
 }
