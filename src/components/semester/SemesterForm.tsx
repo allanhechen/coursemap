@@ -10,7 +10,7 @@ import {
     Title,
 } from "@mantine/core";
 import { YearPickerInput } from "@mantine/dates";
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { IconEdit } from "@tabler/icons-react";
 
 import { useSemesterFormContext } from "@/components/semester/semesterFormContext";
@@ -47,6 +47,7 @@ export default function SemesterForm({
 }) {
     const [opened, { open, close }] = useDisclosure(false);
     const [visible, setVisible] = useState(false);
+
     let updateNodes:
         | ((
               semesters: SemesterInformation[],
@@ -119,8 +120,8 @@ export default function SemesterForm({
         }
     }, [close, semesterId, updateNodes]);
 
-    return (
-        <>
+    const modalMemo = useMemo(
+        () => (
             <Modal
                 // lockScroll introduces a bar onto position absolute elements
                 lockScroll={false}
@@ -264,6 +265,15 @@ export default function SemesterForm({
                     </div>
                 </form>
             </Modal>
+        ),
+        // intentionally skip render when the element is not visible
+        // eslint-disable-next-line
+        [form.values, opened]
+    );
+
+    return (
+        <>
+            {modalMemo}
             <div className="cursor-pointer relative" onClick={openedWrapper}>
                 {semesterName ? (
                     <div
