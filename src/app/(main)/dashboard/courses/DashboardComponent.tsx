@@ -100,111 +100,99 @@ export default function DashboardComponent({
         event.dataTransfer.dropEffect = "move";
     }, []);
 
-    const onDrop = useCallback(
-        (event: React.DragEvent) => {
-            const handler = async () => {
-                event.preventDefault();
+    const handleNewCourse = useCallback(
+        async (newCourseNode: CourseInformation) => {
+            const nodeOutput: PrerequisiteNodeType[] = [];
+            const edgeOutput: Edge[] = [];
+            const wrapperOutput: { [key: string]: Wrapper } = {};
+            let postrequisiteOutput: number[] =
+                postrequisites[newCourseNode.courseId.toString()];
+            if (!postrequisiteOutput) {
+                postrequisiteOutput = [];
+            }
 
-                if (!type) {
-                    return;
-                }
-                notifications.clean();
+            parsePrerequisite(
+                prerequisites,
+                newCourseNode.courseCode,
+                nodeOutput,
+                edgeOutput,
+                wrapperOutput,
+                courseIds
+            );
 
-                const [, droppedNode] = type;
-
-                const nodeOutput: PrerequisiteNodeType[] = [];
-                const edgeOutput: Edge[] = [];
-                const wrapperOutput: { [key: string]: Wrapper } = {};
-                let postrequisiteOutput: number[] =
-                    postrequisites[droppedNode.courseId.toString()];
-                if (!postrequisiteOutput) {
-                    postrequisiteOutput = [];
-                }
-
-                parsePrerequisite(
-                    prerequisites,
-                    droppedNode.courseCode,
-                    nodeOutput,
-                    edgeOutput,
-                    wrapperOutput,
-                    courseIds
+            const courseStates: CourseToSemesterIdDict = {};
+            const informationEndpoint = new URLSearchParams("");
+            nodeOutput.forEach((node) => {
+                informationEndpoint.append(
+                    "courseIds",
+                    node.courseId.toString()
                 );
+            });
+            postrequisiteOutput.forEach((postrequisiteId) => {
+                informationEndpoint.append(
+                    "courseIds",
+                    postrequisiteId.toString()
+                );
+            });
 
-                const courseStates: CourseToSemesterIdDict = {};
-                const informationEndpoint = new URLSearchParams("");
-                nodeOutput.forEach((node) => {
-                    informationEndpoint.append(
-                        "courseIds",
-                        node.courseId.toString()
-                    );
+            let courseInformation: {
+                [courseId: number]: CourseInformation;
+            };
+            try {
+                const courseInformationResponse = await fetch(
+                    "/api/course/information?" + informationEndpoint
+                );
+                courseInformation = await courseInformationResponse.json();
+            } catch {
+                notifications.show({
+                    withCloseButton: true,
+                    autoClose: false,
+                    title: "Error retrieving course information ",
+                    message:
+                        "API call to retrieve course information failed, please try again",
+                    color: "red",
+                    className: "mt-2 transition-transform",
                 });
-                postrequisiteOutput.forEach((postrequisiteId) => {
-                    informationEndpoint.append(
-                        "courseIds",
-                        postrequisiteId.toString()
-                    );
+                return 0;
+            }
+
+            const filledCourses = nodeOutput.map((node) => {
+                const course = courseInformation[node.courseId];
+                return { id: node.key, data: course };
+            });
+
+            let courseSemesters: {
+                semesterId: number;
+                course: CourseInformation;
+            }[];
+
+            try {
+                const courseSemesterResponse = await fetch(
+                    "/api/course/semesters"
+                );
+                courseSemesters = await courseSemesterResponse.json();
+            } catch {
+                notifications.show({
+                    withCloseButton: true,
+                    autoClose: false,
+                    title: "Error retrieving course semesters",
+                    message:
+                        "API call to retrieve course semesters failed, please try again",
+                    color: "red",
+                    className: "mt-2 transition-transform",
                 });
+                return 0;
+            }
 
-                let courseInformation: {
-                    [courseId: number]: CourseInformation;
-                };
-                try {
-                    const courseInformationResponse = await fetch(
-                        "/api/course/information?" + informationEndpoint
-                    );
-                    courseInformation = await courseInformationResponse.json();
-                } catch {
-                    notifications.show({
-                        withCloseButton: true,
-                        autoClose: false,
-                        title: "Error retrieving course information ",
-                        message:
-                            "API call to retrieve course information failed, please try again",
-                        color: "red",
-                        className: "mt-2 transition-transform",
-                    });
-                    return 0;
-                }
+            courseSemesters.forEach((courseSemester) => {
+                courseStates[courseSemester.course.courseCode] =
+                    courseSemester.semesterId;
+            });
 
-                const filledCourses = nodeOutput.map((node) => {
-                    const course = courseInformation[node.courseId];
-                    return { id: node.key, data: course };
-                });
+            setRelatedSemesterId(courseStates);
 
-                let courseSemesters: {
-                    semesterId: number;
-                    course: CourseInformation;
-                }[];
-
-                try {
-                    const courseSemesterResponse = await fetch(
-                        "/api/course/semesters"
-                    );
-                    courseSemesters = await courseSemesterResponse.json();
-                } catch {
-                    notifications.show({
-                        withCloseButton: true,
-                        autoClose: false,
-                        title: "Error retrieving course semesters",
-                        message:
-                            "API call to retrieve course semesters failed, please try again",
-                        color: "red",
-                        className: "mt-2 transition-transform",
-                    });
-                    return 0;
-                }
-
-                courseSemesters.forEach((courseSemester) => {
-                    courseStates[courseSemester.course.courseCode] =
-                        courseSemester.semesterId;
-                });
-
-                setRelatedSemesterId(courseStates);
-
-                const dropdownCourses: (
-                    | DropdownCardWrapper
-                    | WrapperWrapper
-                )[] = filledCourses.map((course) => {
+            const dropdownCourses: (DropdownCardWrapper | WrapperWrapper)[] =
+                filledCourses.map((course) => {
                     return {
                         id: course.id,
                         data: {
@@ -218,72 +206,69 @@ export default function DashboardComponent({
                     };
                 });
 
-                placeNodes(dropdownCourses);
-                placeWrappers(dropdownCourses, wrapperOutput);
+            placeNodes(dropdownCourses);
+            placeWrappers(dropdownCourses, wrapperOutput);
 
-                const postrequisiteDropdownCourses: DropdownCardWrapper[] =
-                    postrequisiteOutput.map((postrequisiteId) => {
-                        return {
-                            id: postrequisiteId.toString(),
-                            data: {
-                                courseInformation:
-                                    courseInformation[postrequisiteId],
-                                courseToSemesters: () => relatedSemesterId,
-                                selectSemester: selectSemester,
-                                prerequisiteMet: undefined,
-                            },
-                            type: "prerequisiteDropdownNode",
-                            postition: { x: 0, y: 0 },
-                        };
-                    });
+            const postrequisiteDropdownCourses: DropdownCardWrapper[] =
+                postrequisiteOutput.map((postrequisiteId) => {
+                    return {
+                        id: postrequisiteId.toString(),
+                        data: {
+                            courseInformation:
+                                courseInformation[postrequisiteId],
+                            courseToSemesters: () => relatedSemesterId,
+                            selectSemester: selectSemester,
+                            prerequisiteMet: undefined,
+                        },
+                        type: "prerequisiteDropdownNode",
+                        postition: { x: 0, y: 0 },
+                    };
+                });
 
-                setEdges([]);
-                setNodes([]);
+            setEdges([]);
+            setNodes([]);
 
-                setNodes(dropdownCourses as Node[]);
-                setEdges(edgeOutput);
+            setNodes(dropdownCourses as Node[]);
+            setEdges(edgeOutput);
 
-                const fitAndPlaceEdges = async () => {
-                    fitView({ padding: 0.1 });
+            const fitAndPlaceEdges = async () => {
+                fitView({ padding: 0.1 });
 
-                    // Small delay to allow layout adjustments if needed
-                    await new Promise((resolve) => setTimeout(resolve, 500));
+                // Small delay to allow layout adjustments if needed
+                await new Promise((resolve) => setTimeout(resolve, 500));
 
-                    let newEdges: Edge[];
-                    setNodes((currentNodes) => {
-                        if (currentNodes.length > 0) {
-                            const updatedNodes = [...currentNodes];
-                            const temp = getPostrequisitePlacements(
-                                updatedNodes,
-                                postrequisiteDropdownCourses
-                            );
-                            newEdges = temp["newEdges"];
-                            const newNodes = temp["newNodes"];
+                let newEdges: Edge[];
+                setNodes((currentNodes) => {
+                    if (currentNodes.length > 0) {
+                        const updatedNodes = [...currentNodes];
+                        const temp = getPostrequisitePlacements(
+                            updatedNodes,
+                            postrequisiteDropdownCourses
+                        );
+                        newEdges = temp["newEdges"];
+                        const newNodes = temp["newNodes"];
 
-                            return updatedNodes.concat(newNodes);
-                        }
-                        return currentNodes;
-                    });
-                    setEdges((currentEdges) => {
-                        if (newEdges && newEdges.length > 0) {
-                            return currentEdges.concat(newEdges);
-                        }
-                        return currentEdges;
-                    });
+                        return updatedNodes.concat(newNodes);
+                    }
+                    return currentNodes;
+                });
+                setEdges((currentEdges) => {
+                    if (newEdges && newEdges.length > 0) {
+                        return currentEdges.concat(newEdges);
+                    }
+                    return currentEdges;
+                });
 
-                    setTimeout(
-                        () => checkPrerequisites(courseStates, semesterDict),
-                        100
-                    );
-                };
-
-                // let React update the nodes before centering page
-                setTimeout(fitAndPlaceEdges, 100);
+                setTimeout(
+                    () => checkPrerequisites(courseStates, semesterDict),
+                    100
+                );
             };
-            handler();
+
+            // let React update the nodes before centering page
+            setTimeout(fitAndPlaceEdges, 100);
         },
         [
-            type,
             prerequisites,
             postrequisites,
             selectSemester,
@@ -295,6 +280,21 @@ export default function DashboardComponent({
             fitView,
             semesterDict,
         ]
+    );
+
+    const onDrop = useCallback(
+        (event: React.DragEvent) => {
+            event.preventDefault();
+
+            if (!type) {
+                return;
+            }
+            notifications.clean();
+
+            const [, droppedNode] = type;
+            handleNewCourse(droppedNode);
+        },
+        [type, handleNewCourse]
     );
 
     useEffect(() => {
