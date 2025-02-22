@@ -9,7 +9,7 @@ import {
 } from "@/components/courseCard/CourseCard";
 import NavBar from "@/components/header/NavBar";
 
-import "@/app/(main)/dashboard/courses/DashboardComponent.css";
+import "@/app/(main)/dashboard/courses/[[...slug]]//DashboardComponent.css";
 import "@/app/(main)/dashboard/Dashboard.css";
 import {
     parsePrerequisite,
@@ -28,12 +28,12 @@ import {
     DropdownCardWrapper,
     WrapperWrapper,
 } from "@/types/courseCard";
-import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/courseSemesterContext";
+import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/[[...slug]]//courseSemesterContext";
 import AndWrapper from "@/components/wrapper/AndWrapper";
 import OrWrapper from "@/components/wrapper/OrWrapper";
 import eventBus from "@/lib/eventBus";
-import { NodeContext } from "@/app/(main)/dashboard/courses/nodeContext";
-import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
+import { NodeContext } from "@/app/(main)/dashboard/courses/[[...slug]]//nodeContext";
+import { SemesterContext } from "@/app/(main)/dashboard/courses/[[...slug]]//semesterContext";
 import { notifications } from "@mantine/notifications";
 
 const nodeTypes = {

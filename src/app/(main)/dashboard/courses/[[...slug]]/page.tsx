@@ -3,7 +3,7 @@
 import { ReactFlowProvider } from "@xyflow/react";
 import { redirect } from "next/navigation";
 
-import DashboardWrapper from "@/app/(main)/dashboard/courses/DashboardWrapper";
+import DashboardWrapper from "@/app/(main)/dashboard/courses/[[...slug]]//DashboardWrapper";
 import { auth } from "@/lib/auth";
 import {
     getCourseIds,

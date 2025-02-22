@@ -1,5 +1,5 @@
-import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/courseSemesterContext";
-import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
+import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/[[...slug]]//courseSemesterContext";
+import { SemesterContext } from "@/app/(main)/dashboard/courses/[[...slug]]//semesterContext";
 import eventBus from "@/lib/eventBus";
 import { useCheckPrerequisites } from "@/lib/tree";
 import { SemesterInformation, termOrder } from "@/types/semester";

@@ -17,7 +17,7 @@ import { useSemesterFormContext } from "@/components/semester/semesterFormContex
 
 import { useUpdateNodes } from "@/lib/placement";
 import { SemesterDict, SemesterTerm } from "@/types/semester";
-import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
+import { SemesterContext } from "@/app/(main)/dashboard/courses/[[...slug]]//semesterContext";
 import "@/components/semester/SemesterForm.css";
 import { Session } from "next-auth";
 import { SessionContext } from "@/components/sessionContext";
