@@ -15,13 +15,17 @@ import { IconEdit } from "@tabler/icons-react";
 
 import { useSemesterFormContext } from "@/components/semester/semesterFormContext";
 
-import { useUpdateNodes } from "@/lib/placement";
-import { SemesterDict, SemesterTerm } from "@/types/semester";
+import { useUpdateNodes, getOverviewInformation } from "@/lib/placement";
+import {
+    SemesterDict,
+    SemesterInformation,
+    SemesterTerm,
+} from "@/types/semester";
 import { SemesterContext } from "@/app/(main)/dashboard/courses/[[...slug]]//semesterContext";
 import "@/components/semester/SemesterForm.css";
-import { Session } from "next-auth";
 import { SessionContext } from "@/components/sessionContext";
 import { notifications } from "@mantine/notifications";
+import { CourseInformation } from "@/types/courseCard";
 
 // semseterForm will be called in two places
 // the first is the create page on a semester, where all fields will initially be fileld in
@@ -46,7 +50,15 @@ export default function SemesterForm({
     const [visible, setVisible] = useState(false);
 
     const session = useContext(SessionContext)!;
-    let updateNodes: ((session: Session) => Promise<number>) | null = null;
+    let updateNodes:
+        | ((
+              semesters: SemesterInformation[],
+              courseSemesters: {
+                  semesterId: number;
+                  course: CourseInformation;
+              }[]
+          ) => number)
+        | null = null;
     let semesterDict: SemesterDict | undefined;
     let setSemesterDict:
         | React.Dispatch<React.SetStateAction<SemesterDict>>
@@ -92,7 +104,9 @@ export default function SemesterForm({
                 throw new Error(res.statusText);
             }
             if (updateNodes) {
-                updateNodes(session);
+                const [semesters, courseSemesters] =
+                    await getOverviewInformation();
+                updateNodes(semesters, courseSemesters);
             }
             close();
         } catch {
@@ -201,7 +215,9 @@ export default function SemesterForm({
                         }
 
                         if (updateNodes) {
-                            updateNodes(session);
+                            const [semesters, courseSemesters] =
+                                await getOverviewInformation();
+                            updateNodes(semesters, courseSemesters);
                         }
                         close();
                     })}

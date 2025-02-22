@@ -6,7 +6,8 @@ import { redirect } from "next/navigation";
 import DashboardWrapper from "@/app/(main)/dashboard/overview/DashboardWrapper";
 import { auth } from "@/lib/auth";
 import { Metadata } from "next";
-import { getCourseNames } from "@/actions/course";
+import { getCourseNames, getCourseSemesters } from "@/actions/course";
+import { getSemesters } from "@/actions/semester";
 
 export async function generateMetadata(): Promise<Metadata> {
     return {
@@ -23,11 +24,30 @@ export default async function Page() {
         redirect("/help");
     }
 
+    const { userId, institutionId, programName, startingYear } = session.user;
+
     const courseNames = await getCourseNames(session.user.institutionId);
+    const semesters = await getSemesters(
+        userId,
+        institutionId,
+        programName,
+        startingYear
+    );
+    const courseSemesters = await getCourseSemesters(
+        userId,
+        institutionId,
+        programName,
+        startingYear
+    );
 
     return (
         <ReactFlowProvider>
-            <DashboardWrapper session={session} courseNames={courseNames} />
+            <DashboardWrapper
+                session={session}
+                courseNames={courseNames}
+                semesters={semesters}
+                courseSemesters={courseSemesters}
+            />
         </ReactFlowProvider>
     );
 }
