@@ -122,7 +122,6 @@ export default function DashboardComponent({
                 courseIds
             );
 
-            const courseStates: CourseToSemesterIdDict = {};
             const informationEndpoint = new URLSearchParams("");
             nodeOutput.forEach((node) => {
                 informationEndpoint.append(
@@ -163,36 +162,6 @@ export default function DashboardComponent({
                 return { id: node.key, data: course };
             });
 
-            let courseSemesters: {
-                semesterId: number;
-                course: CourseInformation;
-            }[];
-
-            try {
-                const courseSemesterResponse = await fetch(
-                    "/api/course/semesters"
-                );
-                courseSemesters = await courseSemesterResponse.json();
-            } catch {
-                notifications.show({
-                    withCloseButton: true,
-                    autoClose: false,
-                    title: "Error retrieving course semesters",
-                    message:
-                        "API call to retrieve course semesters failed, please try again",
-                    color: "red",
-                    className: "mt-2 transition-transform",
-                });
-                return 0;
-            }
-
-            courseSemesters.forEach((courseSemester) => {
-                courseStates[courseSemester.course.courseCode] =
-                    courseSemester.semesterId;
-            });
-
-            setRelatedSemesterId(courseStates);
-
             const dropdownCourses: (DropdownCardWrapper | WrapperWrapper)[] =
                 filledCourses.map((course) => {
                     return {
@@ -227,8 +196,8 @@ export default function DashboardComponent({
                     };
                 });
 
-            setEdges([]);
-            setNodes([]);
+            // setEdges([]);
+            // setNodes([]);
 
             setNodes(dropdownCourses as Node[]);
             setEdges(edgeOutput);
@@ -262,7 +231,7 @@ export default function DashboardComponent({
                 });
 
                 setTimeout(
-                    () => checkPrerequisites(courseStates, semesterDict),
+                    () => checkPrerequisites(relatedSemesterId, semesterDict),
                     100
                 );
             };
@@ -300,6 +269,40 @@ export default function DashboardComponent({
     );
 
     useEffect(() => {
+        async function getSemesters() {
+            let courseSemesters: {
+                semesterId: number;
+                course: CourseInformation;
+            }[];
+
+            try {
+                const courseSemesterResponse = await fetch(
+                    "/api/course/semesters"
+                );
+                courseSemesters = await courseSemesterResponse.json();
+            } catch {
+                notifications.show({
+                    withCloseButton: true,
+                    autoClose: false,
+                    title: "Error retrieving course semesters",
+                    message:
+                        "API call to retrieve course semesters failed, please try again",
+                    color: "red",
+                    className: "mt-2 transition-transform",
+                });
+                return 0;
+            }
+
+            const courseStates: CourseToSemesterIdDict = {};
+            courseSemesters.forEach((courseSemester) => {
+                courseStates[courseSemester.course.courseCode] =
+                    courseSemester.semesterId;
+            });
+
+            setRelatedSemesterId(courseStates);
+        }
+        getSemesters();
+
         if (initialCourse) {
             handleNewCourse(initialCourse);
         }
@@ -312,7 +315,7 @@ export default function DashboardComponent({
     }, []);
 
     useEffect(() => {
-        if (nodes.length === 0) {
+        if (nodes.length === 0 && !initialCourse) {
             notifications.show({
                 id: "no-course-selected",
                 withCloseButton: false,
@@ -324,7 +327,7 @@ export default function DashboardComponent({
         } else {
             notifications.hide("no-course-selected");
         }
-    }, [nodes]);
+    }, [nodes, initialCourse]);
 
     const closeDropdowns = useCallback(() => {
         eventBus.dispatchEvent(new CustomEvent("closeDropdowns", {}));

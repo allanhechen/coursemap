@@ -60,7 +60,7 @@ export default function SearchResult({
                 prerequisites=""
                 postrequisites={[]}
                 antirequisites={[]}
-                courseId={0}
+                courseId={-1}
             />
         );
     } else if (cards.length == 0) {
@@ -75,7 +75,7 @@ export default function SearchResult({
                 prerequisites=""
                 postrequisites={[]}
                 antirequisites={[]}
-                courseId={0}
+                courseId={-1}
             />
         );
     }
