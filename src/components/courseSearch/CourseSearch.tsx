@@ -13,7 +13,11 @@ import { CourseInformation } from "@/types/courseCard";
 import fetcher from "@/lib/fetcher";
 
 export default function CourseSearch(props: HTMLAttributes<HTMLDivElement>) {
-    const [searchQuery, setSearchQuery] = useState("");
+    const storedQuery = localStorage.getItem("courseSearch-query");
+
+    const [searchQuery, setSearchQuery] = useState(
+        storedQuery ? storedQuery : ""
+    );
     const [courses, setCourses] = useState<CourseInformation[]>([]);
 
     const [includeFall, setIncludeFall] = useState(true);
@@ -34,7 +38,12 @@ export default function CourseSearch(props: HTMLAttributes<HTMLDivElement>) {
 
     const courseSWR = useSWR<CourseInformation[], string>(
         "/api/course/search?" + url.toString(),
-        fetcher
+        fetcher,
+        {
+            revalidateIfStale: false,
+            revalidateOnFocus: false,
+            revalidateOnReconnect: false,
+        }
     );
 
     if (courseSWR.error) {
@@ -52,6 +61,11 @@ export default function CourseSearch(props: HTMLAttributes<HTMLDivElement>) {
             setCourses(courseSWR.data); // Only update `courses` when data changes
         }
     }, [courseSWR.data]);
+
+    useEffect(() => {
+        localStorage.setItem("courseSearch-query", searchQuery);
+        console.log("searchquery", searchQuery, typeof searchQuery);
+    }, [searchQuery]);
 
     const onChange = useCallback((event: React.FormEvent<HTMLInputElement>) => {
         setSearchQuery(event.currentTarget.value);
@@ -92,6 +106,7 @@ export default function CourseSearch(props: HTMLAttributes<HTMLDivElement>) {
                     variant="filled"
                     w="20rem"
                     onChange={onChange}
+                    value={searchQuery}
                 />
                 <div className="flex flex-wrap justify-center flex-none">
                     <div className="mt-4 mx-1">

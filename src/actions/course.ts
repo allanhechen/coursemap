@@ -301,7 +301,8 @@ export async function searchCourses(
                     AND course.institutionid = $2
                 )
             ) AS subquery
-            GROUP BY courseid;
+            GROUP BY courseid
+            LIMIT 30;
             `,
             [searchQuery, institutionId]
         );
@@ -314,6 +315,8 @@ export async function searchCourses(
                 courseattribute ON course.courseid = courseattribute.courseid
             WHERE ${joinedOptions} institutionid = $1
             GROUP BY course.courseid
+            ORDER BY RANDOM()
+            LIMIT 30;
             `,
             [institutionId]
         );
