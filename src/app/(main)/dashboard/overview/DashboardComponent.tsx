@@ -90,7 +90,7 @@ export default function DashboardComponent({
         updateNodes(semesters, courseSemesters);
         // I am unsure why my viewport is being set to something else, hacky way to fix this
         setViewport({ x: 0, y: 0, zoom: 1 });
-    }, [updateNodes, setViewport, session]);
+    }, [updateNodes, setViewport, session, courseSemesters, semesters]);
 
     const onNodesChange = useCallback((changes: NodeChange[]) => {
         setNodes((nds) => applyNodeChanges(changes, nds));
