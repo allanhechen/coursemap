@@ -1,5 +1,6 @@
 .course-card.mantine-Paper-root {
     background-color: #22242e !important;
+    overflow: visible;
 }
 
 .mantine-Paper-root.card-dropdown {

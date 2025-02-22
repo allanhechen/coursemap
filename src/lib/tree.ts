@@ -1,4 +1,4 @@
-import { NodeContext } from "@/app/(main)/dashboard/courses/nodeContext";
+import { NodeContext } from "@/app/(main)/dashboard/courses/[[...slug]]//nodeContext";
 import {
     CourseToSemesterIdDict,
     DropdownCardWrapper,

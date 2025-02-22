@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-import DashboardComponent from "@/app/(main)/dashboard/courses/DashboardComponent";
-import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/courseSemesterContext";
+import DashboardComponent from "@/app/(main)/dashboard/courses/[[...slug]]//DashboardComponent";
+import { CourseSemesterContext } from "@/app/(main)/dashboard/courses/[[...slug]]//courseSemesterContext";
 import { DnDContext } from "@/components/dndContext";
 import {
     SemesterFormProvider,
@@ -12,7 +12,7 @@ import {
 
 import { CourseInformation, CourseToSemesterIdDict } from "@/types/courseCard";
 import { SemesterDict, SemesterTerm } from "@/types/semester";
-import { SemesterContext } from "@/app/(main)/dashboard/courses/semesterContext";
+import { SemesterContext } from "@/app/(main)/dashboard/courses/[[...slug]]//semesterContext";
 import { Session } from "next-auth";
 import { SessionContext } from "@/components/sessionContext";
 import { NodeContext } from "./nodeContext";
@@ -25,12 +25,14 @@ export default function DashboardWrapper({
     postrequisites,
     allSemesters,
     courseIds,
+    initialCourse,
 }: {
     session: Session;
     prerequisites: { [key: string]: string };
     postrequisites: { [key: string]: number[] };
     allSemesters: SemesterDict;
     courseIds: { [courseCode: string]: number };
+    initialCourse?: CourseInformation;
 }) {
     const [nodes, setNodes] = useState<Node[]>([]);
     const [type, setType] = useState<[string, CourseInformation] | null>(null);
@@ -65,6 +67,7 @@ export default function DashboardWrapper({
                                         prerequisites={prerequisites}
                                         postrequisites={postrequisites}
                                         courseIds={courseIds}
+                                        initialCourse={initialCourse}
                                     />
                                 </NodeContext.Provider>
                             </DnDContext.Provider>

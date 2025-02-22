@@ -12,6 +12,8 @@ import { Handle, Node, Position, useNodeId, useReactFlow } from "@xyflow/react";
 
 import "@/components/courseCard/CourseCard.css";
 import CourseCardForm from "@/components/courseCard/CourseCardForm";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function CourseCardWrapper({ data }: CardWrapper) {
     const { getNode, getIntersectingNodes } = useReactFlow();
@@ -125,6 +127,8 @@ export function CourseCard({
     courseId,
     ...rest
 }: CourseInformation & React.HTMLAttributes<HTMLDivElement>) {
+    const pathname = usePathname();
+    const urlCourseId = pathname.split("/").at(-1);
     const warningClasses = requisiteWarning
         ? "border-2 border-rose-500"
         : termWarning
@@ -134,7 +138,7 @@ export function CourseCard({
     return (
         <Card
             {...rest}
-            className={`h-44 w-80 min-h-44 select-none course-card ${warningClasses}`}
+            className={`h-44 w-80 min-h-44 select-none course-card relative ${warningClasses}`}
             radius="lg"
             shadow="sm"
             padding="lg"
@@ -179,6 +183,38 @@ export function CourseCard({
                         );
                     })}
             </Group>
+
+            {courseId === -1 ||
+            (urlCourseId && urlCourseId === courseId.toString()) ? (
+                ""
+            ) : (
+                <Link
+                    href={`/dashboard/courses/${courseId}`}
+                    className="absolute bottom-0 left-0"
+                >
+                    <div
+                        className="flex justify-center items-center"
+                        style={{ width: 32, height: 32 }}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="27"
+                            height="27"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="icon icon-tabler icons-tabler-outline icon-tabler-border-corner-pill"
+                            transform="rotate(-90)"
+                        >
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M4 20v-5c0 -6.075 4.925 -11 11 -11h5" />
+                        </svg>
+                    </div>
+                </Link>
+            )}
         </Card>
     );
 }
