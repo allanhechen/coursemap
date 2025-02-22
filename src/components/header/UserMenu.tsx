@@ -24,16 +24,19 @@ export default function UserMenu() {
     const [menuOpened, setMenuOpened] = useState(false);
 
     return (
-        <div className="cursor-pointer">
+        <div className="cursor-pointer flex">
             <Menu
                 shadow="sm"
                 position="bottom-end"
                 onClose={() => setMenuOpened(false)}
                 onOpen={() => setMenuOpened(true)}
             >
+                <Link href="/dashboard/overview">
+                    <Avatar src={image} alt={`${name}'s avatar'`} />
+                </Link>
+
                 <Menu.Target>
-                    <Group>
-                        <Avatar src={image} alt={`${name}'s avatar'`} />
+                    <Group className="ml-4">
                         <Text className="hidden md:block" size="md">
                             {name}
                         </Text>
