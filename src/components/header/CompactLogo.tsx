@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function CompactLogo() {
     return (
-        <Link href="/dashboard">
+        <Link href="/dashboard" prefetch>
             <img
                 className="hidden dark:block"
                 src="/logos/coursemap-icon-no-bg-dark.svg"

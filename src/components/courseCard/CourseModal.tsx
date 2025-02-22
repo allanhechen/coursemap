@@ -30,6 +30,7 @@ export default function CourseModal({
                 <Group className="mt-3">
                     <Link
                         href={`/dashboard/courses/${courseInformation.courseId}`}
+                        prefetch
                     >
                         <Button color="green">Prerequisite Tree</Button>
                     </Link>

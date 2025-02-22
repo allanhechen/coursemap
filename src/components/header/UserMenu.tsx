@@ -31,7 +31,7 @@ export default function UserMenu() {
                 onClose={() => setMenuOpened(false)}
                 onOpen={() => setMenuOpened(true)}
             >
-                <Link href="/dashboard/overview">
+                <Link href="/dashboard/overview" prefetch>
                     <Avatar src={image} alt={`${name}'s avatar'`} />
                 </Link>
 
@@ -49,7 +49,7 @@ export default function UserMenu() {
                 </Menu.Target>
 
                 <Menu.Dropdown>
-                    <Link href="/dashboard/overview">
+                    <Link href="/dashboard/overview" prefetch>
                         <Menu.Item
                             leftSection={
                                 <IconCarouselVertical
@@ -60,7 +60,7 @@ export default function UserMenu() {
                             Overview
                         </Menu.Item>
                     </Link>
-                    <Link href="/dashboard/courses">
+                    <Link href="/dashboard/courses" prefetch>
                         <Menu.Item
                             leftSection={
                                 <IconVectorBezier2
@@ -75,7 +75,7 @@ export default function UserMenu() {
                         </Menu.Item>
                     </Link>
                     <Menu.Divider />
-                    <Link href="/settings">
+                    <Link href="/settings" prefetch>
                         <Menu.Item
                             leftSection={
                                 <IconSettings

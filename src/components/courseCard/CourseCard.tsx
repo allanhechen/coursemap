@@ -246,6 +246,7 @@ export function CourseCard({
                         <Link
                             href={`/dashboard/courses/${courseId}`}
                             className="absolute bottom-0 left-0"
+                            prefetch
                         >
                             <div
                                 className="flex justify-center items-center"
