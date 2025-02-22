@@ -28,9 +28,10 @@ import "@/app/(main)/dashboard/overview/DashboardComponent.css";
 import "@/app/(main)/dashboard/Dashboard.css";
 import CourseSearch from "@/components/courseSearch/CourseSearch";
 import { DnDContext } from "@/components/dndContext";
-import { CardWrapper } from "@/types/courseCard";
+import { CardWrapper, CourseInformation } from "@/types/courseCard";
 import { SessionContext } from "@/components/sessionContext";
 import { notifications } from "@mantine/notifications";
+import { SemesterInformation } from "@/types/semester";
 
 // ipmlementation notes:
 // 1. pan on drag false -> can't move the viewport with mouse
@@ -48,10 +49,17 @@ const nodeTypes = {
 
 export default function DashboardComponent({
     courseNames,
+    semesters,
+    courseSemesters,
 }: {
     courseNames: {
         [courseId: number]: string;
     };
+    semesters: SemesterInformation[];
+    courseSemesters: {
+        semesterId: number;
+        course: CourseInformation;
+    }[];
 }) {
     const [lastX, setLastX] = useState(0);
     const [nodes, setNodes] = useState<Node[]>([]);
@@ -79,10 +87,7 @@ export default function DashboardComponent({
 
     // get initial node state
     useEffect(() => {
-        const loadData = async () => {
-            await updateNodes();
-        };
-        loadData();
+        updateNodes(semesters, courseSemesters);
         // I am unsure why my viewport is being set to something else, hacky way to fix this
         setViewport({ x: 0, y: 0, zoom: 1 });
     }, [updateNodes, setViewport, session]);

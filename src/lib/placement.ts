@@ -341,104 +341,51 @@ export const useUpdateNodes = () => {
     }
     const [, setPlacements] = contextItem;
 
-    const updateNodes = useCallback(async () => {
-        // these are already sorted so we don't need to sort them again
-        let semesters;
-        try {
-            const semesterResponse = await fetch("/api/semester");
-            if (!semesterResponse.ok) {
-                throw new Error(
-                    `${semesterResponse.status} ${semesterResponse.statusText}`
-                );
+    const updateNodes = useCallback(
+        (
+            semesters: SemesterInformation[],
+            courseSemesters: {
+                semesterId: number;
+                course: CourseInformation;
+            }[]
+        ) => {
+            if (semesters.length === 0) {
+                notifications.show({
+                    id: "no-semesters",
+                    withCloseButton: false,
+                    autoClose: false,
+                    title: "No semesters found!",
+                    message: "Add a semester from the navigation bar above",
+                    className: "mt-2 transition-transform",
+                });
+            } else {
+                notifications.hide("no-semesters");
             }
-            const temp: { semesters: SemesterInformation[] } =
-                await semesterResponse.json();
-            semesters = temp.semesters;
-        } catch {
-            notifications.show({
-                withCloseButton: true,
-                autoClose: false,
-                title: "Error placing courses",
-                message:
-                    "Could not load existing semesters, please reload the page",
-                color: "red",
-                className: "mt-2 transition-transform",
+
+            // we need to group all the courseSemesters by semesters and convert them into nodes
+            const semesterGroupDict: Dictionary<SemesterGroup> = {};
+            semesters.forEach((semester) => {
+                const key = semester.semesterId.toString();
+                semesterGroupDict[key] = {
+                    semester: { data: semester },
+                    courses: [],
+                };
             });
-            return 0;
-        }
 
-        if (semesters.length === 0) {
-            notifications.show({
-                id: "no-semesters",
-                withCloseButton: false,
-                autoClose: false,
-                title: "No semesters found!",
-                message: "Add a semester from the navigation bar above",
-                className: "mt-2 transition-transform",
+            courseSemesters.forEach(({ semesterId, course }) => {
+                const key = semesterId.toString();
+                const { courses } = semesterGroupDict[key];
+
+                courses.push({ data: course });
             });
-        } else {
-            notifications.hide("no-semesters");
-        }
 
-        // the items received are not actually dates
-        semesters.forEach((semester) => {
-            const dateObject = new Date();
-            const yearString = (
-                semester.semesterYear as unknown as string
-            ).substring(0, 5);
-            dateObject.setFullYear(parseInt(yearString));
-            semester.semesterYear = dateObject;
-        });
-
-        let courseSemesters: {
-            semesterId: number;
-            course: CourseInformation;
-        }[];
-        try {
-            const courseSemestersResponse = await fetch(
-                "/api/course/semesters"
-            );
-            if (!courseSemestersResponse.ok) {
-                throw new Error(
-                    `${courseSemestersResponse.status} ${courseSemestersResponse.statusText}`
-                );
-            }
-            courseSemesters = await courseSemestersResponse.json();
-        } catch {
-            notifications.show({
-                withCloseButton: true,
-                autoClose: false,
-                title: "Error placing courses",
-                message:
-                    "Could not load courseSemesters, please reload the page",
-                color: "red",
-                className: "mt-2 transition-transform",
-            });
-            return 0;
-        }
-
-        // we need to group all the courseSemesters by semesters and convert them into nodes
-        const semesterGroupDict: Dictionary<SemesterGroup> = {};
-        semesters.forEach((semester) => {
-            const key = semester.semesterId.toString();
-            semesterGroupDict[key] = {
-                semester: { data: semester },
-                courses: [],
-            };
-        });
-
-        courseSemesters.forEach(({ semesterId, course }) => {
-            const key = semesterId.toString();
-            const { courses } = semesterGroupDict[key];
-
-            courses.push({ data: course });
-        });
-
-        const { x } = getViewport();
-        const nodes = placeNodes(semesterGroupDict, setPlacements, x);
-        setNodes(nodes);
-        return nodes.length;
-    }, [setNodes, setPlacements, getViewport]);
+            const { x } = getViewport();
+            const nodes = placeNodes(semesterGroupDict, setPlacements, x);
+            setNodes(nodes);
+            return nodes.length;
+        },
+        [setNodes, setPlacements, getViewport]
+    );
 
     return { updateNodes };
 };
@@ -980,3 +927,59 @@ export const useOnViewportMove = () => {
 
     return { onViewportMove };
 };
+
+export async function getOverviewInformation(): Promise<
+    [
+        semesters: SemesterInformation[],
+        courseSemesters: {
+            semesterId: number;
+            course: CourseInformation;
+        }[]
+    ]
+> {
+    try {
+        const [courseSemestersResponse, semesterResponse] = await Promise.all([
+            fetch("/api/course/semesters"),
+            fetch("/api/semester"),
+        ]);
+
+        if (!courseSemestersResponse.ok) {
+            throw new Error(
+                `${courseSemestersResponse.status} ${courseSemestersResponse.statusText}`
+            );
+        }
+        if (!semesterResponse.ok) {
+            throw new Error(
+                `${semesterResponse.status} ${semesterResponse.statusText}`
+            );
+        }
+
+        const [courseSemesters, { semesters }] = await Promise.all([
+            courseSemestersResponse.json(),
+            semesterResponse.json(),
+        ]);
+
+        // the items received are not actually dates
+        semesters.forEach((semester: SemesterInformation) => {
+            const dateObject = new Date();
+            const yearString = (
+                semester.semesterYear as unknown as string
+            ).substring(0, 5);
+            dateObject.setFullYear(parseInt(yearString));
+            semester.semesterYear = dateObject;
+        });
+
+        return [semesters, courseSemesters];
+    } catch {
+        notifications.show({
+            withCloseButton: true,
+            autoClose: false,
+            title: "Error placing courses",
+            message:
+                "Could not load courseSemesters or semesters, please reload the page",
+            color: "red",
+            className: "mt-2 transition-transform",
+        });
+        return [[], []];
+    }
+}
