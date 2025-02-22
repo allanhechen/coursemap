@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS program (
     programname VARCHAR(64),
     startingyear INT,
     faculty VARCHAR(64),
+    externallink VARCHAR(256),
     PRIMARY KEY (institutionid, programname, startingyear)
 );
 CREATE TABLE IF NOT EXISTS userprogram (
@@ -62,7 +63,8 @@ CREATE TABLE IF NOT EXISTS course (
     coursecode VARCHAR(10) NOT NULL,
     coursetitle VARCHAR(64) NOT NULL,
     coursedescription VARCHAR(2048),
-    courseprerequisites VARCHAR(512)
+    courseprerequisites VARCHAR(512),
+    externallink VARCHAR(256)
 );
 CREATE TABLE IF NOT EXISTS coursepostrequisite (
     courseid INT REFERENCES course(courseid),
