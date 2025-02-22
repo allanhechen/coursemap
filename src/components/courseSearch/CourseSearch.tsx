@@ -1,7 +1,7 @@
 "use client";
 
 import { HTMLAttributes, useCallback, useEffect, useState } from "react";
-import { Paper, TextInput } from "@mantine/core";
+import { CloseButton, Paper, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import useSWR from "swr";
 
@@ -92,6 +92,18 @@ export default function CourseSearch(props: HTMLAttributes<HTMLDivElement>) {
                     variant="filled"
                     w="20rem"
                     onChange={onChange}
+                    value={searchQuery}
+                    rightSection={
+                        searchQuery ? (
+                            <CloseButton
+                                size="sm"
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => {
+                                    setSearchQuery("");
+                                }}
+                            />
+                        ) : undefined
+                    }
                 />
                 <div className="flex flex-wrap justify-center flex-none">
                     <div className="mt-4 mx-1">
