@@ -127,10 +127,22 @@ export async function getCourseInformation(
         coursetitle: string;
         coursedescription: string;
         courseprerequisites: string;
+        externallink: string;
+        institutionname: string;
     }>(
         `
-        SELECT courseid, faculty, coursecode, coursetitle, coursedescription, courseprerequisites
+        SELECT 
+            course.courseid, 
+            course.faculty, 
+            course.coursecode, 
+            course.coursetitle, 
+            course.coursedescription, 
+            course.courseprerequisites, 
+            course.externallink,
+            institution.institutionname
         FROM course
+        INNER JOIN institution
+        ON course.institutionid = institution.institutionid
         WHERE courseid in (${set});
         `,
         courseIds
@@ -234,7 +246,10 @@ export async function getCourseInformation(
             courseId: row.courseid,
             courseCode: row.coursecode,
             courseName: row.coursetitle,
+            courseDescription: row.coursedescription,
+            externalLink: row.externallink,
             faculty: row.faculty,
+            institutionName: row.institutionname,
             chips: chips,
             prerequisites: row.courseprerequisites,
             postrequisites: postrequisiteProcessed[row.courseid]

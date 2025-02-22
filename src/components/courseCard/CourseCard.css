@@ -7,6 +7,10 @@
     transition: background-color 400ms ease-in-out;
 }
 
+.card-dropdown .border-2 {
+    border-width: 0;
+}
+
 :root[data-mantine-color-scheme="dark"]
     .course-error.mantine-Paper-root.card-dropdown {
     background-color: #be6161 !important;
