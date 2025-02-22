@@ -25,12 +25,14 @@ export default function DashboardWrapper({
     postrequisites,
     allSemesters,
     courseIds,
+    initialCourse,
 }: {
     session: Session;
     prerequisites: { [key: string]: string };
     postrequisites: { [key: string]: number[] };
     allSemesters: SemesterDict;
     courseIds: { [courseCode: string]: number };
+    initialCourse?: CourseInformation;
 }) {
     const [nodes, setNodes] = useState<Node[]>([]);
     const [type, setType] = useState<[string, CourseInformation] | null>(null);
@@ -65,6 +67,7 @@ export default function DashboardWrapper({
                                         prerequisites={prerequisites}
                                         postrequisites={postrequisites}
                                         courseIds={courseIds}
+                                        initialCourse={initialCourse}
                                     />
                                 </NodeContext.Provider>
                             </DnDContext.Provider>

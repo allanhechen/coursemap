@@ -47,10 +47,12 @@ export default function DashboardComponent({
     prerequisites,
     postrequisites,
     courseIds,
+    initialCourse,
 }: {
     prerequisites: { [key: string]: string };
     postrequisites: { [key: string]: number[] };
     courseIds: { [courseCode: string]: number };
+    initialCourse: CourseInformation | undefined;
 }) {
     const [edges, setEdges] = useState<Edge[]>([]);
     const { fitView } = useReactFlow();
@@ -298,25 +300,15 @@ export default function DashboardComponent({
     );
 
     useEffect(() => {
-        // if (typeof window !== "undefined") {
-        //     const updateHeight = () => {
-        //         setHeight(
-        //             window.innerWidth >= 768
-        //                 ? window.innerHeight - 126
-        //                 : window.innerHeight - 134
-        //         );
-        //     };
-
-        //     updateHeight();
-        //     window.addEventListener("resize", updateHeight);
-        //     return () => {
-        //         window.removeEventListener("resize", updateHeight);
-        //     };
-        // }
+        if (initialCourse) {
+            handleNewCourse(initialCourse);
+        }
 
         return () => {
             notifications.clean();
         };
+        // intentionally don't include items in dependency array because this should only run on mount
+        // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
