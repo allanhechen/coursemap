@@ -125,6 +125,8 @@ export function CourseCard({
     termWarning,
     requisiteWarning,
     courseId,
+    courseDescription,
+    institutionName,
     ...rest
 }: CourseInformation & React.HTMLAttributes<HTMLDivElement>) {
     const pathname = usePathname();
@@ -135,86 +137,98 @@ export function CourseCard({
         ? "border-2 border-yellow-500"
         : "";
 
-    return (
-        <Card
-            {...rest}
-            className={`h-44 w-80 min-h-44 select-none course-card relative ${warningClasses}`}
-            radius="lg"
-            shadow="sm"
-            padding="lg"
-            data-faculty={faculty}
-            data-courseid={courseId}
-            style={{
-                background: `linear-gradient(${stringToDeg(
-                    courseCode + courseName
-                )}, ${stringToColor(courseCode)}, ${stringToColor(
-                    courseName
-                )})`,
-            }}
-        >
-            <Text
-                className="leading-none"
-                size="xl"
-                fw={700}
-                truncate="end"
-                lineClamp={1}
-                c="white"
-            >
-                {courseCode}
-            </Text>
-            <Text
-                className="mt-2"
-                size="l"
-                truncate="end"
-                lineClamp={1}
-                c="white"
-            >
-                {courseName}
-            </Text>
-            <Group className="flex-wrap mt-3" gap="xs">
-                {chips &&
-                    chips.map((chip) => {
-                        return (
-                            <Chip
-                                key={courseCode + chip}
-                                variant={chip}
-                                clickable={false}
-                            />
-                        );
-                    })}
-            </Group>
+    // TODO: actually use this value
+    console.log(courseDescription);
+    console.log(institutionName);
 
-            {courseId === -1 ||
-            (urlCourseId && urlCourseId === courseId.toString()) ? (
-                ""
-            ) : (
-                <Link
-                    href={`/dashboard/courses/${courseId}`}
-                    className="absolute bottom-0 left-0"
+    return (
+        <>
+            <Card
+                {...rest}
+                className={`h-44 w-80 min-h-44 select-none course-card relative ${warningClasses}`}
+                radius="lg"
+                shadow="sm"
+                padding="lg"
+                data-faculty={faculty}
+                data-courseid={courseId}
+                style={{
+                    background: `linear-gradient(${stringToDeg(
+                        courseCode + courseName
+                    )}, ${stringToColor(courseCode)}, ${stringToColor(
+                        courseName
+                    )})`,
+                }}
+            >
+                <Text
+                    className="leading-none"
+                    size="xl"
+                    fw={700}
+                    truncate="end"
+                    lineClamp={1}
+                    c="white"
                 >
-                    <div
-                        className="flex justify-center items-center"
-                        style={{ width: 32, height: 32 }}
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="27"
-                            height="27"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="white"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="icon icon-tabler icons-tabler-outline icon-tabler-border-corner-pill"
-                            transform="rotate(-90)"
+                    {courseCode}
+                </Text>
+                <Text
+                    className="mt-2"
+                    size="l"
+                    truncate="end"
+                    lineClamp={1}
+                    c="white"
+                >
+                    {courseName}
+                </Text>
+                <Group className="flex-wrap mt-3" gap="xs">
+                    {chips &&
+                        chips.map((chip) => {
+                            return (
+                                <Chip
+                                    key={courseCode + chip}
+                                    variant={chip}
+                                    clickable={false}
+                                />
+                            );
+                        })}
+                </Group>
+
+                {courseId === -1 ||
+                (urlCourseId && urlCourseId === courseId.toString()) ? (
+                    ""
+                ) : (
+                    <>
+                        <Link
+                            href={`/dashboard/courses/${courseId}`}
+                            className="absolute bottom-0 left-0"
                         >
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M4 20v-5c0 -6.075 4.925 -11 11 -11h5" />
-                        </svg>
-                    </div>
-                </Link>
-            )}
-        </Card>
+                            <div
+                                className="flex justify-center items-center"
+                                style={{ width: 32, height: 32 }}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="27"
+                                    height="27"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="white"
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="icon icon-tabler icons-tabler-outline icon-tabler-border-corner-pill"
+                                    transform="rotate(-90)"
+                                >
+                                    <path
+                                        stroke="none"
+                                        d="M0 0h24v24H0z"
+                                        fill="none"
+                                    />
+                                    <path d="M4 20v-5c0 -6.075 4.925 -11 11 -11h5" />
+                                </svg>
+                            </div>
+                        </Link>
+                    </>
+                )}
+            </Card>
+        </>
     );
 }

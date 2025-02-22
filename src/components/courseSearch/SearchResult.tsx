@@ -39,7 +39,10 @@ export default function SearchResult({
                 key={`search-course-${card.courseCode}`}
                 courseCode={card.courseCode}
                 courseName={card.courseName}
+                courseDescription={card.courseDescription}
+                externalLink={card.externalLink}
                 faculty={card.faculty}
+                institutionName={card.institutionName}
                 chips={card.chips}
                 prerequisites={card.prerequisites}
                 postrequisites={card.postrequisites}
@@ -55,6 +58,9 @@ export default function SearchResult({
                 key="additional-results"
                 courseCode="Refine your search term"
                 courseName="There are additional results hidden"
+                courseDescription=""
+                externalLink=""
+                institutionName=""
                 faculty="NA"
                 chips={[]}
                 prerequisites=""
@@ -70,7 +76,10 @@ export default function SearchResult({
                 key="no-results-found"
                 courseCode="No results found"
                 courseName="Please try another search query"
+                courseDescription=""
+                externalLink=""
                 faculty="NA"
+                institutionName=""
                 chips={[]}
                 prerequisites=""
                 postrequisites={[]}

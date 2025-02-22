@@ -58,7 +58,10 @@ export interface CourseInformation {
     courseId: number;
     courseCode: string;
     courseName: string;
+    courseDescription: string;
+    externalLink: string;
     faculty: string;
+    institutionName: string;
     chips: ChipVariant[];
     prerequisites: string;
     postrequisites: number[];
