@@ -22,6 +22,7 @@ import {
     useDragStartHandler,
     useOnViewportMove,
     useScrollHandler,
+    getOverviewInformation,
 } from "@/lib/placement";
 import "@/app/(main)/dashboard/overview/DashboardComponent.css";
 import "@/app/(main)/dashboard/Dashboard.css";
@@ -30,6 +31,7 @@ import { CardWrapper, CourseInformation } from "@/types/courseCard";
 import { SessionContext } from "@/components/sessionContext";
 import { notifications } from "@mantine/notifications";
 import { SemesterInformation } from "@/types/semester";
+import { usePathname } from "next/navigation";
 
 // ipmlementation notes:
 // 1. pan on drag false -> can't move the viewport with mouse
@@ -69,6 +71,7 @@ export default function DashboardComponent({
     const { dragStartHandler } = useDragStartHandler();
     const { onViewportMove } = useOnViewportMove();
     const { getViewport, setViewport, getNodes } = useReactFlow();
+    const pathname = usePathname();
 
     const session = useContext(SessionContext)!;
 
@@ -89,6 +92,14 @@ export default function DashboardComponent({
         // I am unsure why my viewport is being set to something else, hacky way to fix this
         setViewport({ x: 0, y: 0, zoom: 1 });
     }, [updateNodes, setViewport, session, courseSemesters, semesters]);
+
+    useEffect(() => {
+        const revalidateData = async () => {
+            const [semesters, courseSemesters] = await getOverviewInformation();
+            updateNodes(semesters, courseSemesters);
+        };
+        revalidateData();
+    }, [pathname, updateNodes]);
 
     const onNodesChange = useCallback((changes: NodeChange[]) => {
         setNodes((nds) => applyNodeChanges(changes, nds));
