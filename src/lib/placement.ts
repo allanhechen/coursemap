@@ -571,13 +571,9 @@ export const useGroupCards = (courseNames: { [courseId: number]: string }) => {
             droppedNode: Node,
             inputNodes?: Node[]
         ) => {
-            console.log(inputNodes);
-
             if (!inputNodes) {
                 inputNodes = getNodes();
             }
-            console.log(inputNodes);
-
             const intersectingNodes = getIntersectingNodes(droppedNode);
 
             // see if it's intersecting with deletearea

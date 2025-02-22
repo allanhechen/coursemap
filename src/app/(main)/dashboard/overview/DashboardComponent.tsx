@@ -185,7 +185,6 @@ export default function DashboardComponent({
             const nextNodes = [...nodes];
             const insertIndex = nextNodes.length - 1;
             nextNodes.splice(insertIndex, 0, newNode as unknown as Node);
-            console.log(nextNodes);
 
             groupCards(null, newNode as unknown as Node, nextNodes);
         },

@@ -159,6 +159,7 @@ export function CourseCard({
                 size="auto"
                 padding="xs"
                 overlayProps={{
+                    backgroundOpacity: 0.55,
                     blur: 3,
                 }}
                 centered

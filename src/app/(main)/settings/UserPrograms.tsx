@@ -143,7 +143,15 @@ export default function UserPrograms({
     });
     return (
         <>
-            <Modal opened={opened} onClose={close} title="Delete Program">
+            <Modal
+                opened={opened}
+                onClose={close}
+                title="Delete Program"
+                overlayProps={{
+                    backgroundOpacity: 0.55,
+                    blur: 3,
+                }}
+            >
                 <div className="flex flex-col">
                     <Text className="mt-3">
                         Are you sure you want to delete{" "}

@@ -28,7 +28,15 @@ export default function DeleteModal() {
 
     return (
         <>
-            <Modal opened={opened} onClose={close} title="Authentication">
+            <Modal
+                opened={opened}
+                onClose={close}
+                title="Delete Account"
+                overlayProps={{
+                    backgroundOpacity: 0.55,
+                    blur: 3,
+                }}
+            >
                 <Text className="my-5">
                     Are you sure you want to delete your account? This action
                     cannot be undone!

@@ -64,7 +64,6 @@ export default function CourseSearch(props: HTMLAttributes<HTMLDivElement>) {
 
     useEffect(() => {
         localStorage.setItem("courseSearch-query", searchQuery);
-        console.log("searchquery", searchQuery, typeof searchQuery);
     }, [searchQuery]);
 
     const onChange = useCallback((event: React.FormEvent<HTMLInputElement>) => {
