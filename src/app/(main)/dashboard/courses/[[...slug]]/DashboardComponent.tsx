@@ -101,7 +101,10 @@ export default function DashboardComponent({
     }, []);
 
     const handleNewCourse = useCallback(
-        async (newCourseNode: CourseInformation) => {
+        async (
+            newCourseNode: CourseInformation,
+            courseSemesters: CourseToSemesterIdDict
+        ) => {
             const nodeOutput: PrerequisiteNodeType[] = [];
             const edgeOutput: Edge[] = [];
             const wrapperOutput: { [key: string]: Wrapper } = {};
@@ -208,7 +211,7 @@ export default function DashboardComponent({
             setEdges(edgeOutput.concat(additionalEdges));
 
             setTimeout(() => {
-                checkPrerequisites(relatedSemesterId, semesterDict);
+                checkPrerequisites(courseSemesters, semesterDict);
                 fitView({ padding: 0.1, nodes: nextCourses });
             }, 100);
         },
@@ -235,9 +238,9 @@ export default function DashboardComponent({
             notifications.clean();
 
             const [, droppedNode] = type;
-            handleNewCourse(droppedNode);
+            handleNewCourse(droppedNode, relatedSemesterId);
         },
-        [type, handleNewCourse]
+        [type, handleNewCourse, relatedSemesterId]
     );
 
     useEffect(() => {
@@ -272,12 +275,11 @@ export default function DashboardComponent({
             });
 
             setRelatedSemesterId(courseStates);
+            if (initialCourse) {
+                handleNewCourse(initialCourse, courseStates);
+            }
         }
         getSemesters();
-
-        if (initialCourse) {
-            handleNewCourse(initialCourse);
-        }
 
         return () => {
             notifications.clean();
