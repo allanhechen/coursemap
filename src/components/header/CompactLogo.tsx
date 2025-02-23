@@ -1,17 +1,21 @@
+import Image from "next/image";
 import Link from "next/link";
+
+import darkCompactLogo from "@/../public/logos/coursemap-icon-no-bg-dark.svg";
+import lightCompactLogo from "@/../public/logos/coursemap-icon-no-bg-dark.svg";
 
 export default function CompactLogo() {
     return (
         <Link href="/dashboard" prefetch>
-            <img
+            <Image
                 className="hidden dark:block"
-                src="/logos/coursemap-icon-no-bg-dark.svg"
+                src={darkCompactLogo}
                 alt="Compact Coursemap Logo Dark"
             />
-            <img
+            <Image
                 className="dark:hidden"
-                src="/logos/coursemap-icon-no-bg-light.svg"
-                alt="Compact Coursemap Logo Dark"
+                src={lightCompactLogo}
+                alt="Compact Coursemap Logo Light"
             />
         </Link>
     );
