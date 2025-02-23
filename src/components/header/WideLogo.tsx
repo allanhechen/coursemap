@@ -1,17 +1,21 @@
+import Image from "next/image";
 import Link from "next/link";
+
+import darkWideLogo from "@/../public/logos/coursemap-banner-dark.svg";
+import lightWideLogo from "@/../public/logos/coursemap-banner-light.svg";
 
 export default function WideLogo() {
     return (
         <Link href="/dashboard" prefetch>
-            <img
+            <Image
                 className="hidden dark:block"
-                src="/logos/coursemap-banner-dark.svg"
+                src={darkWideLogo}
                 alt="Wide Coursemap Logo Dark"
             />
-            <img
+            <Image
                 className="dark:hidden"
-                src="/logos/coursemap-banner-light.svg"
-                alt="Wide Coursemap Logo Dark"
+                src={lightWideLogo}
+                alt="Wide Coursemap Logo Light"
             />
         </Link>
     );

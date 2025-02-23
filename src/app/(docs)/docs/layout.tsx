@@ -6,6 +6,10 @@ import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import { RootProvider } from "fumadocs-ui/provider";
 import "@/app/(docs)/docs/globals.css";
+import Image from "next/image";
+
+import darkWideLogo from "@/../public/logos/coursemap-banner-dark.svg";
+import lightWideLogo from "@/../public/logos/coursemap-banner-light.svg";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -37,9 +41,15 @@ export default function Layout({ children }: { children: ReactNode }) {
                         sidebar={{
                             banner: (
                                 <Link href="/docs">
-                                    <img
-                                        src="/logos/coursemap-banner-dark.svg"
-                                        alt="Wide Coursemap Logo"
+                                    <Image
+                                        className="hidden dark:block"
+                                        src={darkWideLogo}
+                                        alt="Wide Coursemap Logo Dark"
+                                    />
+                                    <Image
+                                        className="dark:hidden"
+                                        src={lightWideLogo}
+                                        alt="Wide Coursemap Logo Light"
                                     />
                                 </Link>
                             ),

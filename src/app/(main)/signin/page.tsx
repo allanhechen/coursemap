@@ -8,6 +8,9 @@ import {
     IconBrandDiscordFilled,
     IconBrandGithubFilled,
 } from "@tabler/icons-react";
+import Image from "next/image";
+import darkCompactLogo from "@/../public/logos/coursemap-icon-no-bg-dark.svg";
+import lightCompactLogo from "@/../public/logos/coursemap-icon-no-bg-dark.svg";
 
 const providerImages: { [providerName: string]: ReactNode } = {
     GitHub: <IconBrandGithubFilled />,
@@ -38,17 +41,17 @@ export default async function Page() {
                 radius="lg"
             >
                 <div className="flex-col justify-between items-center self-center ml-2">
-                    <img
+                    <Image
                         width={75}
                         className="pointer-events-none -ml-2 -mt-1 hidden dark:block"
-                        src="/logos/coursemap-icon-no-bg-dark.svg"
-                        alt="coursemap dark logo"
+                        src={darkCompactLogo}
+                        alt="Compact Coursemap Logo Dark"
                     />
-                    <img
+                    <Image
                         width={75}
                         className="pointer-events-none -ml-2 -mt-1 dark:hidden"
-                        src="/logos/coursemap-icon-no-bg-light.svg"
-                        alt="coursemap light logo"
+                        src={lightCompactLogo}
+                        alt="Compact Coursemap Logo Light"
                     />
                     <Title>Sign In</Title>
                 </div>
