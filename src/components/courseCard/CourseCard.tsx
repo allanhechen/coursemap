@@ -251,7 +251,11 @@ export function CourseCard({
                         >
                             <div
                                 className="flex justify-center items-center"
-                                style={{ width: 32, height: 32 }}
+                                style={{
+                                    width: 32,
+                                    height: 32,
+                                    transform: "rotate(-90deg)",
+                                }}
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -264,7 +268,6 @@ export function CourseCard({
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     className="icon icon-tabler icons-tabler-outline icon-tabler-border-corner-pill"
-                                    transform="rotate(-90)"
                                 >
                                     <path
                                         stroke="none"
