@@ -22,7 +22,6 @@ import {
     useDragStartHandler,
     useOnViewportMove,
     useScrollHandler,
-    getOverviewInformation,
 } from "@/lib/placement";
 import "@/app/(main)/dashboard/overview/DashboardComponent.css";
 import "@/app/(main)/dashboard/Dashboard.css";
@@ -32,6 +31,7 @@ import { SessionContext } from "@/components/sessionContext";
 import { notifications } from "@mantine/notifications";
 import { SemesterInformation } from "@/types/semester";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 // ipmlementation notes:
 // 1. pan on drag false -> can't move the viewport with mouse
@@ -64,6 +64,7 @@ export default function DashboardComponent({
     const [lastX, setLastX] = useState(0);
     const [nodes, setNodes] = useState<Node[]>([]);
 
+    const router = useRouter();
     const windowSize = useWindowSize();
     const { horizontalScrollHandler } = useScrollHandler();
     const { updateNodes } = useUpdateNodes();
@@ -94,12 +95,8 @@ export default function DashboardComponent({
     }, [updateNodes, setViewport, session, courseSemesters, semesters]);
 
     useEffect(() => {
-        const revalidateData = async () => {
-            const [semesters, courseSemesters] = await getOverviewInformation();
-            updateNodes(semesters, courseSemesters);
-        };
-        revalidateData();
-    }, [pathname, updateNodes]);
+        router.refresh();
+    }, [pathname, router]);
 
     const onNodesChange = useCallback((changes: NodeChange[]) => {
         setNodes((nds) => applyNodeChanges(changes, nds));
